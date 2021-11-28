@@ -162,6 +162,8 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="dllmain.cpp" />
+    <ClCompile Include="Globals.cpp" />
+    <ClCompile Include="Hooks.cpp" />
     <ClCompile Include="ImGui\imgui.cpp" />
     <ClCompile Include="ImGui\imgui_demo.cpp" />
     <ClCompile Include="ImGui\imgui_draw.cpp" />
@@ -169,9 +171,13 @@
     <ClCompile Include="ImGui\imgui_impl_win32.cpp" />
     <ClCompile Include="ImGui\imgui_tables.cpp" />
     <ClCompile Include="ImGui\imgui_widgets.cpp" />
+    <ClCompile Include="Interfaces.cpp" />
+    <ClCompile Include="Netvars.cpp" />
     <ClCompile Include="Utils\Logger.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Globals.hpp" />
+    <ClInclude Include="Hooks.hpp" />
     <ClInclude Include="ImGui\imconfig.h" />
     <ClInclude Include="ImGui\imgui.h" />
     <ClInclude Include="ImGui\imgui_impl_dx9.h" />
@@ -181,7 +187,10 @@
     <ClInclude Include="ImGui\imstb_textedit.h" />
     <ClInclude Include="ImGui\imstb_truetype.h" />
     <ClInclude Include="Include.hpp" />
+    <ClInclude Include="Interfaces.hpp" />
+    <ClInclude Include="Netvars.hpp" />
     <ClInclude Include="Utils\Logger.hpp" />
+    <ClInclude Include="Utils\Utils.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
