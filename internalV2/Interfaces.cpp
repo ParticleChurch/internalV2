@@ -11,6 +11,10 @@ namespace I
 	IClientEntityList* entitylist = nullptr;
 	IInputSystem* inputsystem = nullptr;
 	IWeaponSystem* weaponsystem = nullptr;
+	IPhysicsSurfaceProps* physicsprops = nullptr;
+	IGlobalVarsBase* globalvars = nullptr;
+	IEngineTrace* enginetrace = nullptr;
+	IConVar* convar = nullptr;
 
 	void Init()
 	{
@@ -22,5 +26,10 @@ namespace I
 		entitylist = GetInterface<IClientEntityList   >("client.dll", "VClientEntityList003");
 		inputsystem = GetInterface<IInputSystem         >("inputsystem.dll", "InputSystemVersion001");
 		weaponsystem = *reinterpret_cast<IWeaponSystem**>(FindPattern("client.dll", "8B 35 ? ? ? ? FF 10 0F B7 C0") + 0x2);
+		engine = GetInterface<IEngineClient      >("engine.dll", "VEngineClient014");
+		physicsprops = GetInterface<IPhysicsSurfaceProps >("vphysics.dll", "VPhysicsSurfaceProps001");
+		globalvars = **(IGlobalVarsBase***)((*(uintptr_t**)(client))[11] + 10);
+		enginetrace = GetInterface<IEngineTrace        >("engine.dll", "EngineTraceClient004");
+		convar = GetInterface<IConVar                >("vstdlib.dll", "VEngineCvar007");
 	}
 }

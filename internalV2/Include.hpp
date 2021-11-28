@@ -18,7 +18,7 @@
 #include <WinUser.h>
 #include <winnt.h>
 #include <intrin.h>				 //for _ReturnAddress() (intitially for hooks.cpp)
-
+#include <functional>
 
 #include "Utils/Utils.hpp"	//	includes all utils...
 #include "Valve/Valve.hpp"	//	include all the Valve classes/structs
@@ -34,6 +34,9 @@
 #include "ImGui/imgui.h"
 #include "ImGui/imgui_impl_dx9.h"
 #include "ImGui/imgui_impl_win32.h"
+
+// Hacks
+#include "Hacks/Autowall.hpp"
 
 // Hooks
 #include "Hooks.hpp"            //hooking ingame functions

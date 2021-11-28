@@ -73,6 +73,8 @@ void H::Free()
 	if (clientmodeVMT) clientmodeVMT->UnhookAll();
 	if (panelVMT) panelVMT->UnhookAll();
 
+	// do some last minute adjustments
+	// will do later lol
 
 	// free the VMTs now that they are useless
 	if (d3d9VMT) delete d3d9VMT;
@@ -80,6 +82,9 @@ void H::Free()
 	if (clientVMT) delete clientVMT;
 	if (clientmodeVMT) delete clientmodeVMT;
 	if (panelVMT) delete panelVMT;
+
+	// now delete hacks
+	delete autowall;
 }
 
 long __stdcall H::ResetHook(IDirect3DDevice9* device, D3DPRESENT_PARAMETERS* pPresentationParameters)
@@ -123,36 +128,38 @@ long __stdcall H::EndSceneHook(IDirect3DDevice9* device)
 		ImGui_ImplWin32_NewFrame();
 		ImGui::NewFrame();
 
-		ImGui::Begin("sample menu");
-		static bool examplebool = false;
-		ImGui::Checkbox("example bool", &examplebool);
+		if (G::MenuOpen) {
+			ImGui::Begin("sample menu");
+			static bool examplebool = false;
+			ImGui::Checkbox("example bool", &examplebool);
 
-		bool open_popup = ImGui::Button("Eject");
-		if (open_popup)
-		{
-			ImGui::OpenPopup("Eject popup");
+			bool open_popup = ImGui::Button("Eject");
+			if (open_popup)
+			{
+				ImGui::OpenPopup("Eject popup");
+			}
+			if (ImGui::BeginPopup("Eject popup"))
+			{
+				ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1.f, 0, 0, 1.00f));
+				ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(1.f, 0.1f, 0.1f, 1.00f));
+				ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(1.f, 0.2f, 0.2f, 1.00f));
+
+				ImGui::Text("Are you sure you want to Eject?");
+				if (ImGui::Button("Eject##Eject2"))
+					G::KillDLL = true;
+				if (ImGui::IsItemHovered())
+					ImGui::SetTooltip("NOTE:\nEjecting can potentially crash your game.\nEjecting can is not complete so if you want to inject another cheat, restart the game.");
+
+				ImGui::PopStyleColor();
+				ImGui::PopStyleColor();
+				ImGui::PopStyleColor();
+
+				ImGui::EndPopup();
+			}
+
+			ImGui::End();
 		}
-		if (ImGui::BeginPopup("Eject popup"))
-		{
-			ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1.f, 0, 0, 1.00f));
-			ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(1.f, 0.1f, 0.1f, 1.00f));
-			ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(1.f, 0.2f, 0.2f, 1.00f));
-
-			ImGui::Text("Are you sure you want to Eject?");
-			if (ImGui::Button("Eject##Eject2"))
-				G::KillDLL = true;
-			if (ImGui::IsItemHovered())
-				ImGui::SetTooltip("NOTE:\nEjecting can potentially crash your game.\nEjecting can is not complete so if you want to inject another cheat, restart the game.");
-
-			ImGui::PopStyleColor();
-			ImGui::PopStyleColor();
-			ImGui::PopStyleColor();
-
-			ImGui::EndPopup();
-		}	 
 		
-		ImGui::End();
-
 		ImGui::EndFrame();
 		ImGui::Render();
 		ImGui_ImplDX9_RenderDrawData(ImGui::GetDrawData());
@@ -271,6 +278,12 @@ bool __stdcall H::CreateMoveHook(float flInputSampleTime, CUserCmd* cmd)
 			cmd->iButtons &= ~IN_ATTACK;
 			cmd->iButtons &= ~IN_ATTACK2;
 			cmd->iButtons &= ~IN_ZOOM;
+		}
+
+		// if we are on a different tick and we are allowed to bhop...
+		if ((cmd->iButtons & IN_JUMP) && G::LocalplayerAlive && !(G::Localplayer->GetFlags() & FL_ONGROUND)
+			&& G::Localplayer->GetMoveType() != MOVETYPE_LADDER) {
+			cmd->iButtons &= ~IN_JUMP;
 		}
 
 	}

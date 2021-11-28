@@ -20,6 +20,10 @@ namespace I
 	extern IClientEntityList* entitylist;
 	extern IInputSystem* inputsystem;
 	extern IWeaponSystem* weaponsystem;
+	extern IPhysicsSurfaceProps* physicsprops;
+	extern IGlobalVarsBase* globalvars;
+	extern IEngineTrace* enginetrace;
+	extern IConVar* convar;
 
 	// func
 	typedef void* (*InterfaceCreator)(const char*, int);

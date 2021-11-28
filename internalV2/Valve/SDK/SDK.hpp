@@ -22,3 +22,6 @@
 #include "CUtlMemory.hpp"
 #include "CUtlVector.hpp"
 #include "CCSWeaponData.hpp"
+#include "ITraceFilter.hpp"
+#include "ICollideable.hpp"
+#include "BSPFlags.hpp"

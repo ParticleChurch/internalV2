@@ -2,10 +2,25 @@
 // temporary for now
 #define DEBUG_ENTITY false
 
-// ENUM here for Virtual Functions (for easy changing)
-enum Entity_VFunc_B
+// Enum for team
+enum Team : int
 {
-	GetAbsOrigin = 9,
+	TEAM_UNASSIGNED = 0,
+	TEAM_SPECTATOR,
+	TEAM_TT,
+	TEAM_CT
+};
+
+// Enum here for Virtual Functions (for easy changing)
+enum Entity_VFunc_A : int
+{
+	GetAbsOrigin = 10,
+	GetCollideable = 3
+	
+};
+enum Entity_VFunc_B : int
+{
+	IsDormant = 9,
 	SetupBones = 13
 };
 
@@ -26,14 +41,23 @@ public: // NETVARS
 		static DWORD offset = N::GetOffset("DT_CSPlayer", "m_bHasHelmet");
 		return *(float*)((DWORD)this + offset);
 	}
+	bool HasHeavyArmor() {
+		if constexpr (DEBUG_ENTITY) L::Debug("HasHeavyArmor");
+		static DWORD offset = N::GetOffset("DT_CSPlayer", "m_bHasHeavyArmor");
+		return *(float*)((DWORD)this + offset);
+	}
 	bool* ClientAnimations() {
 		if constexpr (DEBUG_ENTITY) L::Debug("ClientAnimations");
 		static DWORD offset = N::GetOffset("DT_BaseAnimating", "m_bClientSideAnimation");
 		return (bool*)(DWORD(this) + offset);
 	}
+	bool IsBroken() { //  for CBreakableSurface
+		if constexpr (DEBUG_ENTITY) L::Debug("IsBroken");
+		static DWORD offset = N::GetOffset("CBreakableSurface", "m_bIsBroken");
+		return *(bool*)(DWORD(this) + offset);
+	}
 	// int
-	int& GetHealth()
-	{
+	int& GetHealth() {
 		if constexpr (DEBUG_ENTITY) L::Debug("GetHealth");
 		static DWORD offset = N::GetOffset("DT_BasePlayer", "m_iHealth");
 		return *(int*)((DWORD)this + offset);
@@ -58,7 +82,7 @@ public: // NETVARS
 		static DWORD offset = N::GetOffset("DT_BasePlayer", "m_nTickBase");
 		return *(int*)((DWORD)this + offset);
 	}
-	int& GetObserverMode(){
+	int& GetObserverMode() {
 		if constexpr (DEBUG_ENTITY) L::Debug("GetObserverMode");
 		static DWORD offset = N::GetOffset("DT_BasePlayer", "m_iObserverMode");
 		return *(int*)((DWORD)this + offset);
@@ -73,14 +97,19 @@ public: // NETVARS
 		static DWORD offset = N::GetOffset("DT_CSPlayer", "m_iShotsFired");
 		return *(int*)((DWORD)this + offset);
 	}
-	int& ArmorVal() {
-		if constexpr (DEBUG_ENTITY) L::Debug("ArmorVal");
+	int& GetArmor() {
+		if constexpr (DEBUG_ENTITY) L::Debug("GetArmor");
 		static DWORD offset = N::GetOffset("DT_CSPlayer", "m_ArmorValue");
 		return *(int*)((DWORD)this + offset);
 	}
 	int& ScopeLevel() {
 		if constexpr (DEBUG_ENTITY) L::Debug("ScopeLevel");
 		static DWORD offset = N::GetOffset("DT_WeaponCSBaseGun", "m_zoomLevel");
+		return *(int*)((DWORD)this + offset);
+	}
+	int& GetCollisionGroup() {
+		if constexpr (DEBUG_ENTITY) L::Debug("GetCollisionGroup");
+		static DWORD offset = N::GetOffset("CBaseEntity", "m_CollisionGroup");
 		return *(int*)((DWORD)this + offset);
 	}
 	//short
@@ -206,11 +235,16 @@ public: // PATTERNS
 		static auto oSetAbsOrigin = reinterpret_cast<SetAbsOriginFn>(FindPattern("client.dll", "55 8B EC 83 E4 F8 51 53 56 57 8B F1 E8"));
 		oSetAbsOrigin(this, vecOrigin);
 	}
+	int& GetTakeDamage() {
+		if constexpr (DEBUG_ENTITY) L::Debug("GetTakeDamage");
+		static const std::uintptr_t uTakeDamageOffset = *reinterpret_cast<std::uintptr_t*>(FindPattern("client.dll", "80 BE ? ? ? ? ? 75 46 8B 86") + 0x2);
+		return *reinterpret_cast<int*>(reinterpret_cast<std::uintptr_t>(this) + uTakeDamageOffset);
+	}
 public: // VIRTUALS
 	Vector GetAbsOrigin() {
 		if constexpr (DEBUG_ENTITY) L::Debug("GetAbsOrigin");
 		typedef bool(__thiscall* oIsDormant)(void*);
-		return VMT::GetVirtualMethod<oIsDormant>(this + 8, Entity_VFunc_B::GetAbsOrigin)(this + 8);
+		return VMT::GetVirtualMethod<oIsDormant>(this, Entity_VFunc_A::GetAbsOrigin)(this);
 	}
 	bool SetupBones(matrix3x4_t* out, int maxBones, int boneMask, float currentTime, bool fixbonematrix = false)
 	{
@@ -228,6 +262,41 @@ public: // VIRTUALS
 		}
 		return VMT::GetVirtualMethod<oSetupBones>(this + 4, Entity_VFunc_B::SetupBones)(this + 4, out, maxBones, boneMask, currentTime);
 	}
+	bool IsDormant() {
+		if constexpr (DEBUG_ENTITY) L::Debug("IsDormant");
+		typedef bool(__thiscall* oIsDormant)(void*);
+		return VMT::GetVirtualMethod<oIsDormant>(this + sizeof(uintptr_t) * 2, Entity_VFunc_B::IsDormant)(this + sizeof(uintptr_t) * 2);
+	}
+	ICollideable* GetCollideable() {
+		if constexpr (DEBUG_ENTITY) L::Debug("GetCollideable");
+		typedef ICollideable*(__thiscall* oGetCollideable)(void*);
+		return VMT::GetVirtualMethod<oGetCollideable>(this, Entity_VFunc_A::GetCollideable)(this);
+	}
+	int IsMaxHealth() {
+		if constexpr (DEBUG_ENTITY) L::Debug("IsMaxHealth");
+		// @ida: client.dll @ [FF 90 ? ? ? ? 85 C0 0F 8F ? ? ? ? 80 + 0x2] / sizeof(std::uintptr_t)
+		return CallVFunc<int>(this, 123);
+	}
+	CBaseClient* GetClientClass() {
+		if constexpr (DEBUG_ENTITY) L::Debug("GetClientClass");
+		typedef CBaseClient* (__thiscall* oGetClientClass)(void*);
+		return GetVFunc<oGetClientClass>(this + 8, 2)(this + 8);
+	}
+	const char* GetClassname() {
+		if constexpr (DEBUG_ENTITY) L::Debug("GetClassname");
+		// @ida: client.dll @ [8B 01 FF 90 ? ? ? ? 90 + 0x4] / sizeof(std::uintptr_t)
+		return CallVFunc<const char*>(this, 143);
+	}
+	unsigned int PhysicsSolidMaskForEntity() {
+		if constexpr (DEBUG_ENTITY) L::Debug("PhysicsSolidMaskForEntity");
+		// @xref: "func_breakable", "func_breakable_surf"
+		return CallVFunc<unsigned int>(this, 152);
+	}
+	int GetIndex() {
+		if (DEBUG_ENTITY) L::Debug("GetIndex");
+		typedef int(__thiscall* oGetIndex)(void*);
+		return GetVFunc<oGetIndex>(this + 8, 10)(this + 8);
+	}
 public: // OTHERS
 	Entity* GetActiveWeapon() {
 		if (DEBUG_ENTITY) L::Debug("GetActiveWeapon");
@@ -239,4 +308,141 @@ public: // OTHERS
 		short nDefinitionIndex = this->GetItemDefinitionIndex();
 		return I::weaponsystem->GetWeaponData(nDefinitionIndex);
 	}
+	inline bool IsAlive()
+	{
+		// @note: https://github.com/rollraw/qo0-base/issues/135
+		return (this->GetLifeState() == LIFE_ALIVE);
+	}
+	Vector GetEyePosition() {
+		if (DEBUG_ENTITY) L::Debug("GetEyePosition");
+		static DWORD offset = N::GetOffset("DT_CSPlayer", "m_vecViewOffset[0]");
+		return (GetVecOrigin() + *(Vector*)((DWORD)this + offset));
+	}
+	inline bool IsArmored(const int iHitGroup)
+	{
+		// @ida isarmored: server.dll @ 55 8B EC 32 D2
+
+		bool bIsArmored = false;
+
+		if (this->GetArmor() > 0)
+		{
+			switch (iHitGroup)
+			{
+			case HITGROUP_GENERIC:
+			case HITGROUP_CHEST:
+			case HITGROUP_STOMACH:
+			case HITGROUP_LEFTARM:
+			case HITGROUP_RIGHTARM:
+			case HITGROUP_NECK:
+				bIsArmored = true;
+				break;
+			case HITGROUP_HEAD:
+				if (this->HasHelmet())
+					bIsArmored = true;
+				[[fallthrough]];
+			case HITGROUP_LEFTLEG:
+			case HITGROUP_RIGHTLEG:
+				if (this->HasHeavyArmor())
+					bIsArmored = true;
+				break;
+			default:
+				break;
+			}
+		}
+
+		return bIsArmored;
+	}
+	bool IsBreakable() {
+		if constexpr (DEBUG_ENTITY) L::Debug("IsBreakable");
+
+		// @ida isbreakableentity: client.dll @ 55 8B EC 51 56 8B F1 85 F6 74 68
+		/*
+		const int iHealth = this->GetHealth();
+
+		// first check to see if it's already broken
+		if (iHealth < 0 && this->IsMaxHealth() > 0)
+			return true;
+
+		if (this->GetTakeDamage() != DAMAGE_YES)
+		{
+			const EClassIndex nClassIndex = this->GetClientClass()->nClassID;
+
+			// force pass cfuncbrush
+			if (nClassIndex != EClassIndex::CFuncBrush)
+				return false;
+		}
+
+		if (const int nCollisionGroup = this->GetCollisionGroup(); nCollisionGroup != COLLISION_GROUP_PUSHAWAY && nCollisionGroup != COLLISION_GROUP_BREAKABLE_GLASS && nCollisionGroup != COLLISION_GROUP_NONE)
+			return false;
+
+		if (iHealth > 200)
+			return false;
+
+		if (IMultiplayerPhysics* pPhysicsInterface = (IMultiplayerPhysics*)(this); pPhysicsInterface != nullptr)
+		{
+			if (pPhysicsInterface->GetMultiplayerPhysicsMode() != PHYSICS_MULTIPLAYER_SOLID) // probably will cause issues idk
+				return false;
+		}
+		else
+		{
+			if (const char* szClassName = this->GetClassname(); !strcmp(szClassName, "func_breakable") || !strcmp(szClassName, "func_breakable_surf"))
+			{
+				if (!strcmp(szClassName, "func_breakable_surf"))
+				{
+					Entity* pSurface = static_cast<Entity*>(this);
+
+					// don't try to break it if it has already been broken
+					if (pSurface->IsBroken())
+						return false;
+				}
+			}
+			else if (this->PhysicsSolidMaskForEntity() & CONTENTS_PLAYERCLIP)
+			{
+				// hostages and players use CONTENTS_PLAYERCLIP, so we can use it to ignore them
+				return false;
+			}
+		}
+
+		if (IBreakableWithPropData* pBreakableInterface = (IBreakableWithPropData*)(this); pBreakableInterface != nullptr)
+		{
+			// bullets don't damage it - ignore
+			if (pBreakableInterface->GetDmgModBullet() <= 0.0f)
+				return false;
+		}
+
+		return true;
+		*/
+
+		// My version cuz thats^ too confusing
+
+		//m_takeDamage isn't properly set when using the signature.
+		//Back it up, set it to true, then restore.
+		int takeDamageBackup = this->GetTakeDamage();
+
+		CBaseClient* pClass = this->GetClientClass();
+
+		//				 '       ''     '      '   '
+		//			    01234567890123456     012345678
+		//Check against CBreakableSurface and CBaseDoor
+
+		//Windows etc. are CBrekableSurface
+		//Large garage door in Office is CBaseDoor and it get's reported as a breakable when it is not one
+		//This is seperate from "CPropDoorRotating", which is a normal door.
+		//Normally you would also check for "CFuncBrush" but it was acting oddly so I removed it. It's below if interested.
+		//((clientClass->m_pNetworkName[1]) != 'F' || (clientClass->m_pNetworkName[4]) != 'c' || (clientClass->m_pNetworkName[5]) != 'B' || (clientClass->m_pNetworkName[9]) != 'h')
+
+		if ((pClass->szNetworkName[1] == 'B' && pClass->szNetworkName[9] == 'e' && pClass->szNetworkName[10] == 'S' && pClass->szNetworkName[16] == 'e')
+			|| (pClass->szNetworkName[1] != 'B' || pClass->szNetworkName[5] != 'D'))
+			((Entity*)this)->GetTakeDamage() = DAMAGE_YES;
+
+		using IsBreakableEntityFn = bool(__thiscall*)(Entity*);
+		static auto oIsBreakableEntity = reinterpret_cast<IsBreakableEntityFn>(FindPattern("client.dll", "55 8B EC 51 56 8B F1 85 F6 74 68"));
+
+		bool breakable = oIsBreakableEntity(this);
+		((Entity*)this)->GetTakeDamage() = takeDamageBackup;
+
+		return breakable;
+	}
+	
 };
+

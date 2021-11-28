@@ -7,3 +7,7 @@
 #include "IClientEntityList.hpp"
 #include "IInputSystem.hpp"
 #include "IWeaponSystem.hpp"
+#include "IPhysicsSurfaceProps.hpp"
+#include "IGlobalVars.hpp"
+#include "IEngineTrace.hpp"
+#include "Convar.hpp"

@@ -34,6 +34,12 @@
     <Filter Include="Header Files\Valve\Custom">
       <UniqueIdentifier>{3b9273ce-adb5-4842-a775-41eae25a0d2b}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Hacks">
+      <UniqueIdentifier>{cac9f5e3-f794-489b-83ac-b73b2badf1d7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Hacks">
+      <UniqueIdentifier>{6549381b-d1a9-448a-815a-3d42472db2d8}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dllmain.cpp">
@@ -74,6 +80,9 @@
     </ClCompile>
     <ClCompile Include="Netvars.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Hacks\Autowall.cpp">
+      <Filter>Source Files\Hacks</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -240,6 +249,30 @@
       <Filter>Header Files\Valve\SDK</Filter>
     </ClInclude>
     <ClInclude Include="Valve\Interfaces\IWeaponSystem.hpp">
+      <Filter>Header Files\Valve\Interfaces</Filter>
+    </ClInclude>
+    <ClInclude Include="Valve\SDK\ITraceFilter.hpp">
+      <Filter>Header Files\Valve\SDK</Filter>
+    </ClInclude>
+    <ClInclude Include="Hacks\Autowall.hpp">
+      <Filter>Header Files\Hacks</Filter>
+    </ClInclude>
+    <ClInclude Include="Valve\Interfaces\IPhysicsSurfaceProps.hpp">
+      <Filter>Header Files\Valve\Interfaces</Filter>
+    </ClInclude>
+    <ClInclude Include="Valve\Interfaces\IGlobalVars.hpp">
+      <Filter>Header Files\Valve\Interfaces</Filter>
+    </ClInclude>
+    <ClInclude Include="Valve\SDK\ICollideable.hpp">
+      <Filter>Header Files\Valve\SDK</Filter>
+    </ClInclude>
+    <ClInclude Include="Valve\Interfaces\IEngineTrace.hpp">
+      <Filter>Header Files\Valve\Interfaces</Filter>
+    </ClInclude>
+    <ClInclude Include="Valve\SDK\BSPFlags.hpp">
+      <Filter>Header Files\Valve\SDK</Filter>
+    </ClInclude>
+    <ClInclude Include="Valve\Interfaces\Convar.hpp">
       <Filter>Header Files\Valve\Interfaces</Filter>
     </ClInclude>
   </ItemGroup>
