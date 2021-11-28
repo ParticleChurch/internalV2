@@ -11,13 +11,17 @@ void onInject()
     L::Init();
     I::Init();
     N::Init();
+    H::Init();
 
     // TODO: wait for them to press eject
     L::Info("Hello World!");
 
-    // uninitalizers
-    L::Free();
+    while (!G::KillDLL) Sleep(100);
 
+    // uninitalizers
+    H::Free();
+    L::Free();
+    
     // deallocate DLL
     FreeLibraryAndExitThread(dllModule, 0);
 }

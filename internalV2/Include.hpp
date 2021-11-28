@@ -12,6 +12,8 @@
 #include <xutility> 
 #include <algorithm> // used: clamp
 #include <corecrt_math.h> // QAngle used
+#include <d3d9.h>
+#include <Psapi.h>
 
 #include "Utils/Utils.hpp"	//	includes all utils...
 #include "Valve/Valve.hpp"	//	include all the Valve classes/structs

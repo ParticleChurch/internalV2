@@ -7,16 +7,10 @@ namespace I
 	IEngineClient* engine = nullptr;
 	ISurface* surface = nullptr;
 
-	void GUIInit()
+	void Init()
 	{
 		engine = GetInterface<IEngineClient      >("engine.dll", "VEngineClient014");
 		surface = GetInterface<ISurface          >("vguimatsurface.dll", "VGUI_Surface031");
-	}
-
-	void Init()
-	{
-		//InterfaceTools* NewInterface = new InterfaceTools;
 		client = GetInterface<IBaseClientDll>("client.dll", "VClient018");
-		
 	}
 }

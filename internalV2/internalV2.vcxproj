@@ -193,7 +193,9 @@
     <ClInclude Include="Netvars.hpp" />
     <ClInclude Include="Utils\GetVFunc.hpp" />
     <ClInclude Include="Utils\Logger.hpp" />
+    <ClInclude Include="Utils\PatternScan.hpp" />
     <ClInclude Include="Utils\Utils.hpp" />
+    <ClInclude Include="Utils\VMT.hpp" />
     <ClInclude Include="Valve\Custom\Color.hpp" />
     <ClInclude Include="Valve\Custom\Custom.hpp" />
     <ClInclude Include="Valve\Interfaces\IBaseClientDll.hpp" />

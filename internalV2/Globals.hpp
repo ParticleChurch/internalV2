@@ -2,13 +2,15 @@
 #include "Entity.hpp"
 
 namespace G {
-	/*
+	
 	// Menu Crap
 	extern bool MenuOpen;
 
 	// The injected DLL's module
 	extern HMODULE DLLModule;
 	extern bool KillDLL;
+
+	/*
 	extern std::string CSGODirectory;
 	extern std::string CSGOExePath;
 

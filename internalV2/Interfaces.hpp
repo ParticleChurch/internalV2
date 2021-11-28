@@ -55,6 +55,6 @@ namespace I
 		return iface;
 	}
 
-	extern void GUIInit();
+	// idk why we would need a gui init/free :/
 	extern void Init();
 }
