@@ -6,11 +6,16 @@ namespace I
 	IBaseClientDll* client = nullptr;
 	IEngineClient* engine = nullptr;
 	ISurface* surface = nullptr;
+	IClientModeShared* clientmode = nullptr;
+	IVPanel* panel = nullptr;
 
 	void Init()
 	{
 		engine = GetInterface<IEngineClient      >("engine.dll", "VEngineClient014");
 		surface = GetInterface<ISurface          >("vguimatsurface.dll", "VGUI_Surface031");
 		client = GetInterface<IBaseClientDll>("client.dll", "VClient018");
+		clientmode = **(IClientModeShared***)((*(uintptr_t**)(client))[10] + 0x5);
+		panel = GetInterface<IVPanel               >("vgui2.dll", "VGUI_Panel009");
+
 	}
 }

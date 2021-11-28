@@ -126,11 +126,6 @@ public: // NETVARS
 		static DWORD offset = N::GetOffset("DT_WeaponCSBase", "m_flPostponeFireReadyTime");
 		return *(float*)((DWORD)this + offset);
 	}
-	float& GetFlashMaxAlpha() {
-		if constexpr (DEBUG_ENTITY) L::Debug("GetLastShotTime");
-		static DWORD offset = N::GetOffset("DT_CSPlayer", "m_flFlashMaxAlpha");
-		return *(float*)((DWORD)this + offset);
-	}
 	float& GetLBY() {
 		if constexpr (DEBUG_ENTITY) L::Debug("GetLBY");
 		static DWORD offset = N::GetOffset("DT_CSPlayer", "m_flLowerBodyYawTarget");

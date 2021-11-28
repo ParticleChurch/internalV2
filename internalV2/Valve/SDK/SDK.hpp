@@ -13,7 +13,9 @@
 #include "Vertex_t.hpp"
 #include "definitions.hpp" // A LOT IS HERE AND IDK WHATS HAPPENING LOL
 #include "Ray_t.hpp"
+#include "cplane_t.hpp"
 #include "csurface_t.hpp"
 #include "CBaseTrace.hpp"
 #include "CGameTrace.hpp"
 #include "Model_t.hpp"
+#include "CUserCmd.hpp"

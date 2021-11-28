@@ -15,6 +15,8 @@ namespace I
 	extern IBaseClientDll* client;
 	extern IEngineClient* engine;
 	extern ISurface* surface;
+	extern IClientModeShared* clientmode;
+	extern IVPanel* panel;
 
 	// func
 	typedef void* (*InterfaceCreator)(const char*, int);

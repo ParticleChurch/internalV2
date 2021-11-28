@@ -9,18 +9,23 @@ namespace H
 	// VMT Managers
 	VMT::Manager* d3d9VMT = nullptr;
 	VMT::Manager* surfaceVMT = nullptr;
+	VMT::Manager* clientVMT = nullptr;
+	VMT::Manager* clientmodeVMT = nullptr;
+	VMT::Manager* panelVMT = nullptr;
 
 	// Original Functions
 	Reset oReset;
 	LockCursor oLockCursor;
 	EndScene oEndScene;
 	WNDPROC oWndProc = NULL;
+	FrameStageNotify oFrameStageNotify;
+	CreateMove oCreateMove;
+	PaintTraverse oPaintTraverse;
 	
 	// special GUI Vars
 	bool D3dInit = false;
 	HWND CSGOWindow = NULL;
 }
-
 
 void H::Init()
 {
@@ -38,6 +43,9 @@ void H::Init()
 	L::Debug("-->VMT's");
 	d3d9VMT = new VMT::Manager((VMT::VMT*)D3d9Device);
 	surfaceVMT = new VMT::Manager((VMT::VMT*)I::surface);
+	clientVMT = new  VMT::Manager((VMT::VMT*)I::client);
+	clientmodeVMT = new VMT::Manager((VMT::VMT*)I::clientmode);
+	panelVMT = new VMT::Manager((VMT::VMT*)I::panel);
 
 	// do hooks
 	L::Debug("-->oReset");
@@ -48,6 +56,12 @@ void H::Init()
 	oEndScene = (EndScene)d3d9VMT->Hook(42, &EndSceneHook);
 	L::Debug("-->WndProc");
 	oWndProc = WNDPROC(SetWindowLongPtrW(CSGOWindow, GWLP_WNDPROC, LONG_PTR(WndProc)));
+	L::Debug("-->FrameStageNotify");
+	oFrameStageNotify = (FrameStageNotify)clientVMT->Hook(37, &FrameStageNotifyHook);
+	L::Debug("-->CreateMove");
+	oCreateMove = (CreateMove)clientmodeVMT->Hook(24, &CreateMoveHook);
+	L::Debug("-->PaintTraverse");
+	oPaintTraverse = (PaintTraverse)panelVMT->Hook(41, &PaintTraverseHook);
 }
 
 void H::Free()
@@ -55,10 +69,17 @@ void H::Free()
 	// restore the VMTs to normal
 	if (d3d9VMT) d3d9VMT->UnhookAll();
 	if (surfaceVMT) surfaceVMT->UnhookAll();
+	if (clientVMT) clientVMT->UnhookAll();
+	if (clientmodeVMT) clientmodeVMT->UnhookAll();
+	if (panelVMT) panelVMT->UnhookAll();
+
 
 	// free the VMTs now that they are useless
 	if (d3d9VMT) delete d3d9VMT;
 	if (surfaceVMT) delete surfaceVMT;
+	if (clientVMT) delete clientVMT;
+	if (clientmodeVMT) delete clientmodeVMT;
+	if (panelVMT) delete panelVMT;
 }
 
 long __stdcall H::ResetHook(IDirect3DDevice9* device, D3DPRESENT_PARAMETERS* pPresentationParameters)
@@ -185,4 +206,89 @@ LRESULT __stdcall H::WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 		return true;
 	}
 	return CallWindowProc(oWndProc, hWnd, uMsg, wParam, lParam);
+}
+
+void __stdcall H::FrameStageNotifyHook(int stage)
+{
+	G::IsInGame = I::engine->IsInGame();
+
+	// Do menu input fix
+	/*if (!G::IsInGame && G::MenuOpen)
+		I::inputsystem->EnableInput(false);
+	else
+		I::inputsystem->EnableInput(true);*/
+
+	/*if (G::IsInGame)
+	{
+		G::LocalPlayerIndex = I::engine->GetLocalPlayer();
+		G::LocalPlayer = I::entitylist->GetClientEntity(G::LocalPlayerIndex);
+		G::LocalPlayerAlive = G::LocalPlayer ? G::LocalPlayer->GetHealth() > 0 && G::LocalPlayer->GetLifeState() == LIFE_ALIVE: false;
+		G::LocalPlayerTeam = G::LocalPlayer ? G::LocalPlayer->GetTeam() : 0;
+		G::LocalPlayerWeapon = G::LocalPlayer ? G::LocalPlayer->GetActiveWeapon() : nullptr;
+		G::LocalPlayerWeaponData = G::LocalPlayerWeapon ? G::LocalPlayerWeapon->GetWeaponData() : nullptr;
+
+		if (!G::LocalPlayer || !G::LocalPlayerAlive)
+		{
+			lagcomp->ClearRecords();
+			return oFrameStageNotify(stage);
+		}
+	}
+	else
+	{
+		lagcomp->ClearPlayerList();
+		G::LocalPlayerAlive = false;
+		G::LocalPlayer = nullptr;
+		G::LocalPlayerIndex = 0;
+		G::LocalPlayerTeam = 0;
+		G::LocalPlayerWeapon = nullptr;
+		return oFrameStageNotify(stage);
+	}*/
+
+	// temp
+	G::Localplayer = nullptr;
+
+	return oFrameStageNotify(stage);
+}
+
+bool __stdcall H::CreateMoveHook(float flInputSampleTime, CUserCmd* cmd)
+{
+	bool oFunc = oCreateMove(flInputSampleTime, cmd);
+
+	if (!oFunc || !cmd || !cmd->iCommandNumber)
+	{
+		/*return oFunc;*/
+		return false;
+	}
+
+	if (I::engine->IsInGame() && cmd && G::Localplayer)
+	{
+		PVOID pebp;
+		__asm mov pebp, ebp;
+		bool* pSendPacket = (bool*)(*(DWORD*)pebp - 0x1C);
+		bool& bSendPacket = *pSendPacket;
+	}
+
+	return false; //silent aim on false (only for client)
+}
+
+void __stdcall H::PaintTraverseHook(int vguiID, bool force, bool allowForcing)
+{
+	/*if (strcmp("HudZoom", I::panel->GetName(vguiID)) == 0 && cfg->vis.NoScope && G::LocalPlayerAlive)
+		return;*/
+
+	oPaintTraverse(I::panel, vguiID, force, allowForcing);
+	if (I::panel && strcmp(I::panel->GetName(vguiID), "MatSystemTopPanel") == 0) {
+		int x, y;
+		I::engine->GetScreenSize(x, y);
+		
+		I::surface->DrawSetColor(Color(255, 0, 0, 255));
+		I::surface->DrawLine(0, 0, x / 2, y / 2);
+		
+		if (!G::Localplayer || !I::engine->IsInGame())
+			return;
+
+		/*esp->RunPaintTraverse();
+		worldmod->Run_PaintTraverse();
+		antiaim->Visualize();*/
+	}
 }
