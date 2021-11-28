@@ -213,10 +213,10 @@ void __stdcall H::FrameStageNotifyHook(int stage)
 	G::IsInGame = I::engine->IsInGame();
 
 	// Do menu input fix
-	/*if (!G::IsInGame && G::MenuOpen)
+	if (!G::IsInGame && G::MenuOpen)
 		I::inputsystem->EnableInput(false);
 	else
-		I::inputsystem->EnableInput(true);*/
+		I::inputsystem->EnableInput(true);
 
 	if (G::IsInGame)
 	{
@@ -263,6 +263,15 @@ bool __stdcall H::CreateMoveHook(float flInputSampleTime, CUserCmd* cmd)
 		__asm mov pebp, ebp;
 		bool* pSendPacket = (bool*)(*(DWORD*)pebp - 0x1C);
 		bool& bSendPacket = *pSendPacket;
+
+		// Menu fix
+		if (G::MenuOpen && (cmd->iButtons & IN_ATTACK | IN_ATTACK2 | IN_ZOOM))
+		{
+			cmd->iButtons &= ~IN_ATTACK;
+			cmd->iButtons &= ~IN_ATTACK2;
+			cmd->iButtons &= ~IN_ZOOM;
+		}
+
 	}
 
 	return false; //silent aim on false (only for client)

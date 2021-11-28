@@ -18,6 +18,7 @@ namespace I
 	extern IClientModeShared* clientmode;
 	extern IVPanel* panel;
 	extern IClientEntityList* entitylist;
+	extern IInputSystem* inputsystem;
 
 	// func
 	typedef void* (*InterfaceCreator)(const char*, int);

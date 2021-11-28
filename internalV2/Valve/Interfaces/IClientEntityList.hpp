@@ -1,16 +1,5 @@
 #pragma once
 
-
-using CBaseHandle = std::uintptr_t;
-
-// @credits: https://github.com/ValveSoftware/source-sdk-2013/blob/master/mp/src/game/client/cliententitylist.h#L298
-class IClientEntityListener
-{
-public:
-	virtual void OnEntityCreated(Entity* pEntity) { } // actually CBaseEntity
-	virtual void OnEntityDeleted(Entity* pEntity) { } // actually CBaseEntity
-};
-
 // @credits: https://github.com/ValveSoftware/source-sdk-2013/blob/master/mp/src/public/icliententitylist.h
 class IClientEntityList
 {

@@ -5,3 +5,4 @@
 #include "IClientModeShared.hpp"
 #include "IVPanel.hpp"
 #include "IClientEntityList.hpp"
+#include "IInputSystem.hpp"

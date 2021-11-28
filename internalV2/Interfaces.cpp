@@ -9,6 +9,7 @@ namespace I
 	IClientModeShared* clientmode = nullptr;
 	IVPanel* panel = nullptr;
 	IClientEntityList* entitylist = nullptr;
+	IInputSystem* inputsystem = nullptr;
 
 	void Init()
 	{
@@ -18,5 +19,6 @@ namespace I
 		clientmode = **(IClientModeShared***)((*(uintptr_t**)(client))[10] + 0x5);
 		panel = GetInterface<IVPanel               >("vgui2.dll", "VGUI_Panel009");
 		entitylist = GetInterface<IClientEntityList   >("client.dll", "VClientEntityList003");
+		inputsystem = GetInterface<IInputSystem         >("inputsystem.dll", "InputSystemVersion001");
 	}
 }

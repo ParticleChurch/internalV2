@@ -202,6 +202,7 @@
     <ClInclude Include="Valve\Interfaces\IClientEntityList.hpp" />
     <ClInclude Include="Valve\Interfaces\IClientModeShared.hpp" />
     <ClInclude Include="Valve\Interfaces\IEngineClient.hpp" />
+    <ClInclude Include="Valve\Interfaces\IInputSystem.hpp" />
     <ClInclude Include="Valve\Interfaces\Interfaces.hpp" />
     <ClInclude Include="Valve\Interfaces\ISurface.hpp" />
     <ClInclude Include="Valve\Interfaces\IVPanel.hpp" />

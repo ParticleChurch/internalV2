@@ -15,7 +15,7 @@
 #include <d3d9.h>
 #include <Psapi.h>
 #include <cstdint>
-
+#include <WinUser.h>
 
 #include "Utils/Utils.hpp"	//	includes all utils...
 #include "Valve/Valve.hpp"	//	include all the Valve classes/structs
