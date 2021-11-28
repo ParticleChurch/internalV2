@@ -194,15 +194,25 @@
     <ClInclude Include="Utils\GetVFunc.hpp" />
     <ClInclude Include="Utils\Logger.hpp" />
     <ClInclude Include="Utils\Utils.hpp" />
+    <ClInclude Include="Valve\Custom\Color.hpp" />
+    <ClInclude Include="Valve\Custom\Custom.hpp" />
     <ClInclude Include="Valve\Interfaces\IBaseClientDll.hpp" />
+    <ClInclude Include="Valve\Interfaces\IEngineClient.hpp" />
     <ClInclude Include="Valve\Interfaces\Interfaces.hpp" />
+    <ClInclude Include="Valve\Interfaces\ISurface.hpp" />
     <ClInclude Include="Valve\SDK\CRecvProxyData.hpp" />
     <ClInclude Include="Valve\SDK\DataVariant_t.hpp" />
     <ClInclude Include="Valve\SDK\ESendPropType.hpp" />
+    <ClInclude Include="Valve\SDK\INetChannelInfo.hpp" />
+    <ClInclude Include="Valve\SDK\Matrix.hpp" />
+    <ClInclude Include="Valve\SDK\PlayerInfo_t.hpp" />
     <ClInclude Include="Valve\SDK\Prototypes.hpp" />
+    <ClInclude Include="Valve\SDK\QAngle.hpp" />
     <ClInclude Include="Valve\SDK\RecvProp_t.hpp" />
     <ClInclude Include="Valve\SDK\RecvTable_t.hpp" />
     <ClInclude Include="Valve\SDK\SDK.hpp" />
+    <ClInclude Include="Valve\SDK\Vector.hpp" />
+    <ClInclude Include="Valve\SDK\Vertex_t.hpp" />
     <ClInclude Include="Valve\Valve.hpp" />
   </ItemGroup>
   <ItemGroup>

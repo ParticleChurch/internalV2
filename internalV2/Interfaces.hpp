@@ -13,6 +13,8 @@ namespace I
 {
 	//interfaces
 	extern IBaseClientDll* client;
+	extern IEngineClient* engine;
+	extern ISurface* surface;
 
 	// func
 	typedef void* (*InterfaceCreator)(const char*, int);

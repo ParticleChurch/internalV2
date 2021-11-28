@@ -31,6 +31,9 @@
     <Filter Include="Header Files\Valve\Interfaces">
       <UniqueIdentifier>{8bc449c0-d13d-44fd-bf67-0cb9f1e7a972}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Valve\Custom">
+      <UniqueIdentifier>{3b9273ce-adb5-4842-a775-41eae25a0d2b}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dllmain.cpp">
@@ -153,6 +156,36 @@
       <Filter>Header Files\Valve\SDK</Filter>
     </ClInclude>
     <ClInclude Include="Valve\SDK\DataVariant_t.hpp">
+      <Filter>Header Files\Valve\SDK</Filter>
+    </ClInclude>
+    <ClInclude Include="Valve\Interfaces\IEngineClient.hpp">
+      <Filter>Header Files\Valve\Interfaces</Filter>
+    </ClInclude>
+    <ClInclude Include="Valve\SDK\INetChannelInfo.hpp">
+      <Filter>Header Files\Valve\SDK</Filter>
+    </ClInclude>
+    <ClInclude Include="Valve\SDK\Vector.hpp">
+      <Filter>Header Files\Valve\SDK</Filter>
+    </ClInclude>
+    <ClInclude Include="Valve\SDK\Matrix.hpp">
+      <Filter>Header Files\Valve\SDK</Filter>
+    </ClInclude>
+    <ClInclude Include="Valve\SDK\QAngle.hpp">
+      <Filter>Header Files\Valve\SDK</Filter>
+    </ClInclude>
+    <ClInclude Include="Valve\SDK\PlayerInfo_t.hpp">
+      <Filter>Header Files\Valve\SDK</Filter>
+    </ClInclude>
+    <ClInclude Include="Valve\Interfaces\ISurface.hpp">
+      <Filter>Header Files\Valve\Interfaces</Filter>
+    </ClInclude>
+    <ClInclude Include="Valve\Custom\Custom.hpp">
+      <Filter>Header Files\Valve\Custom</Filter>
+    </ClInclude>
+    <ClInclude Include="Valve\Custom\Color.hpp">
+      <Filter>Header Files\Valve\Custom</Filter>
+    </ClInclude>
+    <ClInclude Include="Valve\SDK\Vertex_t.hpp">
       <Filter>Header Files\Valve\SDK</Filter>
     </ClInclude>
   </ItemGroup>

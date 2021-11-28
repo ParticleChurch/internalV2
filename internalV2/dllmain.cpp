@@ -1,6 +1,5 @@
 #include "Include.hpp"
 
-
 HMODULE dllModule;
 
 void onInject()

@@ -7,6 +7,11 @@
 #include <vector>
 #include <string>
 #include <cstddef>
+#include <cmath> // used: isfinite, fmodf, sqrtf
+#include <limits> // used: numeric_limits
+#include <xutility> 
+#include <algorithm> // used: clamp
+#include <corecrt_math.h> // QAngle used
 
 #include "Utils/Utils.hpp"	//	includes all utils...
 #include "Valve/Valve.hpp"	//	include all the Valve classes/structs
