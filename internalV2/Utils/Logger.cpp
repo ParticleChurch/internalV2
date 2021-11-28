@@ -97,7 +97,7 @@ void L::SameLine(const char* txt, const char* end, const bool& flush)
 }
 
 // initalization
-void L::init()
+void L::Init()
 {
 	// usually in release mode
 	if constexpr (LOGGING_ENABLED)
@@ -136,7 +136,7 @@ void L::init()
 }
 
 // deconstruction
-void L::free()
+void L::Free()
 {
 	if constexpr (LOGGING_ENABLED)
 	{

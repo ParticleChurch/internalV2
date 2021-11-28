@@ -4,8 +4,12 @@
 
 #include <time.h>
 #include <Windows.h>
+#include <vector>
+#include <string>
+#include <cstddef>
 
 #include "Utils/Utils.hpp"	//	includes all utils...
+#include "Valve/Valve.hpp"	//	include all the Valve classes/structs
 #include "Interfaces.hpp"	//	includes all the interfaces..
 #include "Netvars.hpp"		//	for grabbing netvars
 

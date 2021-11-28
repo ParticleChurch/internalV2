@@ -7,7 +7,7 @@ namespace L
 
 	// console and or file output?
 	constexpr bool OUTPUT_TO_CONSOLE = true;
-	constexpr bool OUTPUT_TO_FILE = false;
+	constexpr bool OUTPUT_TO_FILE = true;
 	constexpr const char* OUTPUT_FILE_PATH = "a4g4.log"; // will be placed as a sibling to csgo.exe
 
 	// how much data should be kept in the output file? (it is a cyclic log)
@@ -34,6 +34,6 @@ namespace L
 	void SameLine(const char* txt, const char* end = "\n", const bool& flush = true);
 
 	// initalization and deconstruction
-	void init();
-	void free();
+	void Init();
+	void Free();
 }

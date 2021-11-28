@@ -22,6 +22,15 @@
     <Filter Include="Header Files\ImGui">
       <UniqueIdentifier>{8a98fe81-a604-4d3c-b95a-4a6ffc89b9c3}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Valve">
+      <UniqueIdentifier>{1a83d111-8cea-4185-a6e8-6efe588a03c2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Valve\SDK">
+      <UniqueIdentifier>{f304f3dc-376d-4f26-b205-6366f00b9f9b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Valve\Interfaces">
+      <UniqueIdentifier>{8bc449c0-d13d-44fd-bf67-0cb9f1e7a972}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dllmain.cpp">
@@ -110,5 +119,44 @@
     <ClInclude Include="Utils\Utils.hpp">
       <Filter>Header Files\Utils</Filter>
     </ClInclude>
+    <ClInclude Include="Entity.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Utils\GetVFunc.hpp">
+      <Filter>Header Files\Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="Valve\Valve.hpp">
+      <Filter>Header Files\Valve</Filter>
+    </ClInclude>
+    <ClInclude Include="Valve\Interfaces\IBaseClientDll.hpp">
+      <Filter>Header Files\Valve\Interfaces</Filter>
+    </ClInclude>
+    <ClInclude Include="Valve\Interfaces\Interfaces.hpp">
+      <Filter>Header Files\Valve\Interfaces</Filter>
+    </ClInclude>
+    <ClInclude Include="Valve\SDK\CRecvProxyData.hpp">
+      <Filter>Header Files\Valve\SDK</Filter>
+    </ClInclude>
+    <ClInclude Include="Valve\SDK\ESendPropType.hpp">
+      <Filter>Header Files\Valve\SDK</Filter>
+    </ClInclude>
+    <ClInclude Include="Valve\SDK\Prototypes.hpp">
+      <Filter>Header Files\Valve\SDK</Filter>
+    </ClInclude>
+    <ClInclude Include="Valve\SDK\RecvProp_t.hpp">
+      <Filter>Header Files\Valve\SDK</Filter>
+    </ClInclude>
+    <ClInclude Include="Valve\SDK\RecvTable_t.hpp">
+      <Filter>Header Files\Valve\SDK</Filter>
+    </ClInclude>
+    <ClInclude Include="Valve\SDK\SDK.hpp">
+      <Filter>Header Files\Valve\SDK</Filter>
+    </ClInclude>
+    <ClInclude Include="Valve\SDK\DataVariant_t.hpp">
+      <Filter>Header Files\Valve\SDK</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
   </ItemGroup>
 </Project>

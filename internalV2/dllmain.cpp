@@ -9,13 +9,15 @@ void onInject()
     srand(static_cast <unsigned> (time(0)));
 
     // initalizers
-    L::init();
+    L::Init();
+    I::Init();
+    N::Init();
 
     // TODO: wait for them to press eject
     L::Info("Hello World!");
 
     // uninitalizers
-    L::free();
+    L::Free();
 
     // deallocate DLL
     FreeLibraryAndExitThread(dllModule, 0);
