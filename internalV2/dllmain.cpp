@@ -1,7 +1,5 @@
-#include "Utils/Logger.hpp"
+#include "Include.hpp"
 
-#include <time.h>
-#include <Windows.h>
 
 HMODULE dllModule;
 
