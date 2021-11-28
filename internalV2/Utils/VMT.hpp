@@ -84,3 +84,21 @@ namespace VMT { // Virtual Method Table
 		}
 	};
 }
+
+#define _VMT_PREPEND_EMPTY(before, ...) (before)
+#define _VMT_PREPEND_NOTEMPTY(before, ...) (before, __VA_ARGS__)
+#define _VMT_GET_18TH_ARG(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15, arg16, arg17, arg18, ...) arg18
+#define _VMT_PREPEND_MACRO_CHOOSER(...) \
+    _VMT_GET_18TH_ARG(__VA_ARGS__, \
+            _VMT_PREPEND_NOTEMPTY, _VMT_PREPEND_NOTEMPTY, _VMT_PREPEND_NOTEMPTY, _VMT_PREPEND_NOTEMPTY, _VMT_PREPEND_NOTEMPTY, \
+            _VMT_PREPEND_NOTEMPTY, _VMT_PREPEND_NOTEMPTY, _VMT_PREPEND_NOTEMPTY, _VMT_PREPEND_NOTEMPTY, _VMT_PREPEND_NOTEMPTY, \
+            _VMT_PREPEND_NOTEMPTY, _VMT_PREPEND_NOTEMPTY, _VMT_PREPEND_NOTEMPTY, _VMT_PREPEND_NOTEMPTY, _VMT_PREPEND_NOTEMPTY, \
+            _VMT_PREPEND_EMPTY, )
+#define _VMT_PREPEND_UTIL(...) _VMT_PREPEND_MACRO_CHOOSER(__VA_ARGS__)(__VA_ARGS__)
+#define _VMT_PREPEND(before, tuple) _VMT_PREPEND_UTIL(before, _VMT_UNPACK_UTIL tuple)
+#define DECLARE_VIRTUAL_METHOD_CUSTOM_ARGS(return_type, name, index, user_args, csgo_args, pass_args) inline return_type name user_args noexcept \
+{ \
+	typedef return_type (__thiscall* vfunc) _VMT_PREPEND(void* self, csgo_args); \
+	return VMT::GetVirtualMethod<vfunc>(this, index) _VMT_PREPEND(this, pass_args); \
+}
+#define DECLARE_VIRTUAL_METHOD(return_type, name, index, in_args, pass_args) DECLARE_VIRTUAL_METHOD_CUSTOM_ARGS(return_type, name, index, in_args, in_args, pass_args)

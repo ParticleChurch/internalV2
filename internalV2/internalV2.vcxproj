@@ -204,6 +204,7 @@
     <ClInclude Include="Valve\Interfaces\ISurface.hpp" />
     <ClInclude Include="Valve\SDK\CRecvProxyData.hpp" />
     <ClInclude Include="Valve\SDK\DataVariant_t.hpp" />
+    <ClInclude Include="Valve\SDK\definitions.hpp" />
     <ClInclude Include="Valve\SDK\ESendPropType.hpp" />
     <ClInclude Include="Valve\SDK\INetChannelInfo.hpp" />
     <ClInclude Include="Valve\SDK\Matrix.hpp" />

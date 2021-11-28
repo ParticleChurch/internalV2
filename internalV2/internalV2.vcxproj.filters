@@ -194,6 +194,9 @@
     <ClInclude Include="Utils\PatternScan.hpp">
       <Filter>Header Files\Utils</Filter>
     </ClInclude>
+    <ClInclude Include="Valve\SDK\definitions.hpp">
+      <Filter>Header Files\Valve\SDK</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

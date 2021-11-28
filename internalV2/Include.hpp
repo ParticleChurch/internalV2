@@ -15,12 +15,14 @@
 #include <d3d9.h>
 #include <Psapi.h>
 
+
 #include "Utils/Utils.hpp"	//	includes all utils...
 #include "Valve/Valve.hpp"	//	include all the Valve classes/structs
 #include "Interfaces.hpp"	//	includes all the interfaces..
 #include "Netvars.hpp"		//	for grabbing netvars
 
 // Semi-global variables for cheats
+#include "Entity.hpp"
 #include "Globals.hpp"
 
 // Imgui
