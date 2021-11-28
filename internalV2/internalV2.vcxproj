@@ -206,7 +206,9 @@
     <ClInclude Include="Valve\Interfaces\Interfaces.hpp" />
     <ClInclude Include="Valve\Interfaces\ISurface.hpp" />
     <ClInclude Include="Valve\Interfaces\IVPanel.hpp" />
+    <ClInclude Include="Valve\Interfaces\IWeaponSystem.hpp" />
     <ClInclude Include="Valve\SDK\CBaseTrace.hpp" />
+    <ClInclude Include="Valve\SDK\CCSWeaponData.hpp" />
     <ClInclude Include="Valve\SDK\CGameTrace.hpp" />
     <ClInclude Include="Valve\SDK\cplane_t.hpp" />
     <ClInclude Include="Valve\SDK\CRecvProxyData.hpp" />

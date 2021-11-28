@@ -10,6 +10,7 @@ namespace I
 	IVPanel* panel = nullptr;
 	IClientEntityList* entitylist = nullptr;
 	IInputSystem* inputsystem = nullptr;
+	IWeaponSystem* weaponsystem = nullptr;
 
 	void Init()
 	{
@@ -20,5 +21,6 @@ namespace I
 		panel = GetInterface<IVPanel               >("vgui2.dll", "VGUI_Panel009");
 		entitylist = GetInterface<IClientEntityList   >("client.dll", "VClientEntityList003");
 		inputsystem = GetInterface<IInputSystem         >("inputsystem.dll", "InputSystemVersion001");
+		weaponsystem = *reinterpret_cast<IWeaponSystem**>(FindPattern("client.dll", "8B 35 ? ? ? ? FF 10 0F B7 C0") + 0x2);
 	}
 }

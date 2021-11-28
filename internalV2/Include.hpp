@@ -16,6 +16,9 @@
 #include <Psapi.h>
 #include <cstdint>
 #include <WinUser.h>
+#include <winnt.h>
+#include <intrin.h>				 //for _ReturnAddress() (intitially for hooks.cpp)
+
 
 #include "Utils/Utils.hpp"	//	includes all utils...
 #include "Valve/Valve.hpp"	//	include all the Valve classes/structs

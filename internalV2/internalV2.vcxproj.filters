@@ -236,6 +236,12 @@
     <ClInclude Include="Valve\Interfaces\IInputSystem.hpp">
       <Filter>Header Files\Valve\Interfaces</Filter>
     </ClInclude>
+    <ClInclude Include="Valve\SDK\CCSWeaponData.hpp">
+      <Filter>Header Files\Valve\SDK</Filter>
+    </ClInclude>
+    <ClInclude Include="Valve\Interfaces\IWeaponSystem.hpp">
+      <Filter>Header Files\Valve\Interfaces</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

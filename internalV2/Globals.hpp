@@ -15,6 +15,8 @@ namespace G {
 	extern Entity* Localplayer;
 	extern bool LocalplayerAlive;
 	extern int LocalplayerTeam;
+	extern Entity* LocalplayerWeapon;
+	extern CCSWeaponData* LocalplayerWeapondata;
 
 	//LocalPlayer
 	/*extern Entity* LocalPlayer;

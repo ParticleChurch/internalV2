@@ -6,3 +6,4 @@
 #include "IVPanel.hpp"
 #include "IClientEntityList.hpp"
 #include "IInputSystem.hpp"
+#include "IWeaponSystem.hpp"

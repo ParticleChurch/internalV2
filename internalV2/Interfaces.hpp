@@ -19,6 +19,7 @@ namespace I
 	extern IVPanel* panel;
 	extern IClientEntityList* entitylist;
 	extern IInputSystem* inputsystem;
+	extern IWeaponSystem* weaponsystem;
 
 	// func
 	typedef void* (*InterfaceCreator)(const char*, int);

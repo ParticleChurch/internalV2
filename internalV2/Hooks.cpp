@@ -224,9 +224,9 @@ void __stdcall H::FrameStageNotifyHook(int stage)
 		G::Localplayer = I::entitylist->GetClientEntity(G::LocalplayerIndex);
 		G::LocalplayerAlive = G::Localplayer ? G::Localplayer->GetHealth() > 0 && G::Localplayer->GetLifeState() == LIFE_ALIVE: false;
 		G::LocalplayerTeam = G::Localplayer ? G::Localplayer->GetTeam() : 0;
-		/*G::LocalPlayerWeapon = G::LocalPlayer ? G::LocalPlayer->GetActiveWeapon() : nullptr;
-		G::LocalPlayerWeaponData = G::LocalPlayerWeapon ? G::LocalPlayerWeapon->GetWeaponData() : nullptr;
-
+		G::LocalplayerWeapon = G::Localplayer ? G::Localplayer->GetActiveWeapon() : nullptr;
+		G::LocalplayerWeapondata = G::LocalplayerWeapon ? G::LocalplayerWeapon->GetWeaponData() : nullptr;
+		/*
 		if (!G::LocalPlayer || !G::LocalPlayerAlive)
 		{
 			lagcomp->ClearRecords();
@@ -240,7 +240,8 @@ void __stdcall H::FrameStageNotifyHook(int stage)
 		G::Localplayer = nullptr;
 		G::LocalplayerIndex = 0;
 		G::LocalplayerTeam = 0;
-		/*G::LocalPlayerWeapon = nullptr;*/
+		G::LocalplayerWeapon = nullptr;
+		G::LocalplayerWeapondata = nullptr;
 		return oFrameStageNotify(stage);
 	}
 

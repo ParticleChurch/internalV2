@@ -21,3 +21,4 @@
 #include "CUserCmd.hpp"
 #include "CUtlMemory.hpp"
 #include "CUtlVector.hpp"
+#include "CCSWeaponData.hpp"

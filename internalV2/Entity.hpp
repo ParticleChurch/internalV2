@@ -1,9 +1,13 @@
 #pragma once
-
 // temporary for now
 #define DEBUG_ENTITY false
 
 // ENUM here for Virtual Functions (for easy changing)
+enum Entity_VFunc_B
+{
+	GetAbsOrigin = 9,
+	SetupBones = 13
+};
 
 // NOTE: i shouldn't be using all of these as references, im just assuming, will go through and fix later
 // rule of thumb: if it doesn't work, remove the "&" :)
@@ -78,6 +82,12 @@ public: // NETVARS
 		if constexpr (DEBUG_ENTITY) L::Debug("ScopeLevel");
 		static DWORD offset = N::GetOffset("DT_WeaponCSBaseGun", "m_zoomLevel");
 		return *(int*)((DWORD)this + offset);
+	}
+	//short
+	short GetItemDefinitionIndex() {
+		if (DEBUG_ENTITY) L::Debug("GetItemDefinitionIndex");
+		static DWORD offset = N::GetOffset("DT_BaseAttributableItem", "m_iItemDefinitionIndex");
+		return *(short*)((DWORD)this + offset);
 	}
 	// char
 	char& GetLifeState() {
@@ -184,13 +194,49 @@ public: // NETVARS
 		static DWORD offset = N::GetOffset("DT_CSPlayer", "m_hObserverTarget");
 		return *(HANDLE*)((DWORD)this + offset);
 	}
-	HANDLE& GetOwner()
-	{
+	HANDLE& GetOwner() {
+		if constexpr (DEBUG_ENTITY) L::Debug("GetOwner");
 		static DWORD offset = N::GetOffset("DT_BaseEntity", "m_hOwnerEntity");
 		return *(HANDLE*)((DWORD)this + offset);
 	}
-public: // VIRTUALS 
-	
+public: // PATTERNS
+	void SetAbsOrigin(const Vector& vecOrigin) {
+		if constexpr (DEBUG_ENTITY) L::Debug("SetAbsOrigin");
+		using SetAbsOriginFn = void(__thiscall*)(void*, const Vector&);
+		static auto oSetAbsOrigin = reinterpret_cast<SetAbsOriginFn>(FindPattern("client.dll", "55 8B EC 83 E4 F8 51 53 56 57 8B F1 E8"));
+		oSetAbsOrigin(this, vecOrigin);
+	}
+public: // VIRTUALS
+	Vector GetAbsOrigin() {
+		if constexpr (DEBUG_ENTITY) L::Debug("GetAbsOrigin");
+		typedef bool(__thiscall* oIsDormant)(void*);
+		return VMT::GetVirtualMethod<oIsDormant>(this + 8, Entity_VFunc_B::GetAbsOrigin)(this + 8);
+	}
+	bool SetupBones(matrix3x4_t* out, int maxBones, int boneMask, float currentTime, bool fixbonematrix = false)
+	{
+		typedef bool(__thiscall* oSetupBones)(void*, matrix3x4_t*, int, int, float);
+		if (fixbonematrix) {
+			int* render = reinterpret_cast<int*>(this + 0x274);
+			int backup = *render;
+			Vector absOrigin = GetAbsOrigin();
+			*render = 0;
+			SetAbsOrigin(GetVecOrigin());
+			auto result = VMT::GetVirtualMethod<oSetupBones>(this + sizeof(uintptr_t), Entity_VFunc_B::SetupBones)(this + sizeof(uintptr_t), out, maxBones, boneMask, currentTime);
+			SetAbsOrigin(absOrigin);
+			*render = backup;
+			return result;
+		}
+		return VMT::GetVirtualMethod<oSetupBones>(this + 4, Entity_VFunc_B::SetupBones)(this + 4, out, maxBones, boneMask, currentTime);
+	}
 public: // OTHERS
-
+	Entity* GetActiveWeapon() {
+		if (DEBUG_ENTITY) L::Debug("GetActiveWeapon");
+		static DWORD offset = N::GetOffset("DT_BasePlayer", "m_hActiveWeapon");
+		return I::entitylist->GetClientEntityFromHandle(*(HANDLE*)((DWORD)this + offset));
+	}
+	CCSWeaponData* GetWeaponData() {
+		if (DEBUG_ENTITY) L::Debug("GetWeaponData");
+		short nDefinitionIndex = this->GetItemDefinitionIndex();
+		return I::weaponsystem->GetWeaponData(nDefinitionIndex);
+	}
 };

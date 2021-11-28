@@ -16,4 +16,6 @@ namespace G
 	Entity* Localplayer = new Entity();
 	bool LocalplayerAlive = false;
 	int LocalplayerTeam;
+	Entity* LocalplayerWeapon;
+	CCSWeaponData* LocalplayerWeapondata;
 }
