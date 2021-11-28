@@ -11,5 +11,9 @@ namespace G
 
 	// Game stuff
 	bool IsInGame = false;
+
+	int LocalplayerIndex;
 	Entity* Localplayer = new Entity();
+	bool LocalplayerAlive = false;
+	int LocalplayerTeam;
 }

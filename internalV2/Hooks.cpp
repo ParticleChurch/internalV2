@@ -218,34 +218,31 @@ void __stdcall H::FrameStageNotifyHook(int stage)
 	else
 		I::inputsystem->EnableInput(true);*/
 
-	/*if (G::IsInGame)
+	if (G::IsInGame)
 	{
-		G::LocalPlayerIndex = I::engine->GetLocalPlayer();
-		G::LocalPlayer = I::entitylist->GetClientEntity(G::LocalPlayerIndex);
-		G::LocalPlayerAlive = G::LocalPlayer ? G::LocalPlayer->GetHealth() > 0 && G::LocalPlayer->GetLifeState() == LIFE_ALIVE: false;
-		G::LocalPlayerTeam = G::LocalPlayer ? G::LocalPlayer->GetTeam() : 0;
-		G::LocalPlayerWeapon = G::LocalPlayer ? G::LocalPlayer->GetActiveWeapon() : nullptr;
+		G::LocalplayerIndex = I::engine->GetLocalPlayer();
+		G::Localplayer = I::entitylist->GetClientEntity(G::LocalplayerIndex);
+		G::LocalplayerAlive = G::Localplayer ? G::Localplayer->GetHealth() > 0 && G::Localplayer->GetLifeState() == LIFE_ALIVE: false;
+		G::LocalplayerTeam = G::Localplayer ? G::Localplayer->GetTeam() : 0;
+		/*G::LocalPlayerWeapon = G::LocalPlayer ? G::LocalPlayer->GetActiveWeapon() : nullptr;
 		G::LocalPlayerWeaponData = G::LocalPlayerWeapon ? G::LocalPlayerWeapon->GetWeaponData() : nullptr;
 
 		if (!G::LocalPlayer || !G::LocalPlayerAlive)
 		{
 			lagcomp->ClearRecords();
 			return oFrameStageNotify(stage);
-		}
+		}*/
 	}
 	else
 	{
-		lagcomp->ClearPlayerList();
-		G::LocalPlayerAlive = false;
-		G::LocalPlayer = nullptr;
-		G::LocalPlayerIndex = 0;
-		G::LocalPlayerTeam = 0;
-		G::LocalPlayerWeapon = nullptr;
+		/*lagcomp->ClearPlayerList();*/
+		G::LocalplayerAlive = false;
+		G::Localplayer = nullptr;
+		G::LocalplayerIndex = 0;
+		G::LocalplayerTeam = 0;
+		/*G::LocalPlayerWeapon = nullptr;*/
 		return oFrameStageNotify(stage);
-	}*/
-
-	// temp
-	G::Localplayer = nullptr;
+	}
 
 	return oFrameStageNotify(stage);
 }

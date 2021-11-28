@@ -17,6 +17,7 @@ namespace I
 	extern ISurface* surface;
 	extern IClientModeShared* clientmode;
 	extern IVPanel* panel;
+	extern IClientEntityList* entitylist;
 
 	// func
 	typedef void* (*InterfaceCreator)(const char*, int);

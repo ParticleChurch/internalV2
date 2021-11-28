@@ -199,6 +199,7 @@
     <ClInclude Include="Valve\Custom\Color.hpp" />
     <ClInclude Include="Valve\Custom\Custom.hpp" />
     <ClInclude Include="Valve\Interfaces\IBaseClientDll.hpp" />
+    <ClInclude Include="Valve\Interfaces\IClientEntityList.hpp" />
     <ClInclude Include="Valve\Interfaces\IClientModeShared.hpp" />
     <ClInclude Include="Valve\Interfaces\IEngineClient.hpp" />
     <ClInclude Include="Valve\Interfaces\Interfaces.hpp" />
@@ -210,6 +211,8 @@
     <ClInclude Include="Valve\SDK\CRecvProxyData.hpp" />
     <ClInclude Include="Valve\SDK\csurface_t.hpp" />
     <ClInclude Include="Valve\SDK\CUserCmd.hpp" />
+    <ClInclude Include="Valve\SDK\CUtlMemory.hpp" />
+    <ClInclude Include="Valve\SDK\CUtlVector.hpp" />
     <ClInclude Include="Valve\SDK\DataVariant_t.hpp" />
     <ClInclude Include="Valve\SDK\definitions.hpp" />
     <ClInclude Include="Valve\SDK\ESendPropType.hpp" />

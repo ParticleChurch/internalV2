@@ -224,6 +224,15 @@
     <ClInclude Include="Valve\SDK\cplane_t.hpp">
       <Filter>Header Files\Valve\SDK</Filter>
     </ClInclude>
+    <ClInclude Include="Valve\Interfaces\IClientEntityList.hpp">
+      <Filter>Header Files\Valve\Interfaces</Filter>
+    </ClInclude>
+    <ClInclude Include="Valve\SDK\CUtlMemory.hpp">
+      <Filter>Header Files\Valve\SDK</Filter>
+    </ClInclude>
+    <ClInclude Include="Valve\SDK\CUtlVector.hpp">
+      <Filter>Header Files\Valve\SDK</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

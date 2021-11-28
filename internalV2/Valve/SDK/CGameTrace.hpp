@@ -9,7 +9,7 @@ public:
 	int					iHitGroup;				// 0 == generic, non-zero is specific body part
 	short				sPhysicsBone;			// physics bone hit by trace in studio
 	std::uint16_t		uWorldSurfaceIndex;		// index of the msurface2_t, if applicable
-	CBaseEntity* pHitEntity;				// entity hit by trace
+	Entity* pHitEntity;				// entity hit by trace
 	int					iHitbox;				// box hit by trace in studio
 
 	inline bool DidHit() const

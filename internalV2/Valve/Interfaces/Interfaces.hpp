@@ -4,3 +4,4 @@
 #include "ISurface.hpp"
 #include "IClientModeShared.hpp"
 #include "IVPanel.hpp"
+#include "IClientEntityList.hpp"

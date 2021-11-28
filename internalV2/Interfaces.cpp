@@ -8,6 +8,7 @@ namespace I
 	ISurface* surface = nullptr;
 	IClientModeShared* clientmode = nullptr;
 	IVPanel* panel = nullptr;
+	IClientEntityList* entitylist = nullptr;
 
 	void Init()
 	{
@@ -16,6 +17,6 @@ namespace I
 		client = GetInterface<IBaseClientDll>("client.dll", "VClient018");
 		clientmode = **(IClientModeShared***)((*(uintptr_t**)(client))[10] + 0x5);
 		panel = GetInterface<IVPanel               >("vgui2.dll", "VGUI_Panel009");
-
+		entitylist = GetInterface<IClientEntityList   >("client.dll", "VClientEntityList003");
 	}
 }

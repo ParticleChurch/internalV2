@@ -19,3 +19,5 @@
 #include "CGameTrace.hpp"
 #include "Model_t.hpp"
 #include "CUserCmd.hpp"
+#include "CUtlMemory.hpp"
+#include "CUtlVector.hpp"

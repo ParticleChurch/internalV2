@@ -14,6 +14,7 @@
 #include <corecrt_math.h> // QAngle used
 #include <d3d9.h>
 #include <Psapi.h>
+#include <cstdint>
 
 
 #include "Utils/Utils.hpp"	//	includes all utils...
