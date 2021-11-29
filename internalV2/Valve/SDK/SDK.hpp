@@ -27,3 +27,4 @@
 #include "BSPFlags.hpp"
 #include "Studio.hpp"
 #include "EClientFrameStage.hpp"
+#include "EFontFlags.hpp"

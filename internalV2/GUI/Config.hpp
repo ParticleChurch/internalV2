@@ -32,6 +32,20 @@ namespace CFG
 		bool Backtrack = false;
 		float BacktrackTime = 0.f;
 	};
+
+	struct ESP
+	{
+		bool Enable = false;
+		bool Name = false;
+		Color NameColor = Color();
+		bool Skeleton = false;
+		Color SkeletonColor = Color();
+		bool Health = false;
+		bool Weapon = false;
+		Color WeaponColor = Color();
+		bool Grenade = false;
+		Color GrenadeColor = Color();
+	};
 }
 
 class Config
@@ -41,6 +55,7 @@ public:
 
 	CFG::Movement movement;
 	CFG::Offense offense;
+	CFG::ESP esp;
 
 	Config();
 	void HandleKeybinds();

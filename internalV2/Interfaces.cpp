@@ -15,6 +15,7 @@ namespace I
 	IGlobalVarsBase* globalvars = nullptr;
 	IEngineTrace* enginetrace = nullptr;
 	IConVar* convar = nullptr;
+	IVModelInfo* modelinfo = nullptr;
 
 	void Init()
 	{
@@ -31,5 +32,6 @@ namespace I
 		globalvars = **(IGlobalVarsBase***)((*(uintptr_t**)(client))[11] + 10);
 		enginetrace = GetInterface<IEngineTrace        >("engine.dll", "EngineTraceClient004");
 		convar = GetInterface<IConVar                >("vstdlib.dll", "VEngineCvar007");
+		modelinfo = GetInterface<IVModelInfo         >("engine.dll", "VModelInfoClient004");
 	}
 }

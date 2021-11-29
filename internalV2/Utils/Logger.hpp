@@ -6,7 +6,7 @@ namespace L
 	constexpr bool LOGGING_ENABLED = true;
 
 	// console and or file output?
-	constexpr bool OUTPUT_TO_CONSOLE = true;
+	constexpr bool OUTPUT_TO_CONSOLE = false;
 	constexpr bool OUTPUT_TO_FILE = true;
 	constexpr const char* OUTPUT_FILE_PATH = "a4g4.log"; // will be placed as a sibling to csgo.exe
 

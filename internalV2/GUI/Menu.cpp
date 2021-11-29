@@ -178,6 +178,77 @@ namespace C
 	}
 }
 
+void Menu::RenderESP()
+{
+	static float propersize = 100.f;
+
+	ImGui::BeginChild("##ESPArea", ImVec2(0, propersize), true);
+
+	float pos1 = ImGui::GetCursorPosY();
+
+	ImGui::Text("ESP");
+	ImGui::Separator();
+
+	ImGui::Columns(2, "##ESPCols"); // 4-ways, with border
+
+	ImGui::Text("Enable");
+	ImGui::NextColumn();
+	C::Checkbox("##ESPEnable", &cfg->esp.Enable);
+	ImGui::NextColumn();
+
+	ImGui::Text("Names");
+	ImGui::NextColumn();
+	C::Checkbox("##ESPNames", &cfg->esp.Name);
+	if (cfg->esp.Name)
+	{
+		ImGui::SameLine();
+		C::ColorPicker("Name Color", &cfg->esp.NameColor);
+	}
+	ImGui::NextColumn();
+
+	ImGui::Text("Skeleton");
+	ImGui::NextColumn();
+	C::Checkbox("##ESPSkeleton", &cfg->esp.Skeleton);
+	if (cfg->esp.Skeleton)
+	{
+		ImGui::SameLine();
+		C::ColorPicker("Skeleton Color", &cfg->esp.SkeletonColor);
+	}
+	ImGui::NextColumn();
+
+	ImGui::Text("Health");
+	ImGui::NextColumn();
+	C::Checkbox("##ESPHealth", &cfg->esp.Health);
+	ImGui::NextColumn();
+
+	ImGui::Text("Weapon");
+	ImGui::NextColumn();
+	C::Checkbox("##ESPWeapon", &cfg->esp.Weapon);
+	if (cfg->esp.Weapon)
+	{
+		ImGui::SameLine();
+		C::ColorPicker("Weapon Color", &cfg->esp.WeaponColor);
+	}
+	ImGui::NextColumn();
+
+	ImGui::Text("Grenades");
+	ImGui::NextColumn();
+	C::Checkbox("##ESPGrenades", &cfg->esp.Grenade);
+	if (cfg->esp.Grenade)
+	{
+		ImGui::SameLine();
+		C::ColorPicker("Grenade Color", &cfg->esp.GrenadeColor);
+	}
+	ImGui::NextColumn();
+
+	ImGui::EndColumns(); // end columns
+
+	float pos2 = ImGui::GetCursorPosY();
+	propersize = pos2 - pos1 + 20.f;
+
+	ImGui::EndChild(); // end child
+}
+
 void Menu::Render()
 {
 	cfg->HandleKeybinds();
@@ -248,6 +319,10 @@ void Menu::Render()
 			ImGui::SameLine();
 			ImGui::SliderFloat("##BacktrackTIme", &cfg->offense.BacktrackTime, 10, 200);
 		}
+
+		ImGui::Separator();
+
+		RenderESP();
 
 		ImGui::Separator();
 

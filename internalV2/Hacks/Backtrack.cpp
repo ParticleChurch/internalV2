@@ -44,6 +44,8 @@ void Backtrack::Run()
 {
 	if (!cfg->offense.Backtrack) return;
 
+	if (!G::LocalplayerAlive) return;
+
 	GetTargEnt();
 	if (!ValidEntFound) return;
 

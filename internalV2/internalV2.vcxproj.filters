@@ -105,6 +105,9 @@
     <ClCompile Include="Hacks\Movement.cpp">
       <Filter>Source Files\Hacks</Filter>
     </ClCompile>
+    <ClCompile Include="Hacks\ESP.cpp">
+      <Filter>Source Files\Hacks</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Utils\Logger.hpp">
@@ -319,6 +322,15 @@
     </ClInclude>
     <ClInclude Include="Hacks\Backtrack.hpp">
       <Filter>Header Files\Hacks</Filter>
+    </ClInclude>
+    <ClInclude Include="Hacks\ESP.hpp">
+      <Filter>Header Files\Hacks</Filter>
+    </ClInclude>
+    <ClInclude Include="Valve\SDK\EFontFlags.hpp">
+      <Filter>Header Files\Valve\SDK</Filter>
+    </ClInclude>
+    <ClInclude Include="Valve\Interfaces\IVModelInfo.hpp">
+      <Filter>Header Files\Valve\Interfaces</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

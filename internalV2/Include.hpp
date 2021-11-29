@@ -49,6 +49,7 @@
 #include "Hacks/Movement.hpp"
 #include "Hacks/Lagcomp.hpp"
 #include "Hacks/Backtrack.hpp"
+#include "Hacks/ESP.hpp"
 
 // Hooks
 #include "Hooks.hpp"            //hooking ingame functions

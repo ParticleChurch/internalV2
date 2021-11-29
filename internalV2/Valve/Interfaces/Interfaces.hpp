@@ -11,3 +11,4 @@
 #include "IGlobalVars.hpp"
 #include "IEngineTrace.hpp"
 #include "Convar.hpp"
+#include "IVModelInfo.hpp"

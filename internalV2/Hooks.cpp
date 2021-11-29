@@ -89,6 +89,7 @@ void H::Free()
 	delete movement;
 	delete backtrack;
 	delete lagcomp;
+	delete esp;
 }
 
 long __stdcall H::ResetHook(IDirect3DDevice9* device, D3DPRESENT_PARAMETERS* pPresentationParameters)
@@ -281,6 +282,8 @@ void __stdcall H::PaintTraverseHook(int vguiID, bool force, bool allowForcing)
 
 		if (!G::Localplayer || !I::engine->IsInGame())
 			return;
+
+		esp->RunPaintTraverse();
 
 		if (lagcomp->PlayerList[backtrack->TargEnt].records.empty())
 			return;
