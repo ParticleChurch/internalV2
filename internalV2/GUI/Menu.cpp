@@ -198,43 +198,56 @@ void Menu::Render()
 		ImGui::SameLine();
 		C::Checkbox("##Bunnyhop", &cfg->movement.Bunnyhop);
 
-		ImGui::Text("Bunnyhop Chance");
-		ImGui::SameLine();
-		ImGui::SliderInt("###BunnyhopChance", &cfg->movement.Chance, 0, 100);
+		if (cfg->movement.Bunnyhop) {
+			ImGui::Text("Bunnyhop Chance");
+			ImGui::SameLine();
+			ImGui::SliderInt("###BunnyhopChance", &cfg->movement.Chance, 0, 100);
 
-		// if the max hops is slid down... compensate min hops
-		if (cfg->movement.MaxHops < cfg->movement.MinHops) {
-			cfg->movement.MinHops = std::clamp(cfg->movement.MaxHops - 1, 0, 15);
+			// if the max hops is slid down... compensate min hops
+			if (cfg->movement.MaxHops < cfg->movement.MinHops) {
+				cfg->movement.MinHops = std::clamp(cfg->movement.MaxHops - 1, 0, 15);
+			}
+
+			// if the min hops is slid up.. compensate max hops
+			if (cfg->movement.MinHops > cfg->movement.MaxHops) {
+				cfg->movement.MaxHops = std::clamp(cfg->movement.MinHops + 1, 0, 15);
+			}
+
+			ImGui::Text("Bunnyhop Min Hops");
+			ImGui::SameLine();
+			ImGui::SliderInt("###BunnyhopMinHops", &cfg->movement.MinHops, 0, 15);
+
+			ImGui::Text("Bunnyhop Max Hops");
+			ImGui::SameLine();
+			ImGui::SliderInt("###BunnyhopMaxHops", &cfg->movement.MaxHops, 0, 15);
 		}
-
-		// if the min hops is slid up.. compensate max hops
-		if (cfg->movement.MinHops > cfg->movement.MaxHops) {
-			cfg->movement.MaxHops = std::clamp(cfg->movement.MinHops + 1, 0, 15);
-		}
-
-		ImGui::Text("Bunnyhop Min Hops");
-		ImGui::SameLine();
-		ImGui::SliderInt("###BunnyhopMinHops", &cfg->movement.MinHops, 0, 15);
-			
-		ImGui::Text("Bunnyhop Max Hops");
-		ImGui::SameLine();
-		ImGui::SliderInt("###BunnyhopMaxHops", &cfg->movement.MaxHops, 0, 15);
 
 		ImGui::Separator();
 
 		ImGui::Text("Autostrafe");
 		ImGui::SameLine();
 		C::Checkbox("##Autostrafe", &cfg->movement.Autostrafe);
+		if (cfg->movement.Autostrafe) {
+			ImGui::Text("Angle Sacrifice");
+			ImGui::SameLine();
+			ImGui::SliderFloat("##AutostrafeAngSacrifice", &cfg->movement.AngSacrifice, 0, 10);
 
-		ImGui::Text("Angle Sacrifice");
-		ImGui::NextColumn();
-		ImGui::SliderFloat("##AutostrafeAngSacrifice", &cfg->movement.AngSacrifice, 0, 10);
-		ImGui::NextColumn();
+			ImGui::Text("Strafing angle");
+			ImGui::SameLine();
+			ImGui::SliderFloat("##AutostrafeStrafeAng", &cfg->movement.StrafeAng, 0, 30);
+		}
 
-		ImGui::Text("Strafing angle");
-		ImGui::NextColumn();
-		ImGui::SliderFloat("##AutostrafeStrafeAng", &cfg->movement.StrafeAng, 0, 30);
-		ImGui::NextColumn();
+		ImGui::Separator();
+
+		ImGui::Text("Backtrack");
+		ImGui::SameLine();
+		C::Checkbox("###Backtrack", &cfg->offense.Backtrack);
+
+		if (cfg->offense.Backtrack) {
+			ImGui::Text("Backtrack Time");
+			ImGui::SameLine();
+			ImGui::SliderFloat("##BacktrackTIme", &cfg->offense.BacktrackTime, 10, 200);
+		}
 
 		ImGui::Separator();
 

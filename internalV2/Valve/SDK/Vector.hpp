@@ -225,6 +225,22 @@ public:
 		return vecOut;
 	}
 
+	void NormalizeAngle() {
+		// pitch
+		if (x > 89) x = 89;
+		else if (x < -89) x = -89;
+		else if (isnan(x)) x = 0;
+
+		// yaw
+		if (y > 180 || y <= -180)
+			y = isinf(y) ? 0 : fmodf(fmodf(y + 180, 360) + 360, 360) - 180;
+		else if (isnan(y))
+			y = 0;
+
+		// roll
+		z = 0;
+	}
+
 	float NormalizeInPlace()
 	{
 		const float flLength = this->Length();

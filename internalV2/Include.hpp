@@ -20,6 +20,7 @@
 #include <intrin.h>				 //for _ReturnAddress() (intitially for hooks.cpp)
 #include <functional>
 #include <map>
+#include <deque>
 
 #include "Utils/Utils.hpp"	//	includes all utils...
 #include "Valve/Valve.hpp"	//	include all the Valve classes/structs
@@ -40,9 +41,14 @@
 #include "GUI/Config.hpp"
 #include "GUI/Menu.hpp"
 
+// lol
+#include "Utils/Math.hpp"
+
 // Hacks
 #include "Hacks/Autowall.hpp"
 #include "Hacks/Movement.hpp"
+#include "Hacks/Lagcomp.hpp"
+#include "Hacks/Backtrack.hpp"
 
 // Hooks
 #include "Hooks.hpp"            //hooking ingame functions

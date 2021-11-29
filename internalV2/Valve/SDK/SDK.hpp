@@ -25,3 +25,5 @@
 #include "ITraceFilter.hpp"
 #include "ICollideable.hpp"
 #include "BSPFlags.hpp"
+#include "Studio.hpp"
+#include "EClientFrameStage.hpp"

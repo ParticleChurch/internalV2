@@ -86,6 +86,9 @@ void H::Free()
 
 	// now delete hacks
 	delete autowall;
+	delete movement;
+	delete backtrack;
+	delete lagcomp;
 }
 
 long __stdcall H::ResetHook(IDirect3DDevice9* device, D3DPRESENT_PARAMETERS* pPresentationParameters)
@@ -204,16 +207,16 @@ void __stdcall H::FrameStageNotifyHook(int stage)
 		G::LocalplayerTeam = G::Localplayer ? G::Localplayer->GetTeam() : 0;
 		G::LocalplayerWeapon = G::Localplayer ? G::Localplayer->GetActiveWeapon() : nullptr;
 		G::LocalplayerWeapondata = G::LocalplayerWeapon ? G::LocalplayerWeapon->GetWeaponData() : nullptr;
-		/*
-		if (!G::LocalPlayer || !G::LocalPlayerAlive)
+		
+		if (!G::Localplayer || !G::LocalplayerAlive)
 		{
 			lagcomp->ClearRecords();
 			return oFrameStageNotify(stage);
-		}*/
+		}
 	}
 	else
 	{
-		/*lagcomp->ClearPlayerList();*/
+		lagcomp->ClearPlayerList();
 		G::LocalplayerAlive = false;
 		G::Localplayer = nullptr;
 		G::LocalplayerIndex = 0;
@@ -222,6 +225,8 @@ void __stdcall H::FrameStageNotifyHook(int stage)
 		G::LocalplayerWeapondata = nullptr;
 		return oFrameStageNotify(stage);
 	}
+
+	lagcomp->Run_FSN(stage);
 
 	return oFrameStageNotify(stage);
 }
@@ -259,7 +264,8 @@ bool __stdcall H::CreateMoveHook(float flInputSampleTime, CUserCmd* cmd)
 		movement->Bunnyhop();
 		movement->AutoStrafe();
 
-		
+		// offensive 
+		backtrack->Run();
 	}
 
 	return false; //silent aim on false (only for client)
@@ -272,17 +278,19 @@ void __stdcall H::PaintTraverseHook(int vguiID, bool force, bool allowForcing)
 
 	oPaintTraverse(I::panel, vguiID, force, allowForcing);
 	if (I::panel && strcmp(I::panel->GetName(vguiID), "MatSystemTopPanel") == 0) {
-		/*int x, y;
-		I::engine->GetScreenSize(x, y);
-		
-		I::surface->DrawSetColor(Color(255, 0, 0, 255));
-		I::surface->DrawLine(0, 0, x / 2, y / 2);*/
-		
+
 		if (!G::Localplayer || !I::engine->IsInGame())
 			return;
 
-		/*esp->RunPaintTraverse();
-		worldmod->Run_PaintTraverse();
-		antiaim->Visualize();*/
+		if (lagcomp->PlayerList[backtrack->TargEnt].records.empty())
+			return;
+
+		Vector screen;
+		Vector world = lagcomp->PlayerList[backtrack->TargEnt].records.front().HeadPos;
+		if (!WorldToScreen(world, screen))
+			return;
+
+		I::surface->DrawSetColor(Color(255, 0, 0, 255));
+		I::surface->DrawOutlinedCircle(screen.x, screen.y, 5, 10);
 	}
 }

@@ -26,6 +26,12 @@ namespace CFG
 		float AngSacrifice = 0.f;
 		float StrafeAng = 5.f;
 	};
+
+	struct Offense
+	{
+		bool Backtrack = false;
+		float BacktrackTime = 0.f;
+	};
 }
 
 class Config
@@ -34,6 +40,7 @@ public:
 	std::map<std::string, Keybind> Keybinds;
 
 	CFG::Movement movement;
+	CFG::Offense offense;
 
 	Config();
 	void HandleKeybinds();

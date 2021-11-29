@@ -443,6 +443,17 @@ public: // OTHERS
 
 		return breakable;
 	}
-	
+	float GetServerTime() {
+		if constexpr (DEBUG_ENTITY) L::Debug("GetServerTime");
+		return GetTickBase() * I::globalvars->flIntervalPerTick;
+	}
+	bool CanShoot() {
+		if constexpr (DEBUG_ENTITY) L::Debug("CanShoot");
+		Entity* weap = this->GetActiveWeapon();
+		if (!weap)
+			return false;
+		float ServerTime = this->GetServerTime();
+		return this->GetNextAttack() <= ServerTime && weap->GetNextPrimaryAttack() <= ServerTime;
+	}
 };
 

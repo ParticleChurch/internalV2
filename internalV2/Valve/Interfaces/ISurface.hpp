@@ -86,6 +86,12 @@ public:
 		return CallVFunc<int>(this, 43, bProcedural);
 	}
 
+	void GetScreenSize(int& width, int& height)
+	{
+		typedef void(__thiscall* oGetScreenSize)(void*, int&, int&);
+		return GetVFunc<oGetScreenSize>(this, 44)(this, width, height);
+	}
+
 	void UnLockCursor()
 	{
 		return CallVFunc<void>(this, 66);

@@ -96,8 +96,14 @@
     <ClCompile Include="GUI\Menu.cpp">
       <Filter>Source Files\GUI</Filter>
     </ClCompile>
+    <ClCompile Include="Hacks\Lagcomp.cpp">
+      <Filter>Source Files\Hacks</Filter>
+    </ClCompile>
+    <ClCompile Include="Hacks\Backtrack.cpp">
+      <Filter>Source Files\Hacks</Filter>
+    </ClCompile>
     <ClCompile Include="Hacks\Movement.cpp">
-      <Filter>Source Files\GUI</Filter>
+      <Filter>Source Files\Hacks</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -301,6 +307,18 @@
     </ClInclude>
     <ClInclude Include="Utils\Math.hpp">
       <Filter>Header Files\Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="Hacks\Lagcomp.hpp">
+      <Filter>Header Files\Hacks</Filter>
+    </ClInclude>
+    <ClInclude Include="Valve\SDK\Studio.hpp">
+      <Filter>Header Files\Valve\SDK</Filter>
+    </ClInclude>
+    <ClInclude Include="Valve\SDK\EClientFrameStage.hpp">
+      <Filter>Header Files\Valve\SDK</Filter>
+    </ClInclude>
+    <ClInclude Include="Hacks\Backtrack.hpp">
+      <Filter>Header Files\Hacks</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
