@@ -22,4 +22,5 @@ namespace G
 
 	// Createmove Stuff
 	CUserCmd* cmd;
+	QAngle StartAngle;
 }

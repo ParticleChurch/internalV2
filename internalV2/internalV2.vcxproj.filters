@@ -299,6 +299,9 @@
     <ClInclude Include="Hacks\Movement.hpp">
       <Filter>Header Files\Hacks</Filter>
     </ClInclude>
+    <ClInclude Include="Utils\Math.hpp">
+      <Filter>Header Files\Utils</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

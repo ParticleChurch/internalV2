@@ -245,6 +245,7 @@ bool __stdcall H::CreateMoveHook(float flInputSampleTime, CUserCmd* cmd)
 
 		// Update global vars
 		G::cmd = cmd;
+		G::StartAngle = G::cmd->angViewAngle;
 
 		// Menu fix
 		if (G::MenuOpen && (cmd->iButtons & IN_ATTACK | IN_ATTACK2 | IN_ZOOM))
@@ -254,7 +255,11 @@ bool __stdcall H::CreateMoveHook(float flInputSampleTime, CUserCmd* cmd)
 			cmd->iButtons &= ~IN_ZOOM;
 		}
 
+		// movement
 		movement->Bunnyhop();
+		movement->AutoStrafe();
+
+		
 	}
 
 	return false; //silent aim on false (only for client)

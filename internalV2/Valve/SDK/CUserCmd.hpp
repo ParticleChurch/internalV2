@@ -30,7 +30,7 @@ struct CUserCmd
 	void* vmt;
 	int				iCommandNumber;		// 0x04
 	int				iTickCount;			// 0x08
-	QAngle			angViewPoint;		// 0x0C
+	QAngle			angViewAngle;		// 0x0C
 	Vector			vecAimDirection;	// 0x18
 	float			flForwardMove;		// 0x24
 	float			flSideMove;			// 0x28

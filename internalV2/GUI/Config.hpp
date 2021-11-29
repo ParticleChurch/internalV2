@@ -15,9 +15,16 @@ namespace CFG
 {
 	struct Movement
 	{
+		// bhop
+		bool Bunnyhop = false;
 		int Chance = 100;	// 100 means 100% of the time it works
 		int MinHops = 0;	// zero means infinite
 		int MaxHops = 0;	// zero means infinite
+
+		// autostrafe
+		bool Autostrafe = false;
+		float AngSacrifice = 0.f;
+		float StrafeAng = 5.f;
 	};
 }
 

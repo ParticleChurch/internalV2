@@ -196,7 +196,7 @@ void Menu::Render()
 
 		ImGui::Text("Bunnyhop");
 		ImGui::SameLine();
-		C::HotKey(cfg->Keybinds["Bunnyhop"]);
+		C::Checkbox("##Bunnyhop", &cfg->movement.Bunnyhop);
 
 		ImGui::Text("Bunnyhop Chance");
 		ImGui::SameLine();
@@ -219,6 +219,22 @@ void Menu::Render()
 		ImGui::Text("Bunnyhop Max Hops");
 		ImGui::SameLine();
 		ImGui::SliderInt("###BunnyhopMaxHops", &cfg->movement.MaxHops, 0, 15);
+
+		ImGui::Separator();
+
+		ImGui::Text("Autostrafe");
+		ImGui::SameLine();
+		C::Checkbox("##Autostrafe", &cfg->movement.Autostrafe);
+
+		ImGui::Text("Angle Sacrifice");
+		ImGui::NextColumn();
+		ImGui::SliderFloat("##AutostrafeAngSacrifice", &cfg->movement.AngSacrifice, 0, 10);
+		ImGui::NextColumn();
+
+		ImGui::Text("Strafing angle");
+		ImGui::NextColumn();
+		ImGui::SliderFloat("##AutostrafeStrafeAng", &cfg->movement.StrafeAng, 0, 30);
+		ImGui::NextColumn();
 
 		ImGui::Separator();
 

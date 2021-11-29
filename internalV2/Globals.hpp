@@ -22,6 +22,7 @@ namespace G {
 
 	// Createmove Stuff
 	extern CUserCmd* cmd;
+	extern QAngle StartAngle;
 
 	//LocalPlayer
 	/*extern Entity* LocalPlayer;
