@@ -42,6 +42,7 @@
 
 // Hacks
 #include "Hacks/Autowall.hpp"
+#include "Hacks/Movement.hpp"
 
 // Hooks
 #include "Hooks.hpp"            //hooking ingame functions

@@ -25,6 +25,7 @@ namespace H
 	// special GUI Vars
 	bool D3dInit = false;
 	HWND CSGOWindow = NULL;
+	std::vector<std::string> console;
 }
 
 void H::Init()
@@ -242,6 +243,9 @@ bool __stdcall H::CreateMoveHook(float flInputSampleTime, CUserCmd* cmd)
 		bool* pSendPacket = (bool*)(*(DWORD*)pebp - 0x1C);
 		bool& bSendPacket = *pSendPacket;
 
+		// Update global vars
+		G::cmd = cmd;
+
 		// Menu fix
 		if (G::MenuOpen && (cmd->iButtons & IN_ATTACK | IN_ATTACK2 | IN_ZOOM))
 		{
@@ -250,12 +254,7 @@ bool __stdcall H::CreateMoveHook(float flInputSampleTime, CUserCmd* cmd)
 			cmd->iButtons &= ~IN_ZOOM;
 		}
 
-		// if we are on a different tick and we are allowed to bhop...
-		if ((cmd->iButtons & IN_JUMP) && G::LocalplayerAlive && !(G::Localplayer->GetFlags() & FL_ONGROUND)
-			&& G::Localplayer->GetMoveType() != MOVETYPE_LADDER) {
-			cmd->iButtons &= ~IN_JUMP;
-		}
-
+		movement->Bunnyhop();
 	}
 
 	return false; //silent aim on false (only for client)
@@ -268,11 +267,11 @@ void __stdcall H::PaintTraverseHook(int vguiID, bool force, bool allowForcing)
 
 	oPaintTraverse(I::panel, vguiID, force, allowForcing);
 	if (I::panel && strcmp(I::panel->GetName(vguiID), "MatSystemTopPanel") == 0) {
-		int x, y;
+		/*int x, y;
 		I::engine->GetScreenSize(x, y);
 		
 		I::surface->DrawSetColor(Color(255, 0, 0, 255));
-		I::surface->DrawLine(0, 0, x / 2, y / 2);
+		I::surface->DrawLine(0, 0, x / 2, y / 2);*/
 		
 		if (!G::Localplayer || !I::engine->IsInGame())
 			return;

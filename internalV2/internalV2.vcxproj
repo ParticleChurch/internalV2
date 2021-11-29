@@ -167,6 +167,7 @@
     <ClCompile Include="GUI\Config.cpp" />
     <ClCompile Include="GUI\Menu.cpp" />
     <ClCompile Include="Hacks\Autowall.cpp" />
+    <ClCompile Include="Hacks\Movement.cpp" />
     <ClCompile Include="Hooks.cpp" />
     <ClCompile Include="ImGui\imgui.cpp" />
     <ClCompile Include="ImGui\imgui_demo.cpp" />
@@ -185,6 +186,7 @@
     <ClInclude Include="GUI\Config.hpp" />
     <ClInclude Include="GUI\Menu.hpp" />
     <ClInclude Include="Hacks\Autowall.hpp" />
+    <ClInclude Include="Hacks\Movement.hpp" />
     <ClInclude Include="Hooks.hpp" />
     <ClInclude Include="ImGui\imconfig.h" />
     <ClInclude Include="ImGui\imgui.h" />

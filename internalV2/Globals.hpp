@@ -11,12 +11,17 @@ namespace G {
 
 	// Game stuff
 	extern bool IsInGame;
+
+	// Localplayer stuff
 	extern int LocalplayerIndex;
 	extern Entity* Localplayer;
 	extern bool LocalplayerAlive;
 	extern int LocalplayerTeam;
 	extern Entity* LocalplayerWeapon;
 	extern CCSWeaponData* LocalplayerWeapondata;
+
+	// Createmove Stuff
+	extern CUserCmd* cmd;
 
 	//LocalPlayer
 	/*extern Entity* LocalPlayer;

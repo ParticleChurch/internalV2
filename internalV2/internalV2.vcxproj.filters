@@ -96,6 +96,9 @@
     <ClCompile Include="GUI\Menu.cpp">
       <Filter>Source Files\GUI</Filter>
     </ClCompile>
+    <ClCompile Include="Hacks\Movement.cpp">
+      <Filter>Source Files\GUI</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Utils\Logger.hpp">
@@ -292,6 +295,9 @@
     </ClInclude>
     <ClInclude Include="GUI\Menu.hpp">
       <Filter>Header Files\GUI</Filter>
+    </ClInclude>
+    <ClInclude Include="Hacks\Movement.hpp">
+      <Filter>Header Files\Hacks</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

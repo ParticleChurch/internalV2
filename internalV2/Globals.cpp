@@ -12,10 +12,14 @@ namespace G
 	// Game stuff
 	bool IsInGame = false;
 
+	// Localplayer Stuff
 	int LocalplayerIndex;
 	Entity* Localplayer = new Entity();
 	bool LocalplayerAlive = false;
 	int LocalplayerTeam;
 	Entity* LocalplayerWeapon;
 	CCSWeaponData* LocalplayerWeapondata;
+
+	// Createmove Stuff
+	CUserCmd* cmd;
 }

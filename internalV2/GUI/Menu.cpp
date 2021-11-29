@@ -22,7 +22,6 @@ namespace ImGui
 // C for Custom
 namespace C
 {
-
 	void ColorPicker(const char* name, Color* COLOR)
 	{
 		ImVec4 color = ImVec4(COLOR->color[0] / 255.f, COLOR->color[1] / 255.f, COLOR->color[2] / 255.f, COLOR->color[3] / 255.f);
@@ -183,6 +182,14 @@ void Menu::Render()
 {
 	cfg->HandleKeybinds();
 
+	if (ConsoleWindow)
+	{
+		ImGui::Begin("Console");
+		for (auto& a : H::console)
+			ImGui::Text(a.c_str());
+		ImGui::End();
+	}
+
 	if (G::MenuOpen)
 	{
 		ImGui::Begin("A$G$ INDUSTRIES");
@@ -195,6 +202,16 @@ void Menu::Render()
 		ImGui::SameLine();
 		ImGui::SliderInt("###BunnyhopChance", &cfg->movement.Chance, 0, 100);
 
+		// if the max hops is slid down... compensate min hops
+		if (cfg->movement.MaxHops < cfg->movement.MinHops) {
+			cfg->movement.MinHops = std::clamp(cfg->movement.MaxHops - 1, 0, 15);
+		}
+
+		// if the min hops is slid up.. compensate max hops
+		if (cfg->movement.MinHops > cfg->movement.MaxHops) {
+			cfg->movement.MaxHops = std::clamp(cfg->movement.MinHops + 1, 0, 15);
+		}
+
 		ImGui::Text("Bunnyhop Min Hops");
 		ImGui::SameLine();
 		ImGui::SliderInt("###BunnyhopMinHops", &cfg->movement.MinHops, 0, 15);
@@ -204,6 +221,8 @@ void Menu::Render()
 		ImGui::SliderInt("###BunnyhopMaxHops", &cfg->movement.MaxHops, 0, 15);
 
 		ImGui::Separator();
+
+		C::Checkbox("Console Window", &ConsoleWindow);
 
 		bool open_popup = ImGui::Button("Eject");
 		if (open_popup)
