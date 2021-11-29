@@ -128,37 +128,7 @@ long __stdcall H::EndSceneHook(IDirect3DDevice9* device)
 		ImGui_ImplWin32_NewFrame();
 		ImGui::NewFrame();
 
-		if (G::MenuOpen) {
-			ImGui::Begin("sample menu");
-			static bool examplebool = false;
-			ImGui::Checkbox("example bool", &examplebool);
-
-			bool open_popup = ImGui::Button("Eject");
-			if (open_popup)
-			{
-				ImGui::OpenPopup("Eject popup");
-			}
-			if (ImGui::BeginPopup("Eject popup"))
-			{
-				ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1.f, 0, 0, 1.00f));
-				ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(1.f, 0.1f, 0.1f, 1.00f));
-				ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(1.f, 0.2f, 0.2f, 1.00f));
-
-				ImGui::Text("Are you sure you want to Eject?");
-				if (ImGui::Button("Eject##Eject2"))
-					G::KillDLL = true;
-				if (ImGui::IsItemHovered())
-					ImGui::SetTooltip("NOTE:\nEjecting can potentially crash your game.\nEjecting can is not complete so if you want to inject another cheat, restart the game.");
-
-				ImGui::PopStyleColor();
-				ImGui::PopStyleColor();
-				ImGui::PopStyleColor();
-
-				ImGui::EndPopup();
-			}
-
-			ImGui::End();
-		}
+		menu->Render();
 		
 		ImGui::EndFrame();
 		ImGui::Render();

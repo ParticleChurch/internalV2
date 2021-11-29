@@ -40,6 +40,12 @@
     <Filter Include="Source Files\Hacks">
       <UniqueIdentifier>{6549381b-d1a9-448a-815a-3d42472db2d8}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\GUI">
+      <UniqueIdentifier>{280fe4e4-6c1d-4092-ae95-a9cb39739077}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\GUI">
+      <UniqueIdentifier>{e8baf18f-d89b-4398-9fbc-a26cecde7f1b}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dllmain.cpp">
@@ -83,6 +89,12 @@
     </ClCompile>
     <ClCompile Include="Hacks\Autowall.cpp">
       <Filter>Source Files\Hacks</Filter>
+    </ClCompile>
+    <ClCompile Include="GUI\Config.cpp">
+      <Filter>Source Files\GUI</Filter>
+    </ClCompile>
+    <ClCompile Include="GUI\Menu.cpp">
+      <Filter>Source Files\GUI</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -274,6 +286,12 @@
     </ClInclude>
     <ClInclude Include="Valve\Interfaces\Convar.hpp">
       <Filter>Header Files\Valve\Interfaces</Filter>
+    </ClInclude>
+    <ClInclude Include="GUI\Config.hpp">
+      <Filter>Header Files\GUI</Filter>
+    </ClInclude>
+    <ClInclude Include="GUI\Menu.hpp">
+      <Filter>Header Files\GUI</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
