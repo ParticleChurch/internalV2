@@ -315,6 +315,14 @@ public: // VIRTUALS
 		// @xref: "effects/nightvision"
 		return CallVFunc<bool>(this, 158);
 	}
+	float GetSpread() {
+		if (DEBUG_ENTITY) L::Debug("GetSpread");
+		return CallVFunc<float>(this, 453);
+	}
+	float GetInaccuracy() {
+		if (DEBUG_ENTITY) L::Debug("GetInaccuracy");
+		return CallVFunc<float>(this, 483);
+	}
 public: // OTHERS
 	Entity* GetActiveWeapon() {
 		if (DEBUG_ENTITY) L::Debug("GetActiveWeapon");
@@ -478,6 +486,88 @@ public: // OTHERS
 		// Coordinate frame is located at m_CollisionGroup - 0x30
 		static DWORD offset = N::GetOffset("DT_BaseEntity", "m_CollisionGroup") - 0x30;
 		return (matrix3x4_t*)((DWORD)this + offset);
+	}
+	Vector GetLeft(Vector C, float radius, Entity* ent) {
+		if (DEBUG_ENTITY) L::Debug("GetLeft");
+		Vector P = ent->GetEyePosition();	//player
+		float gamma = (M_PI / 2.f) + atan2f(C.y - P.y, C.x - P.x);
+		float distance = sqrtf(pow((C.x - P.x), 2) + pow((C.y - P.y), 2));
+		float beta = asin(radius / distance);
+
+		return Vector(C.x + radius * cosf(gamma + beta), C.y + radius * sinf(gamma + beta), C.z);
+	}
+	Vector GetRight(Vector C, float radius, Entity* ent) {
+		if (DEBUG_ENTITY) L::Debug("GetRight");
+		Vector P = ent->GetEyePosition();	//player
+		float gamma = (M_PI / 2.f) + atan2f(C.y - P.y, C.x - P.x);
+		float distance = sqrtf(pow((C.x - P.x), 2) + pow((C.y - P.y), 2));
+		float beta = asin(radius / distance);
+
+		return Vector(C.x - radius * cosf(gamma - beta), C.y - radius * sinf(gamma - beta), C.z);
+	}
+	Vector GetTopLeft(Vector C, float radius, Entity* ent) {
+		if (DEBUG_ENTITY) L::Debug("GetTopLeft");
+		Vector P = ent->GetEyePosition();	//player
+		float gamma = (M_PI / 2.f) + atan2f(C.y - P.y, C.x - P.x);
+		float distance = sqrtf(pow((C.x - P.x), 2) + pow((C.y - P.y), 2));
+		float beta = asin(radius / distance);
+
+		return Vector(C.x + .7071 * radius * cosf(gamma + beta), C.y + .7071 * radius * sinf(gamma + beta), C.z + radius * .7071);
+	}
+	Vector GetTopRight(Vector C, float radius, Entity* ent) {
+		if (DEBUG_ENTITY) L::Debug("GetTopRight");
+		Vector P = ent->GetEyePosition();	//player
+		float gamma = (M_PI / 2.f) + atan2f(C.y - P.y, C.x - P.x);
+		float distance = sqrtf(pow((C.x - P.x), 2) + pow((C.y - P.y), 2));
+		float beta = asin(radius / distance);
+
+		return Vector(C.x - .7071 * radius * cosf(gamma + beta), C.y - .7071 * radius * sinf(gamma + beta), C.z + radius * .7071);
+	}
+	Vector GetBottomLeft(Vector C, float radius, Entity* ent) {
+		if (DEBUG_ENTITY) L::Debug("GetBottomLeft");
+		Vector P = ent->GetEyePosition();	//player
+		float gamma = (M_PI / 2.f) + atan2f(C.y - P.y, C.x - P.x);
+		float distance = sqrtf(pow((C.x - P.x), 2) + pow((C.y - P.y), 2));
+		float beta = asin(radius / distance);
+
+		return Vector(C.x + .7071 * radius * cosf(gamma + beta), C.y + .7071 * radius * sinf(gamma + beta), C.z - radius * .7071);
+	}
+	Vector GetBottomRight(Vector C, float radius, Entity* ent) {
+		if (DEBUG_ENTITY) L::Debug("GetBottomRight");
+		Vector P = ent->GetEyePosition();	//player
+		float gamma = (M_PI / 2.f) + atan2f(C.y - P.y, C.x - P.x);
+		float distance = sqrtf(pow((C.x - P.x), 2) + pow((C.y - P.y), 2));
+		float beta = asin(radius / distance);
+
+		return Vector(C.x - .7071 * radius * cosf(gamma + beta), C.y - .7071 * radius * sinf(gamma + beta), C.z - radius * .7071);
+	}
+	int GetAmmo() {
+		if (DEBUG_ENTITY) L::Debug("GetAmmo");
+		static DWORD offset = N::GetOffset("DT_BaseCombatWeapon", "m_iClip1");
+		Entity* weap = this->GetActiveWeapon();
+		if (!weap)
+			return 0;
+		return *(int*)(weap + offset);
+	}
+	CCSGOPlayerAnimState* GetAnimationState() {
+		if (DEBUG_ENTITY) L::Debug("GetSpread");
+		static DWORD offset = N::GetOffset("DT_CSPlayer", "m_bIsScoped") - 0x14;
+		return (CCSGOPlayerAnimState*)((DWORD)this + offset);
+	}
+	float GetMaxDesyncDelta() {
+		CCSGOPlayerAnimState* pAnimState = this->GetAnimationState();
+		if (!pAnimState) return 0.f;
+
+		float flDuckAmount = pAnimState->flDuckAmount;
+		float flRunningSpeed = std::clamp(pAnimState->flRunningSpeed, 0.0f, 1.0f);
+		float flDuckingSpeed = std::clamp(pAnimState->flDuckingSpeed, 0.0f, 1.0f);
+		float flYawModifier = (((pAnimState->flWalkToRunTransition * -0.3f) - 0.2f) * flRunningSpeed) + 1.0f;
+
+		if (flDuckAmount > 0.0f)
+			flYawModifier += ((flDuckAmount * flDuckingSpeed) * (0.5f - flYawModifier));
+
+		float flMaxYawModifier = flYawModifier * pAnimState->flMaxBodyYaw;
+		return flMaxYawModifier;
 	}
 };
 

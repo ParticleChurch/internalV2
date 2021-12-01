@@ -5,6 +5,7 @@ private:
 	bool ConsoleWindow = true;
 
 	void RenderESP();
+	void RenderAimbot();
 
 public:
 	void Render();

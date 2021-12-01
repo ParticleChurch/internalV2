@@ -28,3 +28,4 @@
 #include "Studio.hpp"
 #include "EClientFrameStage.hpp"
 #include "EFontFlags.hpp"
+#include "Animations.h"

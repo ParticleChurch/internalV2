@@ -46,6 +46,24 @@ namespace CFG
 		bool Grenade = false;
 		Color GrenadeColor = Color();
 	};
+
+	struct Aimbot
+	{
+		//KeyBoundBool Enable = { 0,0,"Enable Aimbot", false };
+		float Hitchance = 0.f;
+		int MinDamage = 1;
+		int Priority = 0; // 0 is none
+		bool Hitboxes[13] = { false, false, false, false, false, false, false, false, false, false, false, false, false };
+		float HeadPointScale = 0.f;
+		float BodyPointScale = 0.f;
+		float LimbPointScale = 0.f;
+	};
+
+	struct Performance {
+		int HitchanceScan = 50;
+		int MaxAimbotScan = 5;
+		bool ShowConsole = false;
+	};
 }
 
 class Config
@@ -56,6 +74,8 @@ public:
 	CFG::Movement movement;
 	CFG::Offense offense;
 	CFG::ESP esp;
+	CFG::Aimbot aimbot;
+	CFG::Performance performance;
 
 	Config();
 	void HandleKeybinds();

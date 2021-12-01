@@ -203,3 +203,67 @@ public:
 	virtual void					UpdateCombinedDynamicModel(int nModelIndex, MDLHandle_t Handle) = 0;
 	virtual int						BeginCombinedModel(const char* pszName, bool bReuseExisting) = 0;
 };
+
+
+static int HitboxToHitgroup(int hbox)
+{
+	switch (hbox)
+	{
+	case HITBOX_CHEST:
+	case HITBOX_UPPER_CHEST:
+	case HITBOX_THORAX:
+		return HITGROUP_CHEST;
+	case HITBOX_LEFT_THIGH:
+	case HITBOX_LEFT_CALF:
+	case HITBOX_LEFT_FOOT:
+		return HITGROUP_LEFTLEG;
+	case HITBOX_RIGHT_THIGH:
+	case HITBOX_RIGHT_CALF:
+	case HITBOX_RIGHT_FOOT:
+		return HITGROUP_RIGHTLEG;
+	case HITBOX_RIGHT_HAND:
+	case HITBOX_RIGHT_FOREARM:
+	case HITBOX_RIGHT_UPPER_ARM:
+		return HITGROUP_RIGHTARM;
+	case HITBOX_LEFT_HAND:
+	case HITBOX_LEFT_UPPER_ARM:
+	case HITBOX_LEFT_FOREARM:
+		return HITGROUP_LEFTARM;
+	case HITBOX_HEAD:
+	case HITBOX_NECK:
+		return HITGROUP_HEAD;
+	case HITBOX_STOMACH:
+		return HITGROUP_STOMACH;
+	case HITBOX_PELVIS:
+		return HITGROUP_GENERIC;
+	}
+	return 0;
+}
+
+static std::string GetHitboxStr(int hbox)
+{
+	switch (hbox)
+	{
+	case HITBOX_HEAD: return "HITBOX_HEAD";  break;
+	case HITBOX_NECK:  return "HITBOX_NECK";  break;
+	case HITBOX_PELVIS:  return "HITBOX_PELVIS";  break;
+	case HITBOX_STOMACH:  return "HITBOX_STOMACH";  break;
+	case HITBOX_THORAX: return "HITBOX_THORAX";  break;
+	case HITBOX_CHEST:  return "HITBOX_CHEST";  break;
+	case HITBOX_UPPER_CHEST:  return "HITBOX_UPPER_CHEST";  break;
+	case HITBOX_RIGHT_THIGH:  return "HITBOX_RIGHT_THIGH";  break;
+	case HITBOX_LEFT_THIGH:  return "HITBOX_LEFT_THIGH";  break;
+	case HITBOX_RIGHT_CALF:  return "HITBOX_RIGHT_CALF";  break;
+	case HITBOX_LEFT_CALF:  return "HITBOX_LEFT_CALF";  break;
+	case HITBOX_RIGHT_FOOT:  return "HITBOX_RIGHT_FOOT";  break;
+	case HITBOX_LEFT_FOOT:  return "HITBOX_LEFT_FOOT";  break;
+	case HITBOX_RIGHT_HAND:  return "HITBOX_RIGHT_HAND";  break;
+	case HITBOX_LEFT_HAND:  return "HITBOX_LEFT_HAND";  break;
+	case HITBOX_RIGHT_UPPER_ARM:  return "HITBOX_RIGHT_UPPER_ARM";  break;
+	case HITBOX_RIGHT_FOREARM:  return "HITBOX_RIGHT_FOREARM";  break;
+	case HITBOX_LEFT_UPPER_ARM:  return "HITBOX_LEFT_UPPER_ARM";  break;
+	case HITBOX_LEFT_FOREARM:  return "HITBOX_LEFT_FOREARM";  break;
+	case HITBOX_MAX:  return "HITBOX_MAX";  break;
+	default:  return "HITBOX_UNKNOWN";  break;
+	}
+}

@@ -266,6 +266,7 @@ bool __stdcall H::CreateMoveHook(float flInputSampleTime, CUserCmd* cmd)
 		movement->AutoStrafe();
 
 		// offensive 
+		aimbot->Run();
 		backtrack->Run();
 	}
 
@@ -284,16 +285,5 @@ void __stdcall H::PaintTraverseHook(int vguiID, bool force, bool allowForcing)
 			return;
 
 		esp->RunPaintTraverse();
-
-		if (lagcomp->PlayerList[backtrack->TargEnt].records.empty())
-			return;
-
-		Vector screen;
-		Vector world = lagcomp->PlayerList[backtrack->TargEnt].records.front().HeadPos;
-		if (!WorldToScreen(world, screen))
-			return;
-
-		I::surface->DrawSetColor(Color(255, 0, 0, 255));
-		I::surface->DrawOutlinedCircle(screen.x, screen.y, 5, 10);
 	}
 }

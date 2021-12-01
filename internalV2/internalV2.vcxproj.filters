@@ -46,6 +46,12 @@
     <Filter Include="Source Files\GUI">
       <UniqueIdentifier>{e8baf18f-d89b-4398-9fbc-a26cecde7f1b}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\Valve">
+      <UniqueIdentifier>{024bc37c-4bd3-46f1-aacf-de03ae0b9755}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Valve\SDK">
+      <UniqueIdentifier>{839b8519-ceee-4cf9-bb82-13ed75e6ee3e}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dllmain.cpp">
@@ -107,6 +113,12 @@
     </ClCompile>
     <ClCompile Include="Hacks\ESP.cpp">
       <Filter>Source Files\Hacks</Filter>
+    </ClCompile>
+    <ClCompile Include="Hacks\Aimbot.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Valve\SDK\Vector.cpp">
+      <Filter>Source Files\Valve\SDK</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -195,9 +207,6 @@
       <Filter>Header Files\Valve\Interfaces</Filter>
     </ClInclude>
     <ClInclude Include="Valve\SDK\INetChannelInfo.hpp">
-      <Filter>Header Files\Valve\SDK</Filter>
-    </ClInclude>
-    <ClInclude Include="Valve\SDK\Vector.hpp">
       <Filter>Header Files\Valve\SDK</Filter>
     </ClInclude>
     <ClInclude Include="Valve\SDK\Matrix.hpp">
@@ -331,6 +340,15 @@
     </ClInclude>
     <ClInclude Include="Valve\Interfaces\IVModelInfo.hpp">
       <Filter>Header Files\Valve\Interfaces</Filter>
+    </ClInclude>
+    <ClInclude Include="Hacks\Aimbot.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Valve\SDK\Animations.h">
+      <Filter>Header Files\Valve\SDK</Filter>
+    </ClInclude>
+    <ClInclude Include="Valve\SDK\Vector.hpp">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

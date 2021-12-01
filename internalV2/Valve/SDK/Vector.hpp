@@ -263,6 +263,52 @@ public:
 		return Vector(this->y * vecCross.z - this->z * vecCross.y, this->z * vecCross.x - this->x * vecCross.z, this->x * vecCross.y - this->y * vecCross.x);
 	}
 
+	Vector Clamp()
+	{
+		NormalizeAngle();
+		return *this;
+	}
+
+	inline float SquareLength() {
+		return this->x * this->x + this->y * this->y + this->z * this->z;
+	}
+
+	void NormalizeNoClamp()
+	{
+
+		x -= floorf(x / 360.0f + 0.5f) * 360.0f;
+
+		y -= floorf(y / 360.0f + 0.5f) * 360.0f;
+
+		z -= floorf(z / 360.0f + 0.5f) * 360.0f;
+	}
+
+	inline float VecLength() {
+		return sqrt(this->x * this->x + this->y * this->y + this->z * this->z);
+	}
+
+	inline float VecLength2D() {
+		return sqrt(this->x * this->x + this->y * this->y);
+	}
+
+	float Dist(const Vector& vOther) const
+	{
+		Vector delta;
+
+		delta.x = x - vOther.x;
+		delta.y = y - vOther.y;
+		delta.z = z - vOther.z;
+
+		return delta.VecLength();
+	}
+
+	inline float Dot(const Vector& vOther) const
+	{
+		return (this->x * vOther.x + this->y * vOther.y + this->z * vOther.z);
+	}
+
+	Vector Transform(const matrix3x4_t& m);
+
 public:
 	float x, y, z;
 };

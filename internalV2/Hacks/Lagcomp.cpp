@@ -6,7 +6,7 @@ void LagComp::Record::Update(Entity* ent)
 {
 	// STUPID BUG FUCK IT IMMA JUST FORCE: spec_replay_autostart 0 <-- force no death cam
 	L::Debug("SETUP BONES");
-	if (ent->SetupBones(this->Matrix, MAXSTUDIOBONES, 0x100, 0, true))
+	if (ent->SetupBones(this->Matrix, MAXSTUDIOBONES, 0x100, 0, false))
 		this->HeadPos = Vector(this->Matrix[8][0][3], this->Matrix[8][1][3], this->Matrix[8][2][3]);
 
 	L::Debug("GetVecOrigin");

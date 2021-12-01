@@ -1,4 +1,6 @@
 
+
+
 using matrix3x3_t = float[3][3];
 struct matrix3x4_t
 {
@@ -64,15 +66,7 @@ struct matrix3x4_t
 		}
 	}
 
-	float* operator[](const int nIndex)
-	{
-		return arrData[nIndex];
-	}
-
-	const float* operator[](const int nIndex) const
-	{
-		return arrData[nIndex];
-	}
+	constexpr auto operator[](int i) const noexcept { return arrData[i]; }
 
 	[[nodiscard]] constexpr Vector at(const int nIndex) const
 	{
@@ -208,3 +202,5 @@ struct ViewMatrix_t
 
 	float arrData[4][4] = { };
 };
+
+

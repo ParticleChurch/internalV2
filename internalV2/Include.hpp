@@ -21,6 +21,11 @@
 #include <functional>
 #include <map>
 #include <deque>
+#include <chrono>
+
+//dumbass warnings
+#pragma warning(disable:4244)
+#pragma warning(disable:4804)
 
 #include "Utils/Utils.hpp"	//	includes all utils...
 #include "Valve/Valve.hpp"	//	include all the Valve classes/structs
@@ -50,6 +55,7 @@
 #include "Hacks/Lagcomp.hpp"
 #include "Hacks/Backtrack.hpp"
 #include "Hacks/ESP.hpp"
+#include "Hacks/Aimbot.hpp"
 
 // Hooks
 #include "Hooks.hpp"            //hooking ingame functions

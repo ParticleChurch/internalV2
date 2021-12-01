@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="..\packages\Microsoft.Windows.CppWinRT.2.0.210806.1\build\native\Microsoft.Windows.CppWinRT.props" Condition="Exists('..\packages\Microsoft.Windows.CppWinRT.2.0.210806.1\build\native\Microsoft.Windows.CppWinRT.props')" />
   <ItemGroup Label="ProjectConfigurations">
@@ -166,6 +166,7 @@
     <ClCompile Include="Globals.cpp" />
     <ClCompile Include="GUI\Config.cpp" />
     <ClCompile Include="GUI\Menu.cpp" />
+    <ClCompile Include="Hacks\Aimbot.cpp" />
     <ClCompile Include="Hacks\Autowall.cpp" />
     <ClCompile Include="Hacks\Backtrack.cpp" />
     <ClCompile Include="Hacks\ESP.cpp" />
@@ -182,12 +183,14 @@
     <ClCompile Include="Interfaces.cpp" />
     <ClCompile Include="Netvars.cpp" />
     <ClCompile Include="Utils\Logger.cpp" />
+    <ClCompile Include="Valve\SDK\Vector.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Entity.hpp" />
     <ClInclude Include="Globals.hpp" />
     <ClInclude Include="GUI\Config.hpp" />
     <ClInclude Include="GUI\Menu.hpp" />
+    <ClInclude Include="Hacks\Aimbot.hpp" />
     <ClInclude Include="Hacks\Autowall.hpp" />
     <ClInclude Include="Hacks\Backtrack.hpp" />
     <ClInclude Include="Hacks\ESP.hpp" />
@@ -227,6 +230,7 @@
     <ClInclude Include="Valve\Interfaces\IVModelInfo.hpp" />
     <ClInclude Include="Valve\Interfaces\IVPanel.hpp" />
     <ClInclude Include="Valve\Interfaces\IWeaponSystem.hpp" />
+    <ClInclude Include="Valve\SDK\Animations.h" />
     <ClInclude Include="Valve\SDK\BSPFlags.hpp" />
     <ClInclude Include="Valve\SDK\CBaseTrace.hpp" />
     <ClInclude Include="Valve\SDK\CCSWeaponData.hpp" />

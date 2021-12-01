@@ -58,6 +58,6 @@ void Config::HandleKeybinds()
 
 Config::Config()
 {
-	/*Keybind Bhop = { false, false, "Bunnyhop", 0, 0 };
-	Keybinds.insert(std::make_pair(Bhop.name, Bhop));*/
+	Keybind Aimbot = { false, false, "Aimbot", 0, 0 };
+	Keybinds.insert(std::make_pair(Aimbot.name, Aimbot));
 }
