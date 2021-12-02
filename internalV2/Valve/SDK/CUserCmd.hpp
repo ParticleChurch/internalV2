@@ -25,6 +25,8 @@
 #define IN_GRENADE1		(1 << 23)	// grenade 1
 #define IN_GRENADE2		(1 << 24)	// grenade 2
 
+using CRC32_t = std::uint32_t;
+
 struct CUserCmd
 {
 	void* vmt;
@@ -46,3 +48,12 @@ struct CUserCmd
 	Vector			vecHeadAngles;		// 0x4C
 	Vector			vecHeadOffset;		// 0x58
 };
+static_assert(sizeof(CUserCmd) == 0x64);
+
+class CVerifiedUserCmd
+{
+public:
+	CUserCmd	userCmd;	// 0x00
+	CRC32_t		uHashCRC;	// 0x64
+};
+static_assert(sizeof(CVerifiedUserCmd) == 0x68);

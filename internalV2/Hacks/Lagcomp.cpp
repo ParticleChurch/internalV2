@@ -26,6 +26,8 @@ void LagComp::Update(Entity* ent, int index)
 	if (!I::engine->GetPlayerInfo(index, &info))
 		return;
 
+	if (!info.szName) return;
+
 	L::Debug(("LagComp Update: " + (std::string)info.szName).c_str(), "\n");
 
 	// if player doesn't exist --> add it
@@ -38,6 +40,8 @@ void LagComp::Update(Entity* ent, int index)
 	// Now we update the player
 	Player& player = PlayerList[info.nUserID];
 
+	L::Debug("Getting basic info");
+
 	// update player vars
 	player.pEntity = ent;
 	player.Dormant = ent->IsDormant();
@@ -45,7 +49,9 @@ void LagComp::Update(Entity* ent, int index)
 	player.Health = ent->GetHealth();
 	player.Team = ent->GetTeam();
 	player.Index = index;
-	std::memcpy(&player.Info, &info, sizeof(PlayerInfo_t));
+
+	L::Debug("copy name");
+	//std::memcpy(&player.Info, &info, sizeof(PlayerInfo_t));
 
 	// add record
 	LagComp::Record NewRec;
@@ -140,6 +146,8 @@ void LagComp::Run_FSN(int stage)
 		// entity existence check
 		ent = I::entitylist->GetClientEntity(i);
 		if (!ent) continue;
+
+		if (!ent->IsPlayer()) continue;
 
 		// just do enemies for now
 		if (ent->GetTeam() == G::LocalplayerTeam) continue;

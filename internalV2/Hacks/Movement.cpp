@@ -122,3 +122,119 @@ void Movement::AutoStrafe()
 		/*G::cmd->viewangles.y += flip ? -5 : 5;*/
 	}
 }
+
+void Movement::CM_Clamp()
+{
+	//Angle stuff
+	if ((G::cmd->angViewAngle).x > 89) {
+		(G::cmd->angViewAngle).x = 89;
+	}
+	else if ((G::cmd->angViewAngle).x < -89) {
+		(G::cmd->angViewAngle).x = -89;
+	}
+
+	while ((G::cmd->angViewAngle).y > 180) {
+		(G::cmd->angViewAngle).y -= 360;
+	}
+	while ((G::cmd->angViewAngle).y < -180) {
+		(G::cmd->angViewAngle).y += 360;
+	}
+	(G::cmd->angViewAngle).z = 0;
+
+	//side/forwardMove/upmove
+	if (G::cmd->flSideMove > 450.f) {
+		G::cmd->flSideMove = 450.f;
+	}
+	if (G::cmd->flSideMove < -450.f) {
+		G::cmd->flSideMove = -450.f;
+	}
+	if (G::cmd->flForwardMove > 450.f) {
+		G::cmd->flForwardMove = 450.f;
+	}
+	if (G::cmd->flForwardMove < -450.f) {
+		G::cmd->flForwardMove = -450.f;
+	}
+	if (G::cmd->flUpMove > 320.f) {
+		G::cmd->flUpMove = 320.f;
+	}
+	if (G::cmd->flUpMove < -320.f) {
+		G::cmd->flUpMove = -320.f;
+	}
+}
+
+void Movement::CM_Start(CUserCmd* cmd, bool* pSendPacket)
+{
+	G::StartAngle = cmd->angViewAngle;
+	G::cmd = cmd;
+	G::pSendpacket = pSendPacket;
+}
+
+void Movement::CM_MoveFixStart()
+{
+	G::StartForwardmove = G::cmd->flForwardMove;
+	G::StartSidemove = G::cmd->flSideMove;
+}
+
+void Movement::CM_MoveFixEnd()
+{
+	//fix movement
+	static float deltaView;
+	static float f1;
+	static float f2;
+
+	if (G::StartAngle.y < 0.f)
+		f1 = 360.0f + G::StartAngle.y;
+	else
+		f1 = G::StartAngle.y;
+
+	if (G::cmd->angViewAngle.y < 0.0f)
+		f2 = 360.0f + G::cmd->angViewAngle.y;
+	else
+		f2 = G::cmd->angViewAngle.y;
+
+	if (f2 < f1)
+		deltaView = abs(f2 - f1);
+	else
+		deltaView = 360.0f - abs(f1 - f2);
+
+	deltaView = 360.0f - deltaView;
+
+	G::cmd->flForwardMove = cos(DEG2RAD(deltaView)) * G::StartForwardmove + cos(DEG2RAD(deltaView + 90.f)) * G::StartSidemove;
+	G::cmd->flSideMove = sin(DEG2RAD(deltaView)) * G::StartForwardmove + sin(DEG2RAD(deltaView + 90.f)) * G::StartSidemove;
+
+	/*
+	IN_FORWARD
+		IN_BACK
+		IN_MOVELEFT
+		IN_MOVERIGHT
+		*/
+
+		/*if (G::cmd->forwardmove > 0)
+		{
+			G::cmd->buttons |= IN_FORWARD;
+			G::cmd->buttons &= ~IN_BACK;
+		}
+		if (G::cmd->forwardmove < 0)
+		{
+			G::cmd->buttons |= IN_BACK;
+			G::cmd->buttons &= ~IN_FORWARD;
+		}*/
+}
+
+void Movement::CM_End()
+{
+	G::cmd->angViewAngle.NormalizeAngle(); //prevent csgo from hating us
+	CM_Clamp();
+	G::EndAngle.x = G::cmd->angViewAngle.x;
+	G::EndAngle.y = G::cmd->angViewAngle.y;
+
+
+	/*if (*G::pSendPacket) {
+		G::FakeAngle = G::cmd->viewangles;
+		G::Localplayer->SetupBones(G::FakeMatrix, 128, 0x100, I::globalvars->m_curTime);
+	}
+	else
+		G::RealAngle = G::cmd->viewangles;*/
+
+	
+}

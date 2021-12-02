@@ -56,6 +56,7 @@
 #include "Hacks/Backtrack.hpp"
 #include "Hacks/ESP.hpp"
 #include "Hacks/Aimbot.hpp"
+#include "Hacks/Thirdperson.hpp"
 
 // Hooks
 #include "Hooks.hpp"            //hooking ingame functions

@@ -14,6 +14,8 @@ namespace H
 	typedef void(__stdcall* FrameStageNotify)(int);
 	typedef bool(__stdcall* CreateMove)(float, CUserCmd*);
 	typedef void(__thiscall* PaintTraverse)(void*, int, bool, bool);
+	typedef void(__thiscall* CamToFirstPeron)(void*);
+	typedef void(__thiscall* DoPostScreenEffects)(void*, int);
 
 	extern Reset oReset;
 	extern LockCursor oLockCursor;
@@ -21,6 +23,8 @@ namespace H
 	extern FrameStageNotify oFrameStageNotify;
 	extern CreateMove oCreateMove;
 	extern PaintTraverse oPaintTraverse;
+	extern CamToFirstPeron oCamToFirstPeron;
+	extern DoPostScreenEffects oDoPostScreenEffects;
 
 	//our functions
 	extern long __stdcall ResetHook(IDirect3DDevice9* device, D3DPRESENT_PARAMETERS* pPresentationParameters);
@@ -30,4 +34,6 @@ namespace H
 	extern void __stdcall FrameStageNotifyHook(int stage);
 	extern bool __stdcall CreateMoveHook(float flInputSampleTime, CUserCmd* cmd);
 	extern void __stdcall PaintTraverseHook(int vguiID, bool force, bool allowForcing);
+	extern void __fastcall CamToFirstPeronHook();
+	extern void __stdcall DoPostScreenEffectsHook(int param);
 }

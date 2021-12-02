@@ -114,11 +114,14 @@
     <ClCompile Include="Hacks\ESP.cpp">
       <Filter>Source Files\Hacks</Filter>
     </ClCompile>
-    <ClCompile Include="Hacks\Aimbot.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Valve\SDK\Vector.cpp">
       <Filter>Source Files\Valve\SDK</Filter>
+    </ClCompile>
+    <ClCompile Include="Hacks\Aimbot.cpp">
+      <Filter>Source Files\Hacks</Filter>
+    </ClCompile>
+    <ClCompile Include="Hacks\Thirdperson.cpp">
+      <Filter>Source Files\Hacks</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -341,14 +344,20 @@
     <ClInclude Include="Valve\Interfaces\IVModelInfo.hpp">
       <Filter>Header Files\Valve\Interfaces</Filter>
     </ClInclude>
-    <ClInclude Include="Hacks\Aimbot.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Valve\SDK\Animations.h">
       <Filter>Header Files\Valve\SDK</Filter>
     </ClInclude>
     <ClInclude Include="Valve\SDK\Vector.hpp">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Hacks\Aimbot.hpp">
+      <Filter>Header Files\Hacks</Filter>
+    </ClInclude>
+    <ClInclude Include="Hacks\Thirdperson.hpp">
+      <Filter>Header Files\Hacks</Filter>
+    </ClInclude>
+    <ClInclude Include="Valve\Interfaces\IInput.hpp">
+      <Filter>Header Files\Valve\Interfaces</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

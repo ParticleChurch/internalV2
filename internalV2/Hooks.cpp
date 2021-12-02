@@ -12,6 +12,7 @@ namespace H
 	VMT::Manager* clientVMT = nullptr;
 	VMT::Manager* clientmodeVMT = nullptr;
 	VMT::Manager* panelVMT = nullptr;
+	VMT::Manager* inputVMT = nullptr;
 
 	// Original Functions
 	Reset oReset;
@@ -21,6 +22,8 @@ namespace H
 	FrameStageNotify oFrameStageNotify;
 	CreateMove oCreateMove;
 	PaintTraverse oPaintTraverse;
+	CamToFirstPeron oCamToFirstPeron;
+	DoPostScreenEffects oDoPostScreenEffects;
 	
 	// special GUI Vars
 	bool D3dInit = false;
@@ -47,6 +50,7 @@ void H::Init()
 	clientVMT = new  VMT::Manager((VMT::VMT*)I::client);
 	clientmodeVMT = new VMT::Manager((VMT::VMT*)I::clientmode);
 	panelVMT = new VMT::Manager((VMT::VMT*)I::panel);
+	inputVMT = new VMT::Manager((VMT::VMT*)I::input);
 
 	// do hooks
 	L::Debug("-->oReset");
@@ -63,6 +67,10 @@ void H::Init()
 	oCreateMove = (CreateMove)clientmodeVMT->Hook(24, &CreateMoveHook);
 	L::Debug("-->PaintTraverse");
 	oPaintTraverse = (PaintTraverse)panelVMT->Hook(41, &PaintTraverseHook);
+	L::Debug("-->CamToFirstPeron");
+	oCamToFirstPeron = (CamToFirstPeron)inputVMT->Hook(36, &CamToFirstPeronHook);
+	L::Debug("-->DoPostScreenEffects");
+	oDoPostScreenEffects = (DoPostScreenEffects)clientmodeVMT->Hook(44, &DoPostScreenEffectsHook);
 }
 
 void H::Free()
@@ -73,6 +81,7 @@ void H::Free()
 	if (clientVMT) clientVMT->UnhookAll();
 	if (clientmodeVMT) clientmodeVMT->UnhookAll();
 	if (panelVMT) panelVMT->UnhookAll();
+	if (inputVMT) inputVMT->UnhookAll();
 
 	// do some last minute adjustments
 	// will do later lol
@@ -83,6 +92,7 @@ void H::Free()
 	if (clientVMT) delete clientVMT;
 	if (clientmodeVMT) delete clientmodeVMT;
 	if (panelVMT) delete panelVMT;
+	if (inputVMT) delete inputVMT;
 
 	// now delete hacks
 	delete autowall;
@@ -90,6 +100,8 @@ void H::Free()
 	delete backtrack;
 	delete lagcomp;
 	delete esp;
+	delete aimbot;
+	delete thirdperson;
 }
 
 long __stdcall H::ResetHook(IDirect3DDevice9* device, D3DPRESENT_PARAMETERS* pPresentationParameters)
@@ -134,6 +146,8 @@ long __stdcall H::EndSceneHook(IDirect3DDevice9* device)
 		ImGui::NewFrame();
 
 		menu->Render();
+
+		aimbot->RenderStats();
 		
 		ImGui::EndFrame();
 		ImGui::Render();
@@ -227,9 +241,17 @@ void __stdcall H::FrameStageNotifyHook(int stage)
 		return oFrameStageNotify(stage);
 	}
 
+	
+
+	static int deadflagOffset = N::GetOffset("DT_BasePlayer", "deadflag");
+	if (stage == FRAME_RENDER_START) {
+		if (cfg->Keybinds["Thirdperson"].boolean)
+			*(QAngle*)((DWORD)G::Localplayer + deadflagOffset + 4) = G::EndAngle;
+	}
+
 	lagcomp->Run_FSN(stage);
 
-	return oFrameStageNotify(stage);
+	oFrameStageNotify(stage);
 }
 
 bool __stdcall H::CreateMoveHook(float flInputSampleTime, CUserCmd* cmd)
@@ -249,10 +271,6 @@ bool __stdcall H::CreateMoveHook(float flInputSampleTime, CUserCmd* cmd)
 		bool* pSendPacket = (bool*)(*(DWORD*)pebp - 0x1C);
 		bool& bSendPacket = *pSendPacket;
 
-		// Update global vars
-		G::cmd = cmd;
-		G::StartAngle = G::cmd->angViewAngle;
-
 		// Menu fix
 		if (G::MenuOpen && (cmd->iButtons & IN_ATTACK | IN_ATTACK2 | IN_ZOOM))
 		{
@@ -260,14 +278,32 @@ bool __stdcall H::CreateMoveHook(float flInputSampleTime, CUserCmd* cmd)
 			cmd->iButtons &= ~IN_ATTACK2;
 			cmd->iButtons &= ~IN_ZOOM;
 		}
+		// movmeent fix
+		movement->CM_Start(cmd, pSendPacket);
 
 		// movement
 		movement->Bunnyhop();
 		movement->AutoStrafe();
 
+		// movmeent fix
+		movement->CM_MoveFixStart();
+
+		// lol
+		if (cfg->aa.Enable)
+		{
+			G::cmd->angViewAngle.x = 89;
+			G::cmd->angViewAngle.y = G::StartAngle.y + 180.f;
+		}
+
 		// offensive 
 		aimbot->Run();
 		backtrack->Run();
+
+		// movmeent fix
+		movement->CM_MoveFixEnd();
+
+		// movmeent fix
+		movement->CM_End();
 	}
 
 	return false; //silent aim on false (only for client)
@@ -286,4 +322,16 @@ void __stdcall H::PaintTraverseHook(int vguiID, bool force, bool allowForcing)
 
 		esp->RunPaintTraverse();
 	}
+}
+
+void __fastcall H::CamToFirstPeronHook()
+{
+	thirdperson->Run_hkCamToFirstPeron();
+}
+
+void __stdcall H::DoPostScreenEffectsHook(int param)
+{
+	thirdperson->Run_DoPostScreenEffects();
+
+	return oDoPostScreenEffects(I::clientmode, param);
 }

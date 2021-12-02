@@ -11,6 +11,7 @@ namespace G {
 
 	// Game stuff
 	extern bool IsInGame;
+	extern bool* pSendpacket;
 
 	// Localplayer stuff
 	extern int LocalplayerIndex;
@@ -23,6 +24,9 @@ namespace G {
 	// Createmove Stuff
 	extern CUserCmd* cmd;
 	extern QAngle StartAngle;
+	extern float StartForwardmove;
+	extern float StartSidemove;
+	extern QAngle EndAngle;
 
 	//LocalPlayer
 	/*extern Entity* LocalPlayer;

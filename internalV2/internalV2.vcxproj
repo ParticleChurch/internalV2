@@ -172,6 +172,7 @@
     <ClCompile Include="Hacks\ESP.cpp" />
     <ClCompile Include="Hacks\Lagcomp.cpp" />
     <ClCompile Include="Hacks\Movement.cpp" />
+    <ClCompile Include="Hacks\Thirdperson.cpp" />
     <ClCompile Include="Hooks.cpp" />
     <ClCompile Include="ImGui\imgui.cpp" />
     <ClCompile Include="ImGui\imgui_demo.cpp" />
@@ -196,6 +197,7 @@
     <ClInclude Include="Hacks\ESP.hpp" />
     <ClInclude Include="Hacks\Lagcomp.hpp" />
     <ClInclude Include="Hacks\Movement.hpp" />
+    <ClInclude Include="Hacks\Thirdperson.hpp" />
     <ClInclude Include="Hooks.hpp" />
     <ClInclude Include="ImGui\imconfig.h" />
     <ClInclude Include="ImGui\imgui.h" />
@@ -223,6 +225,7 @@
     <ClInclude Include="Valve\Interfaces\IEngineClient.hpp" />
     <ClInclude Include="Valve\Interfaces\IEngineTrace.hpp" />
     <ClInclude Include="Valve\Interfaces\IGlobalVars.hpp" />
+    <ClInclude Include="Valve\Interfaces\IInput.hpp" />
     <ClInclude Include="Valve\Interfaces\IInputSystem.hpp" />
     <ClInclude Include="Valve\Interfaces\Interfaces.hpp" />
     <ClInclude Include="Valve\Interfaces\IPhysicsSurfaceProps.hpp" />

@@ -13,9 +13,6 @@ void onInject()
     N::Init();
     H::Init();
 
-    // TODO: wait for them to press eject
-    L::Info("Hello World!");
-
     while (!G::KillDLL) Sleep(100);
 
     // uninitalizers

@@ -25,6 +25,7 @@ namespace I
 	extern IEngineTrace* enginetrace;
 	extern IConVar* convar;
 	extern IVModelInfo* modelinfo;
+	extern IInput* input;
 
 	// func
 	typedef void* (*InterfaceCreator)(const char*, int);

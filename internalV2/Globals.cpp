@@ -11,6 +11,7 @@ namespace G
 
 	// Game stuff
 	bool IsInGame = false;
+	bool* pSendpacket;
 
 	// Localplayer Stuff
 	int LocalplayerIndex;
@@ -23,4 +24,7 @@ namespace G
 	// Createmove Stuff
 	CUserCmd* cmd;
 	QAngle StartAngle;
+	float StartForwardmove;
+	float StartSidemove;
+	QAngle EndAngle;
 }

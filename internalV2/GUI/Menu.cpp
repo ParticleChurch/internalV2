@@ -466,6 +466,18 @@ void Menu::Render()
 
 		ImGui::Separator();
 
+		ImGui::Text("Antiaim");
+		ImGui::SameLine();
+		ImGui::Checkbox("##AntiaimEnable", &cfg->aa.Enable);
+
+		ImGui::Text("Thirdperson");
+		ImGui::SameLine();
+		C::HotKey(cfg->Keybinds["Thirdperson"]);
+		ImGui::SameLine();
+		ImGui::SliderFloat("##VISThirdpersonDistance", &cfg->vis.ThirdPersonDistance, 50, 300);
+
+		ImGui::Separator();
+
 		C::Checkbox("Console Window", &ConsoleWindow);
 
 		bool open_popup = ImGui::Button("Eject");

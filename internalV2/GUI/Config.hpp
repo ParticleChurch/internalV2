@@ -59,10 +59,18 @@ namespace CFG
 		float LimbPointScale = 0.f;
 	};
 
+	struct Visuals {
+		float ThirdPersonDistance = 150.f;
+	};
+
 	struct Performance {
 		int HitchanceScan = 50;
 		int MaxAimbotScan = 5;
 		bool ShowConsole = false;
+	};
+
+	struct Antiaim {
+		bool Enable = false;
 	};
 }
 
@@ -76,6 +84,8 @@ public:
 	CFG::ESP esp;
 	CFG::Aimbot aimbot;
 	CFG::Performance performance;
+	CFG::Visuals vis;
+	CFG::Antiaim aa;
 
 	Config();
 	void HandleKeybinds();

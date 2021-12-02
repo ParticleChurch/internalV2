@@ -16,6 +16,7 @@ namespace I
 	IEngineTrace* enginetrace = nullptr;
 	IConVar* convar = nullptr;
 	IVModelInfo* modelinfo = nullptr;
+	IInput* input = nullptr;
 
 	void Init()
 	{
@@ -33,5 +34,6 @@ namespace I
 		enginetrace = GetInterface<IEngineTrace        >("engine.dll", "EngineTraceClient004");
 		convar = GetInterface<IConVar                >("vstdlib.dll", "VEngineCvar007");
 		modelinfo = GetInterface<IVModelInfo         >("engine.dll", "VModelInfoClient004");
+		input = *(IInput**)((*(DWORD**)client)[16] + 0x1);
 	}
 }

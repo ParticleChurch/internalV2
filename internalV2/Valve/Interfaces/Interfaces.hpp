@@ -12,3 +12,4 @@
 #include "IEngineTrace.hpp"
 #include "Convar.hpp"
 #include "IVModelInfo.hpp"
+#include "IInput.hpp"

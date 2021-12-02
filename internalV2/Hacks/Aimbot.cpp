@@ -2,8 +2,12 @@
 
 Aimbot* aimbot = new Aimbot();
 
+#define DEBUG_AIMBOT true
+
 void Aimbot::UpdateHitboxes()
 {
+	if constexpr (DEBUG_AIMBOT) L::Debug("UpdateHitboxes");
+
 	// only update everytime we change our choice
 	static int LastPriorityChoice = -1;
 	if (cfg->aimbot.Priority != LastPriorityChoice)
@@ -126,6 +130,8 @@ void Aimbot::UpdateHitboxes()
 
 float Aimbot::CalculateHitchance(Vector vangles, const Vector& point, Entity* player, int hbox)
 {
+	if constexpr (DEBUG_AIMBOT) L::Debug("CalculateHitchance");
+
 	auto weapon = G::LocalplayerWeapon;
 	if (!weapon)
 		return 0.f;
@@ -189,6 +195,8 @@ float Aimbot::CalculateHitchance(Vector vangles, const Vector& point, Entity* pl
 
 float Aimbot::CalculatePsudoHitchance()
 {
+	if constexpr (DEBUG_AIMBOT) L::Debug("CalculatePsudoHitchance");
+
 	if (!G::LocalplayerWeapon)
 		return 0;
 	return 0.f;
@@ -196,11 +204,15 @@ float Aimbot::CalculatePsudoHitchance()
 
 bool Aimbot::ValidPlayer(LagComp::Player player)
 {
+	if constexpr (DEBUG_AIMBOT) L::Debug("ValidPlayer");
+
 	return false;
 }
 
 void Aimbot::GetPlayers(std::vector<std::pair<int, float>>& values)
 {
+	if constexpr (DEBUG_AIMBOT) L::Debug("GetPlayers");
+
 	//update every .1 sec
 	static float LastTimeUpdate = I::globalvars->flCurrentTime;
 	if (fabsf(I::globalvars->flCurrentTime - LastTimeUpdate) < 0.1)
@@ -227,6 +239,7 @@ void Aimbot::GetPlayers(std::vector<std::pair<int, float>>& values)
 			continue;
 		if (a.second.Dormant)
 			continue;
+		if (!a.second.pEntity->IsPlayer()) continue;
 		values.push_back(std::pair(a.first, (100 - a.second.pEntity->GetHealth()) * 8 + 80000 / (a.second.pEntity->GetVecOrigin() - localorigin).Length2D()));
 	}
 
@@ -245,6 +258,8 @@ void Aimbot::GetPlayers(std::vector<std::pair<int, float>>& values)
 
 float Aimbot::GetPointScale(int Hitbox)
 {
+	if constexpr (DEBUG_AIMBOT) L::Debug("GetPointScale");
+
 	switch (Hitbox)
 	{
 	case HITBOX_HEAD:
@@ -265,6 +280,8 @@ float Aimbot::GetPointScale(int Hitbox)
 
 bool Aimbot::ScanPlayers()
 {
+	if constexpr (DEBUG_AIMBOT) L::Debug("ScanPlayers");
+
 	// reset the number of scans
 	NumScan = 0;
 
@@ -294,6 +311,8 @@ bool Aimbot::ScanPlayers()
 
 bool Aimbot::ScanPlayer(int UserID)
 {
+	if constexpr (DEBUG_AIMBOT) L::Debug("ScanPlayer UserID");
+
 	Entity* ent = lagcomp->PlayerList[UserID].pEntity;
 
 	if (!ent) return false;
@@ -309,7 +328,7 @@ bool Aimbot::ScanPlayer(int UserID)
 	if (!StudioModel) return false; //if cant get the model
 
 	// if bad setupbones
-	if (!lagcomp->PlayerList[UserID].pEntity->SetupBones(AimMatrix, 128, 0x100, lagcomp->PlayerList[UserID].pEntity->GetSimulationTime(), false)) return false;
+	if (!ent->SetupBones(AimMatrix, 128, 0x100, ent->GetSimulationTime(), false)) return false;
 
 	// PRIORITY SCAN FIRST
 	if (!priority.empty())
@@ -549,6 +568,8 @@ bool Aimbot::ScanPlayer(int UserID)
 
 bool Aimbot::ScanPlayerBacktrack(int UserID)
 {
+	if constexpr (DEBUG_AIMBOT) L::Debug("ScanPlayerBacktrack");
+
 	return false;
 }
 
@@ -558,6 +579,8 @@ bool Aimbot::ScanPlayerBacktrack(int UserID)
 
 Vector RotatePoint(Vector pos, Vector orig, float ang)
 {
+	if constexpr (DEBUG_AIMBOT) L::Debug("RotatePoint");
+
 	// oreient ourselves wih origin @ the new origin
 	pos = pos - orig;
 
@@ -576,8 +599,14 @@ Vector RotatePoint(Vector pos, Vector orig, float ang)
 	return FinalPos;
 }
 
+// need.
+// 1. AA
+// 2. third person
+
 bool Aimbot::GetSafepoint(Entity* ent, int UserID, Vector point, float radius, Vector& safepoint)
 {
+	if constexpr (DEBUG_AIMBOT) L::Debug("GetSafepoint");
+
 	/*if (resolver->PlayerInfo.find(UserID) == resolver->PlayerInfo.end())
 		return false;*/
 
@@ -596,6 +625,8 @@ bool Aimbot::GetSafepoint(Entity* ent, int UserID, Vector point, float radius, V
 
 void Aimbot::Rage()
 {
+	if constexpr (DEBUG_AIMBOT) L::Debug("Rage");
+
 	//movement->AimReqAutostop = false;
 
 	// if the player can SOON shoot a weapon
@@ -674,6 +705,8 @@ void Aimbot::Rage()
 
 void Aimbot::Run()
 {
+	if constexpr (DEBUG_AIMBOT) L::Debug("Run");
+
 	if (!cfg->Keybinds["Aimbot"].boolean) return;
 
 	// update the aimbot values
@@ -688,6 +721,8 @@ void Aimbot::Run()
 
 void Aimbot::RenderStats()
 {
+	if constexpr (DEBUG_AIMBOT) L::Debug("RenderStats");
+
 	/*if (!cfg->performance.ShowConsole) return;*/
 
 	ImGui::Begin("Aimbot stats");

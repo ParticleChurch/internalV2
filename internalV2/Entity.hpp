@@ -379,6 +379,7 @@ public: // OTHERS
 		return bIsArmored;
 	}
 	bool IsBreakable() {
+		return false; // TEMPORARY
 		if constexpr (DEBUG_ENTITY) L::Debug("IsBreakable");
 
 		// @ida isbreakableentity: client.dll @ 55 8B EC 51 56 8B F1 85 F6 74 68
