@@ -1,7 +1,4 @@
 #include "Include.hpp"
-
-HMODULE dllModule;
-
 void onInject()
 {
     // seed random
@@ -20,7 +17,7 @@ void onInject()
     L::Free();
     
     // deallocate DLL
-    FreeLibraryAndExitThread(dllModule, 0);
+    FreeLibraryAndExitThread(G::DLLModule, 0);
 }
 
 BOOL APIENTRY DllMain(HMODULE hModule, DWORD dwReasonForCall, LPVOID lpReserved)
@@ -28,7 +25,7 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD dwReasonForCall, LPVOID lpReserved)
     switch (dwReasonForCall)
     {
     case DLL_PROCESS_ATTACH:
-        dllModule = hModule;
+        G::DLLModule = hModule;
         CreateThread(0, 0, LPTHREAD_START_ROUTINE(onInject), 0, 0, 0);
         break;
     case DLL_THREAD_ATTACH:

@@ -2,7 +2,6 @@
 
 #define DEBUG_HOOKS true
 
-#pragma comment(lib, "Winmm.lib")  // for playsounda
 //for windprc hook
 extern LRESULT ImGui_ImplWin32_WndProcHandler(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
@@ -92,6 +91,8 @@ void H::Init()
 
 void H::Free()
 {
+	L::Debug("Freeing Hooks");
+
 	// restore the VMTs to normal
 	if (d3d9VMT) d3d9VMT->UnhookAll();
 	if (surfaceVMT) surfaceVMT->UnhookAll();
@@ -105,6 +106,8 @@ void H::Free()
 	// do some last minute adjustments
 	// will do later lol
 
+	L::Debug("Freeing VMTs");
+
 	// free the VMTs now that they are useless
 	if (d3d9VMT) delete d3d9VMT;
 	if (surfaceVMT) delete surfaceVMT;
@@ -112,6 +115,8 @@ void H::Free()
 	if (clientmodeVMT) delete clientmodeVMT;
 	if (panelVMT) delete panelVMT;
 	if (inputVMT) delete inputVMT;
+
+	L::Debug("Freeing Hacks");
 
 	// now delete hacks
 	delete autowall;
@@ -129,7 +134,7 @@ void H::Free()
 
 long __stdcall H::ResetHook(IDirect3DDevice9* device, D3DPRESENT_PARAMETERS* pPresentationParameters)
 {
-	if constexpr (DEBUG_HOOKS) L::Debug("ResetHook");
+	if  (DEBUG_HOOKS) L::Debug("ResetHook");
 
 	ImGui_ImplDX9_InvalidateDeviceObjects();
 	ImGui_ImplDX9_CreateDeviceObjects();
@@ -140,7 +145,7 @@ long __stdcall H::ResetHook(IDirect3DDevice9* device, D3DPRESENT_PARAMETERS* pPr
 
 void __stdcall H::LockCursorHook()
 {
-	if constexpr (DEBUG_HOOKS) L::Debug("LockCursorHook");
+	if  (DEBUG_HOOKS) L::Debug("LockCursorHook");
 
 	if (G::KillDLL)
 		return oLockCursor(I::surface);
@@ -154,7 +159,7 @@ void __stdcall H::LockCursorHook()
 
 long __stdcall H::EndSceneHook(IDirect3DDevice9* device)
 {
-	if constexpr (DEBUG_HOOKS) L::Debug("EndSceneHook");
+	if  (DEBUG_HOOKS) L::Debug("EndSceneHook");
 
 	// init imgui
 	if (!D3dInit) {
@@ -188,7 +193,7 @@ long __stdcall H::EndSceneHook(IDirect3DDevice9* device)
 
 LRESULT __stdcall H::WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
-	if constexpr (DEBUG_HOOKS) L::Debug("WndProc");
+	if  (DEBUG_HOOKS) L::Debug("WndProc");
 
 	if (!D3dInit) return CallWindowProc(oWndProc, hWnd, uMsg, wParam, lParam);
 
@@ -237,7 +242,7 @@ LRESULT __stdcall H::WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 
 void __stdcall H::FrameStageNotifyHook(int stage)
 {
-	if constexpr (DEBUG_HOOKS) L::Debug("FrameStageNotifyHook");
+	if  (DEBUG_HOOKS) L::Debug("FrameStageNotifyHook");
 
 	G::IsInGame = I::engine->IsInGame();
 
@@ -296,7 +301,7 @@ void __stdcall H::FrameStageNotifyHook(int stage)
 
 bool __stdcall H::CreateMoveHook(float flInputSampleTime, CUserCmd* cmd)
 {
-	if constexpr (DEBUG_HOOKS) L::Debug("CreateMoveHook");
+	if  (DEBUG_HOOKS) L::Debug("CreateMoveHook");
 
 	bool oFunc = oCreateMove(flInputSampleTime, cmd);
 
@@ -369,7 +374,7 @@ bool __stdcall H::CreateMoveHook(float flInputSampleTime, CUserCmd* cmd)
 
 void __stdcall H::PaintTraverseHook(int vguiID, bool force, bool allowForcing)
 {
-	if constexpr (DEBUG_HOOKS) L::Debug("PaintTraverseHook");
+	if  (DEBUG_HOOKS) L::Debug("PaintTraverseHook");
 
 	// noscope
 	if (strcmp("HudZoom", I::panel->GetName(vguiID)) == 0 && true && G::LocalplayerAlive)
@@ -387,14 +392,14 @@ void __stdcall H::PaintTraverseHook(int vguiID, bool force, bool allowForcing)
 
 void __fastcall H::CamToFirstPeronHook()
 {
-	if constexpr (DEBUG_HOOKS) L::Debug("CamToFirstPeronHook");
+	if  (DEBUG_HOOKS) L::Debug("CamToFirstPeronHook");
 
 	thirdperson->Run_hkCamToFirstPeron();
 }
 
 void __stdcall H::DoPostScreenEffectsHook(int param)
 {
-	if constexpr (DEBUG_HOOKS) L::Debug("DoPostScreenEffectsHook");
+	if  (DEBUG_HOOKS) L::Debug("DoPostScreenEffectsHook");
 
 	thirdperson->Run_DoPostScreenEffects();
 
