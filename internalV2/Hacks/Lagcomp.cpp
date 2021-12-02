@@ -2,25 +2,28 @@
 
 LagComp* lagcomp = new LagComp();
 
+#define DEBUG_LAGCOMP false 
+
 void LagComp::Record::Update(Entity* ent)
 {
 	// STUPID BUG FUCK IT IMMA JUST FORCE: spec_replay_autostart 0 <-- force no death cam
-	L::Debug("SETUP BONES");
+	if constexpr (DEBUG_LAGCOMP) L::Debug("SETUP BONES");
 	if (ent->SetupBones(this->Matrix, MAXSTUDIOBONES, 0x100, 0, false))
 		this->HeadPos = Vector(this->Matrix[8][0][3], this->Matrix[8][1][3], this->Matrix[8][2][3]);
 
-	L::Debug("GetVecOrigin");
+	if constexpr (DEBUG_LAGCOMP) L::Debug("GetVecOrigin");
 	this->Origin = ent->GetVecOrigin();
-	L::Debug("GetSimulationTime");
+	if constexpr (DEBUG_LAGCOMP) L::Debug("GetSimulationTime");
 	this->SimulationTime = ent->GetSimulationTime();
-	L::Debug("GetVecVelocity");
+	if constexpr (DEBUG_LAGCOMP) L::Debug("GetVecVelocity");
 	this->Velocity = ent->GetVecVelocity();
-	L::Debug("GetVecVelocity");
+	if constexpr (DEBUG_LAGCOMP) L::Debug("GetVecVelocity");
 	this->Flags = ent->GetFlags();
 }
 
 void LagComp::Update(Entity* ent, int index)
 {
+	if constexpr (DEBUG_LAGCOMP) L::Debug(("Lagcomp Index: " + std::to_string(index)).c_str());
 	// Get info, otherwise don't even bother trying to update if not human
 	PlayerInfo_t info;
 	if (!I::engine->GetPlayerInfo(index, &info))
@@ -28,7 +31,7 @@ void LagComp::Update(Entity* ent, int index)
 
 	if (!info.szName) return;
 
-	L::Debug(("LagComp Update: " + (std::string)info.szName).c_str(), "\n");
+	if constexpr (DEBUG_LAGCOMP) L::Debug(("LagComp Update: " + (std::string)info.szName).c_str(), "\n");
 
 	// if player doesn't exist --> add it
 	if (PlayerList.find(info.nUserID) == PlayerList.end())
@@ -40,7 +43,7 @@ void LagComp::Update(Entity* ent, int index)
 	// Now we update the player
 	Player& player = PlayerList[info.nUserID];
 
-	L::Debug("Getting basic info");
+	if constexpr (DEBUG_LAGCOMP) L::Debug("Getting basic info");
 
 	// update player vars
 	player.pEntity = ent;
@@ -50,7 +53,7 @@ void LagComp::Update(Entity* ent, int index)
 	player.Team = ent->GetTeam();
 	player.Index = index;
 
-	L::Debug("copy name");
+	if constexpr (DEBUG_LAGCOMP) L::Debug("copy name");
 	//std::memcpy(&player.Info, &info, sizeof(PlayerInfo_t));
 
 	// add record
@@ -135,7 +138,7 @@ void LagComp::Run_FSN(int stage)
 	if (!G::Localplayer) return;
 	if (!G::LocalplayerAlive) return;
 
-	L::Debug("FrameStageNotifyHook LagComp", "\n");
+	if constexpr (DEBUG_LAGCOMP) L::Debug("FrameStageNotifyHook LagComp", "\n");
 
 	Entity* ent;
 	for (int i = 1; i < I::engine->GetMaxClients(); ++i)

@@ -2,8 +2,12 @@
 
 CAutoWall* autowall = new CAutoWall();
 
+#define DEBUG_AUTOWALL false
+
 float CAutoWall::GetDamage(Entity* pLocal, const Vector& vecPoint, FireBulletData_t* pDataOut)
 {
+	if constexpr (DEBUG_AUTOWALL) L::Debug("GetDamage");
+
 	const Vector vecPosition = pLocal->GetEyePosition();
 
 	// setup data
@@ -22,6 +26,8 @@ float CAutoWall::GetDamage(Entity* pLocal, const Vector& vecPoint, FireBulletDat
 
 void CAutoWall::ScaleDamage(const int iHitGroup, Entity* pEntity, const float flWeaponArmorRatio, const float flWeaponHeadShotMultiplier, float& flDamage)
 {
+	if constexpr (DEBUG_AUTOWALL) L::Debug("ScaleDamage");
+
 	// @ida traceattack: server.dll @ 55 8B EC 83 E4 F8 81 EC C0 00 00 00 56 8B 75 08 57 8B F9 C6 44 24 13 01
 
 	const bool bHeavyArmor = pEntity->HasHeavyArmor();
@@ -150,6 +156,8 @@ void CAutoWall::ClipTraceToPlayers(const Vector& vecAbsStart, const Vector& vecA
 
 bool CAutoWall::TraceToExit(Trace_t& enterTrace, Trace_t& exitTrace, const Vector& vecPosition, const Vector& vecDirection, const Entity* pClipPlayer)
 {
+	if constexpr (DEBUG_AUTOWALL) L::Debug("TraceToExit");
+
 	// @ida tracetoexit: client.dll @ 55 8B EC 83 EC 4C F3
 
 	float flDistance = 0.0f;
@@ -236,6 +244,8 @@ bool CAutoWall::TraceToExit(Trace_t& enterTrace, Trace_t& exitTrace, const Vecto
 
 bool CAutoWall::HandleBulletPenetration(Entity* pLocal, const CCSWeaponData* pWeaponData, const surfacedata_t* pEnterSurfaceData, FireBulletData_t& data)
 {
+	if constexpr (DEBUG_AUTOWALL) L::Debug("HandleBulletPenetration");
+
 	// @ida handlebulletpenetration: client.dll @ E8 ? ? ? ? 83 C4 40 84 C0
 
 	static CConVar* ff_damage_reduction_bullets = I::convar->FindVar("ff_damage_reduction_bullets");
@@ -323,6 +333,8 @@ bool CAutoWall::HandleBulletPenetration(Entity* pLocal, const CCSWeaponData* pWe
 
 bool CAutoWall::SimulateFireBullet(Entity* pLocal, Entity* pWeapon, FireBulletData_t& data)
 {
+	if constexpr (DEBUG_AUTOWALL) L::Debug("SimulateFireBullet");
+
 	// @ida firebullet: client.dll @ 55 8B EC 83 E4 F0 81 EC ? ? ? ? F3 0F 7E
 
 	CCSWeaponData* pWeaponData = I::weaponsystem->GetWeaponData(pWeapon->GetItemDefinitionIndex());

@@ -2,7 +2,22 @@
 
 Aimbot* aimbot = new Aimbot();
 
-#define DEBUG_AIMBOT true
+#define DEBUG_AIMBOT false
+
+template<typename ...Args>
+void ConsoleColorMsg(const Color& color, const char* fmt, Args ...args)
+{
+	using ConColorMsg = void(*)(const Color&, const char*, ...);
+	static ConColorMsg con_color_msg = nullptr;
+	if (!con_color_msg) {
+		con_color_msg = reinterpret_cast<ConColorMsg>(GetProcAddress(
+			GetModuleHandleA("tier0.dll"),
+			"?ConColorMsg@@YAXABVColor@@PBDZZ")
+			);
+	}
+
+	con_color_msg(color, fmt, args...);
+}
 
 void Aimbot::UpdateHitboxes()
 {
@@ -136,6 +151,7 @@ float Aimbot::CalculateHitchance(Vector vangles, const Vector& point, Entity* pl
 	if (!weapon)
 		return 0.f;
 
+	if constexpr (DEBUG_AIMBOT) L::Debug("Getting General info...");
 	Vector forward, right, up;
 	Vector eyepos = G::Localplayer->GetEyePosition();
 	const auto spread = weapon->GetSpread();
@@ -150,6 +166,7 @@ float Aimbot::CalculateHitchance(Vector vangles, const Vector& point, Entity* pl
 	float hits = 0;
 	auto i = 0;
 
+	if constexpr (DEBUG_AIMBOT) L::Debug("Running Traces...");
 	// originally 255, reducing down to 100 for less accuracy, but quicker calc
 	int NumTraces = cfg->performance.HitchanceScan;
 	while (i < NumTraces)
@@ -311,7 +328,7 @@ bool Aimbot::ScanPlayers()
 
 bool Aimbot::ScanPlayer(int UserID)
 {
-	if constexpr (DEBUG_AIMBOT) L::Debug("ScanPlayer UserID");
+	if constexpr (DEBUG_AIMBOT) L::Debug(("ScanPlayer UserID:" + std::to_string(UserID)).c_str());
 
 	Entity* ent = lagcomp->PlayerList[UserID].pEntity;
 
@@ -672,6 +689,8 @@ void Aimbot::Rage()
 		// FIRE POW POW POW!
 		G::cmd->iButtons |= IN_ATTACK;
 		G::cmd->iTickCount = AimTickCount;
+
+		//ConsoleColorMsg(Color(0, 255, 0, 255), "Shot at target with [%f] hitchance to do [%f] damage\n", MaxHitchance, MaxDamage);
 
 		// only force send if not fakeducking... (as that will break fd)
 		/*if (G::pSendPacket)

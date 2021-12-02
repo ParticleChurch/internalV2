@@ -1,8 +1,25 @@
 #include "Include.hpp"
 
+#define DEBUG_HOOKS true
+
 #pragma comment(lib, "Winmm.lib")  // for playsounda
 //for windprc hook
 extern LRESULT ImGui_ImplWin32_WndProcHandler(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);
+
+template<typename ...Args>
+void ConsoleColorMsg(const Color& color, const char* fmt, Args ...args)
+{
+	using ConColorMsg = void(*)(const Color&, const char*, ...);
+	static ConColorMsg con_color_msg = nullptr;
+	if (!con_color_msg) {
+		con_color_msg = reinterpret_cast<ConColorMsg>(GetProcAddress(
+			GetModuleHandleA("tier0.dll"),
+			"?ConColorMsg@@YAXABVColor@@PBDZZ")
+			);
+	}
+
+	con_color_msg(color, fmt, args...);
+}
 
 namespace H
 {
@@ -81,6 +98,8 @@ void H::Free()
 	if (clientVMT) clientVMT->UnhookAll();
 	if (clientmodeVMT) clientmodeVMT->UnhookAll();
 	if (panelVMT) panelVMT->UnhookAll();
+	// get user out of thirdperson
+	oCamToFirstPeron(I::input);
 	if (inputVMT) inputVMT->UnhookAll();
 
 	// do some last minute adjustments
@@ -102,10 +121,16 @@ void H::Free()
 	delete esp;
 	delete aimbot;
 	delete thirdperson;
+
+	// let user use mouse again?
+	if (I::engine->IsInGame())
+		I::surface->LockCursor();
 }
 
 long __stdcall H::ResetHook(IDirect3DDevice9* device, D3DPRESENT_PARAMETERS* pPresentationParameters)
 {
+	if constexpr (DEBUG_HOOKS) L::Debug("ResetHook");
+
 	ImGui_ImplDX9_InvalidateDeviceObjects();
 	ImGui_ImplDX9_CreateDeviceObjects();
 
@@ -115,6 +140,8 @@ long __stdcall H::ResetHook(IDirect3DDevice9* device, D3DPRESENT_PARAMETERS* pPr
 
 void __stdcall H::LockCursorHook()
 {
+	if constexpr (DEBUG_HOOKS) L::Debug("LockCursorHook");
+
 	if (G::KillDLL)
 		return oLockCursor(I::surface);
 
@@ -127,6 +154,8 @@ void __stdcall H::LockCursorHook()
 
 long __stdcall H::EndSceneHook(IDirect3DDevice9* device)
 {
+	if constexpr (DEBUG_HOOKS) L::Debug("EndSceneHook");
+
 	// init imgui
 	if (!D3dInit) {
 		D3dInit = true;
@@ -159,6 +188,8 @@ long __stdcall H::EndSceneHook(IDirect3DDevice9* device)
 
 LRESULT __stdcall H::WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
+	if constexpr (DEBUG_HOOKS) L::Debug("WndProc");
+
 	if (!D3dInit) return CallWindowProc(oWndProc, hWnd, uMsg, wParam, lParam);
 
 	// determine input type
@@ -206,6 +237,8 @@ LRESULT __stdcall H::WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 
 void __stdcall H::FrameStageNotifyHook(int stage)
 {
+	if constexpr (DEBUG_HOOKS) L::Debug("FrameStageNotifyHook");
+
 	G::IsInGame = I::engine->IsInGame();
 
 	// Do menu input fix
@@ -245,8 +278,15 @@ void __stdcall H::FrameStageNotifyHook(int stage)
 
 	static int deadflagOffset = N::GetOffset("DT_BasePlayer", "deadflag");
 	if (stage == FRAME_RENDER_START) {
+		static QAngle ThirdpersonHoldAngle = G::EndAngle;
+		static int LastTickCount = 0;
+		// only update every new tick that we send a packet
+		if (LastTickCount != I::globalvars->iTickCount && *G::pSendpacket) {
+			LastTickCount = I::globalvars->iTickCount;
+			ThirdpersonHoldAngle = G::EndAngle;
+		}
 		if (cfg->Keybinds["Thirdperson"].boolean)
-			*(QAngle*)((DWORD)G::Localplayer + deadflagOffset + 4) = G::EndAngle;
+			*(QAngle*)((DWORD)G::Localplayer + deadflagOffset + 4) = ThirdpersonHoldAngle;
 	}
 
 	lagcomp->Run_FSN(stage);
@@ -256,6 +296,8 @@ void __stdcall H::FrameStageNotifyHook(int stage)
 
 bool __stdcall H::CreateMoveHook(float flInputSampleTime, CUserCmd* cmd)
 {
+	if constexpr (DEBUG_HOOKS) L::Debug("CreateMoveHook");
+
 	bool oFunc = oCreateMove(flInputSampleTime, cmd);
 
 	if (!oFunc || !cmd || !cmd->iCommandNumber)
@@ -270,6 +312,22 @@ bool __stdcall H::CreateMoveHook(float flInputSampleTime, CUserCmd* cmd)
 		__asm mov pebp, ebp;
 		bool* pSendPacket = (bool*)(*(DWORD*)pebp - 0x1C);
 		bool& bSendPacket = *pSendPacket;
+
+		static int LagVal = 0;
+		static int LastTickCount = I::globalvars->iTickCount;
+		if (LastTickCount != I::globalvars->iTickCount)
+		{
+			LastTickCount = I::globalvars->iTickCount;
+			LagVal++;
+		}
+
+		if (LagVal >= 10)
+		{
+			LagVal = 0;
+			bSendPacket = true;
+		}
+		else
+			bSendPacket = false;
 
 		// Menu fix
 		if (G::MenuOpen && (cmd->iButtons & IN_ATTACK | IN_ATTACK2 | IN_ZOOM))
@@ -311,8 +369,11 @@ bool __stdcall H::CreateMoveHook(float flInputSampleTime, CUserCmd* cmd)
 
 void __stdcall H::PaintTraverseHook(int vguiID, bool force, bool allowForcing)
 {
-	/*if (strcmp("HudZoom", I::panel->GetName(vguiID)) == 0 && cfg->vis.NoScope && G::LocalPlayerAlive)
-		return;*/
+	if constexpr (DEBUG_HOOKS) L::Debug("PaintTraverseHook");
+
+	// noscope
+	if (strcmp("HudZoom", I::panel->GetName(vguiID)) == 0 && true && G::LocalplayerAlive)
+		return;
 
 	oPaintTraverse(I::panel, vguiID, force, allowForcing);
 	if (I::panel && strcmp(I::panel->GetName(vguiID), "MatSystemTopPanel") == 0) {
@@ -326,11 +387,15 @@ void __stdcall H::PaintTraverseHook(int vguiID, bool force, bool allowForcing)
 
 void __fastcall H::CamToFirstPeronHook()
 {
+	if constexpr (DEBUG_HOOKS) L::Debug("CamToFirstPeronHook");
+
 	thirdperson->Run_hkCamToFirstPeron();
 }
 
 void __stdcall H::DoPostScreenEffectsHook(int param)
 {
+	if constexpr (DEBUG_HOOKS) L::Debug("DoPostScreenEffectsHook");
+
 	thirdperson->Run_DoPostScreenEffects();
 
 	return oDoPostScreenEffects(I::clientmode, param);

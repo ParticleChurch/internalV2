@@ -16,14 +16,14 @@ namespace CFG
 	struct Movement
 	{
 		// bhop
-		bool Bunnyhop = false;
+		bool Bunnyhop = true;
 		int Chance = 100;	// 100 means 100% of the time it works
 		int MinHops = 0;	// zero means infinite
 		int MaxHops = 0;	// zero means infinite
 
 		// autostrafe
-		bool Autostrafe = false;
-		float AngSacrifice = 0.f;
+		bool Autostrafe = true;
+		float AngSacrifice = 10.f;
 		float StrafeAng = 5.f;
 	};
 
@@ -35,13 +35,13 @@ namespace CFG
 
 	struct ESP
 	{
-		bool Enable = false;
-		bool Name = false;
+		bool Enable = true;
+		bool Name = true;
 		Color NameColor = Color();
-		bool Skeleton = false;
+		bool Skeleton = true;
 		Color SkeletonColor = Color();
-		bool Health = false;
-		bool Weapon = false;
+		bool Health = true;
+		bool Weapon = true;
 		Color WeaponColor = Color();
 		bool Grenade = false;
 		Color GrenadeColor = Color();
@@ -64,13 +64,13 @@ namespace CFG
 	};
 
 	struct Performance {
-		int HitchanceScan = 50;
+		int HitchanceScan = 25;
 		int MaxAimbotScan = 5;
 		bool ShowConsole = false;
 	};
 
 	struct Antiaim {
-		bool Enable = false;
+		bool Enable = true;
 	};
 }
 
