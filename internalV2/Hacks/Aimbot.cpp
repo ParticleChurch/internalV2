@@ -2,7 +2,7 @@
 
 Aimbot* aimbot = new Aimbot();
 
-#define DEBUG_AIMBOT false
+#define DEBUG_AIMBOT true
 
 template<typename ...Args>
 void ConsoleColorMsg(const Color& color, const char* fmt, Args ...args)
@@ -145,6 +145,8 @@ void Aimbot::UpdateHitboxes()
 
 float Aimbot::CalculateHitchance(Vector vangles, const Vector& point, Entity* player, int hbox)
 {
+	if (!player) return 0.f;
+
 	if constexpr (DEBUG_AIMBOT) L::Debug("CalculateHitchance");
 
 	auto weapon = G::LocalplayerWeapon;
@@ -230,11 +232,10 @@ void Aimbot::GetPlayers(std::vector<std::pair<int, float>>& values)
 {
 	if constexpr (DEBUG_AIMBOT) L::Debug("GetPlayers");
 
-	//update every .1 sec
-	static float LastTimeUpdate = I::globalvars->flCurrentTime;
-	if (fabsf(I::globalvars->flCurrentTime - LastTimeUpdate) < 0.1)
-		return;
-	LastTimeUpdate = I::globalvars->flCurrentTime;
+	//static float LastTimeUpdate = I::globalvars->flCurrentTime;
+	//if (fabsf(I::globalvars->flCurrentTime - LastTimeUpdate) < 0.02)
+	//	return;
+	//LastTimeUpdate = I::globalvars->flCurrentTime;
 
 	values.clear();
 	values.resize(0);
@@ -256,7 +257,7 @@ void Aimbot::GetPlayers(std::vector<std::pair<int, float>>& values)
 			continue;
 		if (a.second.Dormant)
 			continue;
-		if (!a.second.pEntity->IsPlayer()) continue;
+		/*if (!a.second.pEntity->IsPlayer()) continue;*/
 		values.push_back(std::pair(a.first, (100 - a.second.pEntity->GetHealth()) * 8 + 80000 / (a.second.pEntity->GetVecOrigin() - localorigin).Length2D()));
 	}
 
@@ -311,6 +312,9 @@ bool Aimbot::ScanPlayers()
 	// reset the max damage found
 	MaxDamage = 0.f;
 
+	// if no players, return false
+	if (this->players.empty()) return false;
+
 	// scan players
 	for (auto& a : this->players)
 	{
@@ -336,16 +340,22 @@ bool Aimbot::ScanPlayer(int UserID)
 
 	if (!(ent->GetHealth() > 0)) return false;
 
+	if constexpr (DEBUG_AIMBOT) L::Debug("IsDormant");
 	if (ent->IsDormant()) return false;
 
-	Model_t* model = ent->GetModel();
+	if constexpr (DEBUG_AIMBOT) L::Debug("GetModel");
+	const auto model = ent->GetModel();
 	if (!model) return false;
 
+	if constexpr (DEBUG_AIMBOT) L::Debug("GetStudioModel");
 	studiohdr_t* StudioModel = I::modelinfo->GetStudioModel(model);
 	if (!StudioModel) return false; //if cant get the model
 
 	// if bad setupbones
+	if constexpr (DEBUG_AIMBOT) L::Debug("SetupBones");
 	if (!ent->SetupBones(AimMatrix, 128, 0x100, ent->GetSimulationTime(), false)) return false;
+
+	if constexpr (DEBUG_AIMBOT) L::Debug("Scanning...");
 
 	// PRIORITY SCAN FIRST
 	if (!priority.empty())
@@ -740,6 +750,8 @@ void Aimbot::Run()
 
 void Aimbot::RenderStats()
 {
+	return;
+
 	if constexpr (DEBUG_AIMBOT) L::Debug("RenderStats");
 
 	/*if (!cfg->performance.ShowConsole) return;*/

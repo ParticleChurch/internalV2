@@ -308,7 +308,7 @@ public: // VIRTUALS
 	{
 		if (DEBUG_ENTITY) L::Debug("Model_t");
 		typedef Model_t* (__thiscall* oGetModel)(void*);
-		return GetVFunc<oGetModel>(this + 4, 8)(this + 4);
+		return GetVFunc<oGetModel>(this + sizeof(uintptr_t), 8)(this + sizeof(uintptr_t));
 	}
 	bool IsPlayer() {
 		if (DEBUG_ENTITY) L::Debug("IsPlayer");

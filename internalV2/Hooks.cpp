@@ -134,7 +134,7 @@ void H::Free()
 
 long __stdcall H::ResetHook(IDirect3DDevice9* device, D3DPRESENT_PARAMETERS* pPresentationParameters)
 {
-	if  (DEBUG_HOOKS) L::Debug("ResetHook");
+	//if  (DEBUG_HOOKS) L::Debug("ResetHook");
 
 	ImGui_ImplDX9_InvalidateDeviceObjects();
 	ImGui_ImplDX9_CreateDeviceObjects();
@@ -145,7 +145,7 @@ long __stdcall H::ResetHook(IDirect3DDevice9* device, D3DPRESENT_PARAMETERS* pPr
 
 void __stdcall H::LockCursorHook()
 {
-	if  (DEBUG_HOOKS) L::Debug("LockCursorHook");
+	if (DEBUG_HOOKS) L::Debug("LockCursorHook");
 
 	if (G::KillDLL)
 		return oLockCursor(I::surface);
@@ -159,7 +159,7 @@ void __stdcall H::LockCursorHook()
 
 long __stdcall H::EndSceneHook(IDirect3DDevice9* device)
 {
-	if  (DEBUG_HOOKS) L::Debug("EndSceneHook");
+	//if (DEBUG_HOOKS) L::Debug("EndSceneHook");
 
 	// init imgui
 	if (!D3dInit) {
@@ -283,15 +283,8 @@ void __stdcall H::FrameStageNotifyHook(int stage)
 
 	static int deadflagOffset = N::GetOffset("DT_BasePlayer", "deadflag");
 	if (stage == FRAME_RENDER_START) {
-		static QAngle ThirdpersonHoldAngle = G::EndAngle;
-		static int LastTickCount = 0;
-		// only update every new tick that we send a packet
-		if (LastTickCount != I::globalvars->iTickCount && *G::pSendpacket) {
-			LastTickCount = I::globalvars->iTickCount;
-			ThirdpersonHoldAngle = G::EndAngle;
-		}
 		if (cfg->Keybinds["Thirdperson"].boolean)
-			*(QAngle*)((DWORD)G::Localplayer + deadflagOffset + 4) = ThirdpersonHoldAngle;
+			*(QAngle*)((DWORD)G::Localplayer + deadflagOffset + 4) = G::EndAngle;
 	}
 
 	lagcomp->Run_FSN(stage);
@@ -326,7 +319,7 @@ bool __stdcall H::CreateMoveHook(float flInputSampleTime, CUserCmd* cmd)
 			LagVal++;
 		}
 
-		if (LagVal >= 10)
+		if (LagVal >= 5)
 		{
 			LagVal = 0;
 			bSendPacket = true;
@@ -341,14 +334,20 @@ bool __stdcall H::CreateMoveHook(float flInputSampleTime, CUserCmd* cmd)
 			cmd->iButtons &= ~IN_ATTACK2;
 			cmd->iButtons &= ~IN_ZOOM;
 		}
+
+		if (DEBUG_HOOKS) L::Debug("CM_Start");
 		// movmeent fix
 		movement->CM_Start(cmd, pSendPacket);
 
 		// movement
+		if (DEBUG_HOOKS) L::Debug("Bunnyhop");
 		movement->Bunnyhop();
+
+		if (DEBUG_HOOKS) L::Debug("AutoStrafe");
 		movement->AutoStrafe();
 
 		// movmeent fix
+		if (DEBUG_HOOKS) L::Debug("CM_MoveFixStart");
 		movement->CM_MoveFixStart();
 
 		// lol
@@ -356,16 +355,24 @@ bool __stdcall H::CreateMoveHook(float flInputSampleTime, CUserCmd* cmd)
 		{
 			G::cmd->angViewAngle.x = 89;
 			G::cmd->angViewAngle.y = G::StartAngle.y + 180.f;
+			// p100 legit aa
+			if (!bSendPacket)
+				G::cmd->angViewAngle.y += 30.f;
 		}
 
 		// offensive 
+		if (DEBUG_HOOKS) L::Debug("aimbot");
 		aimbot->Run();
+
+		if (DEBUG_HOOKS) L::Debug("backtrack");
 		backtrack->Run();
 
 		// movmeent fix
+		if (DEBUG_HOOKS) L::Debug("CM_MoveFixEnd");
 		movement->CM_MoveFixEnd();
 
 		// movmeent fix
+		if (DEBUG_HOOKS) L::Debug("CM_End");
 		movement->CM_End();
 	}
 
