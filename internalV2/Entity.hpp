@@ -34,7 +34,7 @@ public: // NETVARS
 	bool GetGunGameImmunity() {
 		if constexpr (DEBUG_ENTITY) L::Debug("GetGunGameImmunity");
 		static DWORD offset = N::GetOffset("DT_CSPlayer", "m_bGunGameImmunity");
-		return *(int*)((DWORD)this + offset);
+		return *(bool*)((DWORD)this + offset);
 	}
 	bool HasHelmet() {
 		if constexpr (DEBUG_ENTITY) L::Debug("HasHelmet");

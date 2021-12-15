@@ -21,27 +21,21 @@ void LagComp::Record::Update(Entity* ent)
 	this->Flags = ent->GetFlags();
 }
 
-void LagComp::Update(Entity* ent, int index)
+void LagComp::Update(Entity* ent, PlayerInfo_t* info)
 {
-	if constexpr (DEBUG_LAGCOMP) L::Debug(("Lagcomp Index: " + std::to_string(index)).c_str());
-	// Get info, otherwise don't even bother trying to update if not human
-	PlayerInfo_t info;
-	if (!I::engine->GetPlayerInfo(index, &info))
-		return;
+	if (!info->szName) return;
 
-	if (!info.szName) return;
-
-	if constexpr (DEBUG_LAGCOMP) L::Debug(("LagComp Update: " + (std::string)info.szName).c_str(), "\n");
+	if constexpr (DEBUG_LAGCOMP) L::Debug(("LagComp Update: " + (std::string)info->szName).c_str(), "\n");
 
 	// if player doesn't exist --> add it
-	if (PlayerList.find(info.nUserID) == PlayerList.end())
+	if (PlayerList.find(info->nUserID) == PlayerList.end())
 	{
 		LagComp::Player NewPlayer;
-		PlayerList.insert(std::pair(info.nUserID, NewPlayer));
+		PlayerList.insert(std::pair(info->nUserID, NewPlayer));
 	}
 
 	// Now we update the player
-	Player& player = PlayerList[info.nUserID];
+	Player& player = PlayerList[info->nUserID];
 
 	if constexpr (DEBUG_LAGCOMP) L::Debug("Getting basic info");
 
@@ -51,10 +45,10 @@ void LagComp::Update(Entity* ent, int index)
 	player.LifeState = ent->GetLifeState();
 	player.Health = ent->GetHealth();
 	player.Team = ent->GetTeam();
-	player.Index = index;
+	player.Index = ent->GetIndex();
 
 	if constexpr (DEBUG_LAGCOMP) L::Debug("copy name");
-	//std::memcpy(&player.Info, &info, sizeof(PlayerInfo_t));
+	std::memcpy(&player.Info, &info, sizeof(PlayerInfo_t));
 
 	// add record
 	LagComp::Record NewRec;
@@ -79,6 +73,17 @@ void LagComp::CleanUp()
 		return true;
 	};
 
+	auto CleanAndDeletePlayer = [](int userid) {
+		// return false if there is no records for that
+		if (lagcomp->PlayerList.find(userid) == lagcomp->PlayerList.end())
+			return false;
+		// otherwise clear records and erase the item, then return true
+		lagcomp->PlayerList[userid].records.clear();
+		lagcomp->PlayerList[userid].records.resize(0);
+		lagcomp->PlayerList.erase(lagcomp->PlayerList.find(userid)); // remove current item
+		return true;
+	};
+
 	PlayerInfo_t info;
 
 	// go through all the players + records, and make sure they are valid
@@ -86,11 +91,18 @@ void LagComp::CleanUp()
 	{
 		Player& player = item.second;
 
-		// remove all records if entity is nullptr
-		if (!player.pEntity) CleanAllRecords(item.first);
+		// remove player if entity is nullptr
+		if (!player.pEntity)
+		{
+			CleanAndDeletePlayer(item.first);
+			continue;
+		}
 
-		// remove all records if entity is no longer human
-		if (!I::engine->GetPlayerInfo(player.Index, &info)) CleanAllRecords(item.first);
+		// remove player if entity is no longer human
+		if (!I::engine->GetPlayerInfo(player.Index, &info)) {
+			CleanAndDeletePlayer(item.first);
+			continue;
+		}
 
 		// remove all records if entity is dormant
 		if (player.Dormant) CleanAllRecords(item.first);
@@ -101,13 +113,28 @@ void LagComp::CleanUp()
 		// remove all records if entitys health isn't greater than zero
 		if (!(player.Health > 0)) CleanAllRecords(item.first);
 
-		// remove all records if entity is on same team as localplayers
-		if (player.Team == G::LocalplayerTeam) CleanAllRecords(item.first);
+		// remove player if entity is on same team as localplayers
+		if (player.Team == G::LocalplayerTeam)
+		{
+			CleanAndDeletePlayer(item.first);
+			continue;
+		}
 
-		// remove all records if entity index is localplayers
-		if (player.Index == G::LocalplayerIndex) CleanAllRecords(item.first);
+		// remove player if entity index is localplayers
+		if (player.Index == G::LocalplayerIndex) {
+			CleanAndDeletePlayer(item.first);
 
-		// remove remaining bad records
+			continue;
+		}
+
+		// remove player if current (front) entity simulation time is super bad (aka > 1)
+		if (!player.records.empty() && fabsf(I::globalvars->flCurrentTime - player.records.front().SimulationTime) > 1) 
+		{
+			CleanAndDeletePlayer(item.first);
+			continue;
+		}
+
+		// remove bad RECORDS (not Player)
 		while (player.records.size() > 3
 			&& fabsf(I::globalvars->flCurrentTime - player.records.back().SimulationTime) > 1) {
 			player.records.pop_back();
@@ -150,15 +177,40 @@ void LagComp::Run_FSN(int stage)
 		ent = I::entitylist->GetClientEntity(i);
 		if (!ent) continue;
 
+		// entity player check
 		if (!ent->IsPlayer()) continue;
 
 		// just do enemies for now
 		if (ent->GetTeam() == G::LocalplayerTeam) continue;
 
+		// do another player check
+		PlayerInfo_t info;
+		if (!I::engine->GetPlayerInfo(i, &info))
+			return;
+
 		// Update based on info
-		Update(ent, i);
+		Update(ent, &info);
 	}
 
 	// Clean up records
 	CleanUp();
+}
+
+void LagComp::RenderStats()
+{
+	// go through all the players + records, and make sure they are valid
+	ImGui::Begin("Lagcomp Records");
+	if (!PlayerList.empty())
+	{
+		int i = 0;
+		for (auto& item : PlayerList)
+		{
+			i++;
+			Player& player = item.second;
+
+			std::string str = std::to_string(i) + ") UserID: " + std::to_string(item.first) /*+ " Name: " + player.Info.szName*/ + " Dormant: " + (player.Dormant ? "True" : "False") + " Health: " + std::to_string(player.Health);
+			ImGui::Text(str.c_str());
+		}
+	}
+	ImGui::End();
 }

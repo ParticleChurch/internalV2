@@ -506,6 +506,9 @@ void Menu::Render()
 			ImGui::EndPopup();
 		}
 
+		if (ImGui::Button("Connect to Big Steppa HVH"))
+			I::engine->ClientCmdUnrestricted("connect 74.91.124.24:27015");
+
 		ImGui::End();
 	}
 }

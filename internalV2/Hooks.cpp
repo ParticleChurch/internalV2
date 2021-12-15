@@ -182,6 +182,7 @@ long __stdcall H::EndSceneHook(IDirect3DDevice9* device)
 		menu->Render();
 
 		aimbot->RenderStats();
+		lagcomp->RenderStats();
 		
 		ImGui::EndFrame();
 		ImGui::Render();
@@ -356,13 +357,13 @@ bool __stdcall H::CreateMoveHook(float flInputSampleTime, CUserCmd* cmd)
 			G::cmd->angViewAngle.x = 89;
 			G::cmd->angViewAngle.y = G::StartAngle.y + 180.f;
 			// p100 legit aa
-			if (!bSendPacket)
-				G::cmd->angViewAngle.y += 30.f;
+			/*if (!bSendPacket)
+				G::cmd->angViewAngle.y += 30.f;*/
 		}
 
 		// offensive 
-		if (DEBUG_HOOKS) L::Debug("aimbot");
-		aimbot->Run();
+		/*if (DEBUG_HOOKS) L::Debug("aimbot");
+		aimbot->Run();*/
 
 		if (DEBUG_HOOKS) L::Debug("backtrack");
 		backtrack->Run();

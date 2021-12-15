@@ -251,7 +251,7 @@ void Aimbot::GetPlayers(std::vector<std::pair<int, float>>& values)
 			continue;
 		if (!a.second.pEntity)
 			continue;
-		if (!(a.second.pEntity->IsAlive() > 0))
+		if (!(a.second.pEntity->GetHealth() > 0))
 			continue;
 		if (!I::engine->GetPlayerInfo(a.second.Index, &info))
 			continue;
@@ -333,6 +333,7 @@ bool Aimbot::ScanPlayers()
 bool Aimbot::ScanPlayer(int UserID)
 {
 	if constexpr (DEBUG_AIMBOT) L::Debug(("ScanPlayer UserID:" + std::to_string(UserID)).c_str());
+	if constexpr (DEBUG_AIMBOT) L::Debug(("Name:" + std::string(lagcomp->PlayerList[UserID].Info.szName)).c_str());
 
 	Entity* ent = lagcomp->PlayerList[UserID].pEntity;
 
@@ -340,11 +341,19 @@ bool Aimbot::ScanPlayer(int UserID)
 
 	if (!(ent->GetHealth() > 0)) return false;
 
-	if constexpr (DEBUG_AIMBOT) L::Debug("IsDormant");
-	if (ent->IsDormant()) return false;
+	if (!ent->IsAlive()) return false;
+
+	if constexpr (DEBUG_AIMBOT) L::Debug("Info->szName");
+	if (!lagcomp->PlayerList[UserID].Info.szName) return false;
+
+	if constexpr (DEBUG_AIMBOT) L::Debug("lagcomp->IsDormant");
+	if (lagcomp->PlayerList[UserID].Dormant) return false;
+
+	//if constexpr (DEBUG_AIMBOT) L::Debug("IsDormant");
+	//if (ent->IsDormant()) return false;
 
 	if constexpr (DEBUG_AIMBOT) L::Debug("GetModel");
-	const auto model = ent->GetModel();
+	Model_t* model = ent->GetModel();
 	if (!model) return false;
 
 	if constexpr (DEBUG_AIMBOT) L::Debug("GetStudioModel");

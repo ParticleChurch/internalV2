@@ -36,7 +36,7 @@ public:
 
 private:
 	// Adds / updates player (NO REMOVALS, only updates
-	void Update(Entity* ent, int index);
+	void Update(Entity* ent, PlayerInfo_t* info);
 	// cleans up playerlist to remove crappy records / players
 	void CleanUp();
 public:
@@ -47,6 +47,7 @@ public:
 public:
 	std::map<int, Player> PlayerList;
 	void Run_FSN(int stage);
+	void RenderStats();
 };
 
 extern LagComp* lagcomp;
