@@ -4,6 +4,8 @@ void onInject()
     // seed random
     srand(static_cast <unsigned> (time(0)));
 
+    //playerradio deathcry Moan
+
     // initalizers
     L::Init();
     I::Init();

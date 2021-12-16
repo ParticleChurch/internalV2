@@ -17,6 +17,7 @@ namespace I
 	IConVar* convar = nullptr;
 	IVModelInfo* modelinfo = nullptr;
 	IInput* input = nullptr;
+	IVDebugOverlay* debugoverlay = nullptr;
 
 	void Init()
 	{
@@ -35,5 +36,6 @@ namespace I
 		convar = GetInterface<IConVar                >("vstdlib.dll", "VEngineCvar007");
 		modelinfo = GetInterface<IVModelInfo         >("engine.dll", "VModelInfoClient004");
 		input = *(IInput**)((*(DWORD**)client)[16] + 0x1);
+		debugoverlay = GetInterface<IVDebugOverlay      >("engine.dll", "VDebugOverlay004");
 	}
 }

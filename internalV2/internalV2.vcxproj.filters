@@ -52,6 +52,9 @@
     <Filter Include="Source Files\Valve\SDK">
       <UniqueIdentifier>{839b8519-ceee-4cf9-bb82-13ed75e6ee3e}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\Valve\Interfaces">
+      <UniqueIdentifier>{8710f647-6119-4e0d-9419-fb0a7e259d16}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dllmain.cpp">
@@ -122,6 +125,9 @@
     </ClCompile>
     <ClCompile Include="Hacks\Thirdperson.cpp">
       <Filter>Source Files\Hacks</Filter>
+    </ClCompile>
+    <ClCompile Include="Valve\Interfaces\IGlobalVars.cpp">
+      <Filter>Source Files\Valve\Interfaces</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -296,9 +302,6 @@
     <ClInclude Include="Valve\Interfaces\IPhysicsSurfaceProps.hpp">
       <Filter>Header Files\Valve\Interfaces</Filter>
     </ClInclude>
-    <ClInclude Include="Valve\Interfaces\IGlobalVars.hpp">
-      <Filter>Header Files\Valve\Interfaces</Filter>
-    </ClInclude>
     <ClInclude Include="Valve\SDK\ICollideable.hpp">
       <Filter>Header Files\Valve\SDK</Filter>
     </ClInclude>
@@ -357,6 +360,12 @@
       <Filter>Header Files\Hacks</Filter>
     </ClInclude>
     <ClInclude Include="Valve\Interfaces\IInput.hpp">
+      <Filter>Header Files\Valve\Interfaces</Filter>
+    </ClInclude>
+    <ClInclude Include="Valve\Interfaces\IGlobalVars.hpp">
+      <Filter>Header Files\Valve\Interfaces</Filter>
+    </ClInclude>
+    <ClInclude Include="Valve\Interfaces\IVDebugOverlay.hpp">
       <Filter>Header Files\Valve\Interfaces</Filter>
     </ClInclude>
   </ItemGroup>

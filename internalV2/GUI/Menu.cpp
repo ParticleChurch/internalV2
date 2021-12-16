@@ -231,152 +231,6 @@ void Menu::RenderESP()
 	}
 	ImGui::NextColumn();
 
-	ImGui::Text("Grenades");
-	ImGui::NextColumn();
-	C::Checkbox("##ESPGrenades", &cfg->esp.Grenade);
-	if (cfg->esp.Grenade)
-	{
-		ImGui::SameLine();
-		C::ColorPicker("Grenade Color", &cfg->esp.GrenadeColor);
-	}
-	ImGui::NextColumn();
-
-	ImGui::EndColumns(); // end columns
-
-	float pos2 = ImGui::GetCursorPosY();
-	propersize = pos2 - pos1 + 20.f;
-
-	ImGui::EndChild(); // end child
-}
-
-void Menu::RenderAimbot()
-{
-	static float propersize = 500.f;
-
-	ImGui::BeginChild("##AimbotArea", ImVec2(0, propersize), true);
-
-	float pos1 = ImGui::GetCursorPosY();
-
-	ImGui::Text("Aimbot");
-	ImGui::Separator();
-
-	ImGui::Columns(2, "##AimCols"); // 4-ways, with border
-
-	ImGui::Text("Enable");
-	ImGui::NextColumn();
-	{
-		int total_w = ImGui::GetContentRegionAvail().x;
-		ImGui::SetNextItemWidth(total_w);
-	}
-	C::HotKey(cfg->Keybinds["Aimbot"]);
-	ImGui::NextColumn();
-
-	ImGui::Text("Hitchance");
-	ImGui::NextColumn();
-	{
-		int total_w = ImGui::GetContentRegionAvail().x;
-		ImGui::SetNextItemWidth(total_w);
-	}
-	ImGui::SliderFloat("##AimHitchance", &cfg->aimbot.Hitchance, 0, 100);
-	ImGui::NextColumn();
-
-	ImGui::Text("MinDamage");
-	ImGui::NextColumn();
-	{
-		int total_w = ImGui::GetContentRegionAvail().x;
-		ImGui::SetNextItemWidth(total_w);
-	}
-	ImGui::SliderInt("##AimMinDamage", &cfg->aimbot.MinDamage, 1, 120);
-	ImGui::NextColumn();
-
-	static std::vector<std::string> priority_hitboxes =
-	{
-		"NONE",
-		"HEAD",
-		"NECK",
-		"PELVIS",
-		"STOMACH",
-		"LOWER_CHEST",
-		"CHEST",
-		"UPPER_CHEST",
-		"THIGH",
-		"CALF",
-		"FOOT",
-		"HAND",
-		"UPPER_ARM",
-		"FOREARM"
-	};
-
-	ImGui::Text("Pirority Hitbox");
-	ImGui::NextColumn();
-	{
-		int total_w = ImGui::GetContentRegionAvail().x;
-		ImGui::SetNextItemWidth(total_w);
-	}
-	ImGui::Combo("##AimPriority", &cfg->aimbot.Priority, priority_hitboxes);
-	ImGui::NextColumn();
-
-	ImGui::Text("Hitboxes");
-	ImGui::NextColumn();
-	{
-		int total_w = ImGui::GetContentRegionAvail().x;
-		ImGui::SetNextItemWidth(total_w);
-	}
-	static std::string preview = "";
-	static std::vector<std::string> hitboxes =
-	{
-		"HEAD",
-		"NECK",
-		"PELVIS",
-		"STOMACH",
-		"LOWER_CHEST",
-		"CHEST",
-		"UPPER_CHEST",
-		"THIGH",
-		"CALF",
-		"FOOT",
-		"HAND",
-		"UPPER_ARM",
-		"FOREARM"
-	};
-	if (ImGui::BeginCombo("##AimHitboxes", preview.c_str())) {
-		preview = "";
-		for (size_t i = 0; i < hitboxes.size(); i++) {
-			ImGui::Selectable(hitboxes[i].c_str(), &cfg->aimbot.Hitboxes[i], ImGuiSelectableFlags_::ImGuiSelectableFlags_DontClosePopups);
-			if (cfg->aimbot.Hitboxes[i])
-				preview += hitboxes[i] + ",";
-		}
-		ImGui::EndCombo();
-	}
-	ImGui::NextColumn();
-
-	ImGui::Text("Head Point Scale");
-	ImGui::NextColumn();
-	{
-		int total_w = ImGui::GetContentRegionAvail().x;
-		ImGui::SetNextItemWidth(total_w);
-	}
-	ImGui::SliderFloat("##AimHeadPointScale", &cfg->aimbot.HeadPointScale, 0, 100);
-	ImGui::NextColumn();
-
-	ImGui::Text("Body Point Scale");
-	ImGui::NextColumn();
-	{
-		int total_w = ImGui::GetContentRegionAvail().x;
-		ImGui::SetNextItemWidth(total_w);
-	}
-	ImGui::SliderFloat("##AimBodyPointScale", &cfg->aimbot.BodyPointScale, 0, 100);
-	ImGui::NextColumn();
-
-	ImGui::Text("Limb Point Scale");
-	ImGui::NextColumn();
-	{
-		int total_w = ImGui::GetContentRegionAvail().x;
-		ImGui::SetNextItemWidth(total_w);
-	}
-	ImGui::SliderFloat("##AimLimbPointScale", &cfg->aimbot.LimbPointScale, 0, 100);
-	ImGui::NextColumn();
-
 	ImGui::EndColumns(); // end columns
 
 	float pos2 = ImGui::GetCursorPosY();
@@ -462,10 +316,6 @@ void Menu::Render()
 
 		ImGui::Separator();
 
-		RenderAimbot();
-
-		ImGui::Separator();
-
 		ImGui::Text("Antiaim");
 		ImGui::SameLine();
 		ImGui::Checkbox("##AntiaimEnable", &cfg->aa.Enable);
@@ -475,6 +325,13 @@ void Menu::Render()
 		C::HotKey(cfg->Keybinds["Thirdperson"]);
 		ImGui::SameLine();
 		ImGui::SliderFloat("##VISThirdpersonDistance", &cfg->vis.ThirdPersonDistance, 50, 300);
+
+		ImGui::Separator();
+
+		ImGui::Text("Aimbot");
+		ImGui::NextColumn();
+		C::HotKey(cfg->Keybinds["Aimbot"]);
+		ImGui::NextColumn();
 
 		ImGui::Separator();
 

@@ -181,8 +181,8 @@ long __stdcall H::EndSceneHook(IDirect3DDevice9* device)
 
 		menu->Render();
 
-		aimbot->RenderStats();
-		lagcomp->RenderStats();
+		/*aimbot->RenderStats();
+		lagcomp->RenderStats();*/
 		
 		ImGui::EndFrame();
 		ImGui::Render();
@@ -312,7 +312,8 @@ bool __stdcall H::CreateMoveHook(float flInputSampleTime, CUserCmd* cmd)
 		bool* pSendPacket = (bool*)(*(DWORD*)pebp - 0x1C);
 		bool& bSendPacket = *pSendPacket;
 
-		static int LagVal = 0;
+		bSendPacket = true;
+		/*static int LagVal = 0;
 		static int LastTickCount = I::globalvars->iTickCount;
 		if (LastTickCount != I::globalvars->iTickCount)
 		{
@@ -326,7 +327,7 @@ bool __stdcall H::CreateMoveHook(float flInputSampleTime, CUserCmd* cmd)
 			bSendPacket = true;
 		}
 		else
-			bSendPacket = false;
+			bSendPacket = false;*/
 
 		// Menu fix
 		if (G::MenuOpen && (cmd->iButtons & IN_ATTACK | IN_ATTACK2 | IN_ZOOM))
@@ -362,11 +363,11 @@ bool __stdcall H::CreateMoveHook(float flInputSampleTime, CUserCmd* cmd)
 		}
 
 		// offensive 
-		/*if (DEBUG_HOOKS) L::Debug("aimbot");
-		aimbot->Run();*/
-
 		if (DEBUG_HOOKS) L::Debug("backtrack");
 		backtrack->Run();
+
+		if (DEBUG_HOOKS) L::Debug("aimbot");
+		aimbot->Run();
 
 		// movmeent fix
 		if (DEBUG_HOOKS) L::Debug("CM_MoveFixEnd");
@@ -385,11 +386,32 @@ void __stdcall H::PaintTraverseHook(int vguiID, bool force, bool allowForcing)
 	if  (DEBUG_HOOKS) L::Debug("PaintTraverseHook");
 
 	// noscope
-	if (strcmp("HudZoom", I::panel->GetName(vguiID)) == 0 && true && G::LocalplayerAlive)
-		return;
+	/*if (strcmp("HudZoom", I::panel->GetName(vguiID)) == 0 && false && G::LocalplayerAlive)
+		return;*/
 
 	oPaintTraverse(I::panel, vguiID, force, allowForcing);
 	if (I::panel && strcmp(I::panel->GetName(vguiID), "MatSystemTopPanel") == 0) {
+		static DWORD FONT = I::surface->FontCreate();
+		static bool Once = true;
+		if (Once)
+		{
+			Once = false;
+			I::surface->SetFontGlyphSet(FONT, "Verdana", 16, 1, 0, 0, FONTFLAG_DROPSHADOW);// FONTFLAG_ANTIALIAS | FONTFLAG_OUTLINE);
+		}
+
+		static float framerate;
+		framerate = 0.9f * framerate + (1.0f - 0.9f) * I::globalvars->flAbsFrameTime;
+		if (framerate <= 0.0f)
+			framerate = 1.0f;
+
+		std::string TEXT = "FPS: " + std::to_string(1.f / framerate);
+		static std::wstring wide_string;
+		wide_string = std::wstring(TEXT.begin(), TEXT.end());
+
+		I::surface->DrawSetTextFont(FONT);
+		I::surface->DrawSetTextColor(Color(0, 255, 0, 255));
+		I::surface->DrawSetTextPos(10, 10);
+		I::surface->DrawPrintText(wide_string.c_str(), wcslen(wide_string.c_str()));
 
 		if (!G::Localplayer || !I::engine->IsInGame())
 			return;

@@ -13,3 +13,4 @@
 #include "Convar.hpp"
 #include "IVModelInfo.hpp"
 #include "IInput.hpp"
+#include "IVDebugOverlay.hpp"

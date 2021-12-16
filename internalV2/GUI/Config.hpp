@@ -22,15 +22,15 @@ namespace CFG
 		int MaxHops = 0;	// zero means infinite
 
 		// autostrafe
-		bool Autostrafe = true;
+		bool Autostrafe = false;
 		float AngSacrifice = 10.f;
 		float StrafeAng = 5.f;
 	};
 
 	struct Offense
 	{
-		bool Backtrack = false;
-		float BacktrackTime = 0.f;
+		bool Backtrack = true;
+		float BacktrackTime = 200.f;
 	};
 
 	struct ESP
@@ -43,20 +43,6 @@ namespace CFG
 		bool Health = true;
 		bool Weapon = true;
 		Color WeaponColor = Color();
-		bool Grenade = false;
-		Color GrenadeColor = Color();
-	};
-
-	struct Aimbot
-	{
-		//KeyBoundBool Enable = { 0,0,"Enable Aimbot", false };
-		float Hitchance = 0.f;
-		int MinDamage = 1;
-		int Priority = 0; // 0 is none
-		bool Hitboxes[13] = { false, false, false, false, false, false, false, false, false, false, false, false, false };
-		float HeadPointScale = 0.f;
-		float BodyPointScale = 0.f;
-		float LimbPointScale = 0.f;
 	};
 
 	struct Visuals {
@@ -70,7 +56,7 @@ namespace CFG
 	};
 
 	struct Antiaim {
-		bool Enable = true;
+		bool Enable = false;
 	};
 }
 
@@ -82,7 +68,6 @@ public:
 	CFG::Movement movement;
 	CFG::Offense offense;
 	CFG::ESP esp;
-	CFG::Aimbot aimbot;
 	CFG::Performance performance;
 	CFG::Visuals vis;
 	CFG::Antiaim aa;

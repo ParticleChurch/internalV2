@@ -184,6 +184,7 @@
     <ClCompile Include="Interfaces.cpp" />
     <ClCompile Include="Netvars.cpp" />
     <ClCompile Include="Utils\Logger.cpp" />
+    <ClCompile Include="Valve\Interfaces\IGlobalVars.cpp" />
     <ClCompile Include="Valve\SDK\Vector.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -230,6 +231,7 @@
     <ClInclude Include="Valve\Interfaces\Interfaces.hpp" />
     <ClInclude Include="Valve\Interfaces\IPhysicsSurfaceProps.hpp" />
     <ClInclude Include="Valve\Interfaces\ISurface.hpp" />
+    <ClInclude Include="Valve\Interfaces\IVDebugOverlay.hpp" />
     <ClInclude Include="Valve\Interfaces\IVModelInfo.hpp" />
     <ClInclude Include="Valve\Interfaces\IVPanel.hpp" />
     <ClInclude Include="Valve\Interfaces\IWeaponSystem.hpp" />

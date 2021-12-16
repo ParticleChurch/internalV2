@@ -19,7 +19,7 @@ public:
 	/* simulates fire bullet to penetrate up to 4 walls, return true when hitting player */
 	static bool SimulateFireBullet(Entity* pLocal, Entity* pWeapon, FireBulletData_t& data);
 
-private:
+public:
 	// Main
 	static void ClipTraceToPlayers(const Vector& vecAbsStart, const Vector& vecAbsEnd, const unsigned int fMask, ITraceFilter* pFilter, Trace_t* pTrace, const float flMinRange = 0.0f);
 	static bool TraceToExit(Trace_t& enterTrace, Trace_t& exitTrace, const Vector& vecPosition, const Vector& vecDirection, const Entity* pClipPlayer);

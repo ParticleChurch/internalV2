@@ -19,6 +19,8 @@ public:
 	bool		    bRemoteClient;				//0x35
 	int				iTimestampNetworkingBase;	//0x36
 	int				iTimestampRandomizeWindow;	//0x3A
+
+	float ServerTime(CUserCmd* = nullptr) noexcept;
 }; // Size: 0x3E
 
 class IGlobalVars : public IGlobalVarsBase

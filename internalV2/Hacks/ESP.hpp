@@ -10,7 +10,6 @@ private:
 	void DrawSkeleton(Entity*, int userid);
 	void DrawHealth(int health, int userid);
 	void DrawWeapon(Entity*, int userid);
-	void DrawProjectiles(Entity* e);
 
 public:
 	std::map<int, float> Dormant;

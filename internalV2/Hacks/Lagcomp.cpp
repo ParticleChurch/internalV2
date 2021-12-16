@@ -2,14 +2,94 @@
 
 LagComp* lagcomp = new LagComp();
 
-#define DEBUG_LAGCOMP false 
+#define DEBUG_LAGCOMP true 
 
 void LagComp::Record::Update(Entity* ent)
 {
 	// STUPID BUG FUCK IT IMMA JUST FORCE: spec_replay_autostart 0 <-- force no death cam
 	if constexpr (DEBUG_LAGCOMP) L::Debug("SETUP BONES");
-	if (ent->SetupBones(this->Matrix, MAXSTUDIOBONES, 0x100, 0, false))
+	if (ent->SetupBones(this->Matrix, MAXSTUDIOBONES, 0x100, 0, true))
+	{
 		this->HeadPos = Vector(this->Matrix[8][0][3], this->Matrix[8][1][3], this->Matrix[8][2][3]);
+
+		Model_t* model = ent->GetModel();
+		if (model) {
+			studiohdr_t* StudioModel = I::modelinfo->GetStudioModel(model);
+			if (StudioModel) {
+				this->bones.Valid = true;
+
+				static std::vector< EHitboxIndex> hitboxes = { HITBOX_HEAD, HITBOX_PELVIS, HITBOX_STOMACH, HITBOX_UPPER_CHEST };
+
+				for (auto& HITBOX : hitboxes)
+				{
+					mstudiobbox_t* StudioBox = StudioModel->GetHitboxSet(0)->GetHitbox(HITBOX_HEAD);
+					if (!StudioBox) continue;
+
+					Vector min = StudioBox->vecBBMin.Transform(this->Matrix[StudioBox->iBone]);
+					Vector max = StudioBox->vecBBMax.Transform(this->Matrix[StudioBox->iBone]);
+
+					Vector point = (min + max) / 2.f;
+
+					// special p100 multipoint
+					if (HITBOX == HITBOX_HEAD)
+					{
+						// go for upper echelons of hittin head
+						point = min.z > max.z ? min : max;
+
+						// arbitrary switch statement
+						switch (G::cmd->iTickCount % 2)
+						{
+						case 0: // target top left
+							point = ent->GetTopLeft(point, 0.45f, G::Localplayer);
+							break;
+						case 1: // target top right
+							point = ent->GetTopRight(point, 0.45f, G::Localplayer);
+							break;
+						}
+					}
+					// lame multipoint
+					else
+					{
+						switch (G::cmd->iTickCount % 2)
+						{
+						case 0: // target left
+							point = ent->GetLeft(point, 0.7f, G::Localplayer);
+							break;
+						case 1: // target right
+							point = ent->GetRight(point, 0.7f, G::Localplayer);
+							break;
+						}
+					}
+
+					// assign the points
+					switch (HITBOX)
+					{
+					case HITBOX_HEAD:
+						this->bones.Head = point;
+						break;
+					case HITBOX_PELVIS:
+						this->bones.Pelvis = point;
+						break;
+					case HITBOX_STOMACH:
+						this->bones.Stomach = point;
+						break;
+					case HITBOX_UPPER_CHEST:
+						this->bones.Chest = point;
+						break;
+					default:
+						break;
+					}
+				}
+			}
+			else
+				this->bones.Valid = false;
+		}
+		else
+			this->bones.Valid = false;
+	}
+	else
+		this->bones.Valid = false;
+		
 
 	if constexpr (DEBUG_LAGCOMP) L::Debug("GetVecOrigin");
 	this->Origin = ent->GetVecOrigin();
@@ -136,7 +216,7 @@ void LagComp::CleanUp()
 
 		// remove bad RECORDS (not Player)
 		while (player.records.size() > 3
-			&& fabsf(I::globalvars->flCurrentTime - player.records.back().SimulationTime) > 1) {
+			&& fabsf(I::globalvars->flCurrentTime - player.records.back().SimulationTime) > 0.2f) {
 			player.records.pop_back();
 		}
 	}

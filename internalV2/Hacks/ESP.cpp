@@ -251,91 +251,6 @@ void ESP::DrawWeapon(Entity* entity, int userid)
 	I::surface->DrawPrintText(wide_string.c_str(), wcslen(wide_string.c_str()));
 }
 
-void ESP::DrawProjectiles(Entity* entity)
-{
-	if (!cfg->esp.Grenade) return;
-
-	// velocity check
-	if (entity->GetVecVelocity().Length() < 4) return;
-
-	static DWORD FONT = I::surface->FontCreate();
-	static bool Once = true;
-	if (Once)
-	{
-		Once = false;
-		I::surface->SetFontGlyphSet(FONT, "Verdana", 12, 1, 0, 0, FONTFLAG_DROPSHADOW);// FONTFLAG_ANTIALIAS | FONTFLAG_OUTLINE);
-	}
-
-	auto client_class = entity->GetClientClass();
-
-	if (!client_class)
-		return;
-
-	auto model = entity->GetModel();
-
-	if (!model)
-		return;
-
-	auto studio_model = I::modelinfo->GetStudioModel(model);
-
-	if (!studio_model)
-		return;
-
-	auto name = (std::string)studio_model->szName;
-
-	if (name.find("dropped") != std::string::npos ||
-		client_class->nClassID == EClassIndex::CBaseCSGrenadeProjectile || client_class->nClassID == EClassIndex::CDecoyProjectile || client_class->nClassID == EClassIndex::CMolotovProjectile)
-	{
-
-		auto grenade_origin = entity->GetAbsOrigin();
-		auto grenade_position = Vector(0, 0, 0);
-
-		if (!WorldToScreen(grenade_origin, grenade_position))
-			return;
-
-		std::string grenade_name;
-
-		if (name.find("flashbang") != std::string::npos)
-		{
-			grenade_name = "FLASHBANG";
-		}
-		else if (name.find("smokegrenade") != std::string::npos)
-		{
-			grenade_name = "SMOKE";
-		}
-		else if (name.find("incendiarygrenade") != std::string::npos)
-		{
-			grenade_name = "INCENDIARY";
-		}
-		else if (name.find("molotov") != std::string::npos)
-		{
-			grenade_name = "MOLOTOV";
-		}
-		else if (name.find("fraggrenade") != std::string::npos)
-		{
-			grenade_name = "HE GRENADE";
-		}
-		else if (name.find("decoy") != std::string::npos)
-		{
-			grenade_name = "DECOY";
-		}
-		else
-			return;
-
-		static std::wstring wide_string;
-		wide_string = std::wstring(grenade_name.begin(), grenade_name.end());
-
-		//vgui_spew_fonts TYPE THAT IN CONSOLE TO GET ALL FONTS
-		I::surface->DrawSetTextFont(FONT);
-		Color clr = cfg->esp.GrenadeColor;
-		clr.color[3] = 255;
-		I::surface->DrawSetTextColor(clr);
-		I::surface->DrawSetTextPos(grenade_position.x, grenade_position.y);
-		I::surface->DrawPrintText(wide_string.c_str(), wcslen(wide_string.c_str()));
-
-	}
-}
-
 void ESP::RunPaintTraverse()
 {
 	if (!cfg->esp.Enable)
@@ -424,7 +339,7 @@ void ESP::RunPaintTraverse()
 
 			break;
 		default:
-			DrawProjectiles(e);
+			//DrawProjectiles(e);
 
 			break;
 		}

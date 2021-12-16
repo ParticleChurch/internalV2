@@ -26,6 +26,7 @@ namespace I
 	extern IConVar* convar;
 	extern IVModelInfo* modelinfo;
 	extern IInput* input;
+	extern IVDebugOverlay* debugoverlay;
 
 	// func
 	typedef void* (*InterfaceCreator)(const char*, int);

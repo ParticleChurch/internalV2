@@ -1,4 +1,13 @@
 #pragma once
+struct BoneStruct
+{
+	bool Valid = false;
+	Vector Head;
+	Vector Pelvis;
+	Vector Stomach;
+	Vector Chest;
+};
+
 class LagComp
 {
 public:
@@ -9,6 +18,7 @@ public:
 	{
 		Entity* pEntity; // parent entity
 		matrix3x4_t Matrix[MAXSTUDIOBONES];
+		BoneStruct bones;
 		Vector Origin;
 		Vector HeadPos;
 		float SimulationTime;
