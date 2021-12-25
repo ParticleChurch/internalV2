@@ -179,7 +179,16 @@ long __stdcall H::EndSceneHook(IDirect3DDevice9* device)
 		ImGui_ImplWin32_NewFrame();
 		ImGui::NewFrame();
 
+		if (menu->ConsoleWindow)
+		{
+			ImGui::Begin("Console");
+			for (auto& a : H::console)
+				ImGui::Text(a.c_str());
+			ImGui::End();
+		}
+
 		menu->Render();
+
 
 		/*aimbot->RenderStats();
 		lagcomp->RenderStats();*/
@@ -381,6 +390,10 @@ bool __stdcall H::CreateMoveHook(float flInputSampleTime, CUserCmd* cmd)
 	return false; //silent aim on false (only for client)
 }
 
+Vector ExtrapolateTick2(Vector p0, Vector v0, int ticks = 1) {
+	return p0 + (v0 * I::globalvars->flIntervalPerTick * ticks);
+}
+
 void __stdcall H::PaintTraverseHook(int vguiID, bool force, bool allowForcing)
 {
 	if  (DEBUG_HOOKS) L::Debug("PaintTraverseHook");
@@ -415,6 +428,15 @@ void __stdcall H::PaintTraverseHook(int vguiID, bool force, bool allowForcing)
 
 		if (!G::Localplayer || !I::engine->IsInGame())
 			return;
+
+		/*Vector origin = G::Localplayer->GetVecOrigin();
+		Vector nextPos = ExtrapolateTick2(origin, G::Localplayer->GetVecVelocity(), H::slider);
+		Vector screen1, screen2;
+		if (WorldToScreen(nextPos, screen1) && WorldToScreen(origin, screen2))
+		{
+			I::surface->DrawSetColor(Color(255,255,255,255));
+			I::surface->DrawLine(screen1.x, screen1.y, screen2.x, screen2.y);
+		}*/
 
 		esp->RunPaintTraverse();
 	}

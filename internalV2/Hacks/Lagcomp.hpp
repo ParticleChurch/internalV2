@@ -49,6 +49,13 @@ private:
 	void Update(Entity* ent, PlayerInfo_t* info);
 	// cleans up playerlist to remove crappy records / players
 	void CleanUp();
+	// Deal with lagging...
+	Vector oAbsOrigin;
+	int* render;
+	int backup;
+	void Backup(Entity* ent);
+	void Restore(Entity* ent);
+	void Extrapolate(Entity* ent);
 public:
 	// clears/removes all records (basically if spectating)
 	void ClearRecords();

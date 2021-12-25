@@ -2,10 +2,9 @@
 class Menu
 {
 private:
-	bool ConsoleWindow = true;
-
 	void RenderESP();
 public:
+	bool ConsoleWindow = true;
 	void Render();
 };
 

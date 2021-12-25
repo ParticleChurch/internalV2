@@ -287,9 +287,17 @@ public: // NETVARS
 		return *(char*)((DWORD)this + offset);
 	}
 	// float
-	float GetSimulationTime() {
+	float& GetSimulationTime() {
 		if constexpr (DEBUG_ENTITY) L::Debug("GetSimulationTime");
 		static DWORD offset = N::GetOffset("DT_BaseAnimating", "m_flSimulationTime");
+		return *(float*)((DWORD)this + offset);
+	}
+	float& GetOldSimulationTime()
+	{
+		if constexpr (DEBUG_ENTITY) L::Debug("GetOldSimulationTime");
+		static DWORD offset = N::GetOffset("DT_BaseAnimating", "m_flSimulationTime") + 4;
+		if (!offset)
+			return GetSimulationTime();
 		return *(float*)((DWORD)this + offset);
 	}
 	float GetNextAttack() {
@@ -486,6 +494,10 @@ public: // VIRTUALS
 		return CallVFunc<float>(this, 483);
 	}
 public: // OTHERS
+	Entity* GetObserverTarget() {
+		if (DEBUG_ENTITY) L::Debug("GetActiveWeapon");
+		return I::entitylist->GetClientEntityFromHandle(m_hObserverTarget());
+	}
 	Entity* GetActiveWeapon() {
 		if (DEBUG_ENTITY) L::Debug("GetActiveWeapon");
 		static DWORD offset = N::GetOffset("DT_BasePlayer", "m_hActiveWeapon");

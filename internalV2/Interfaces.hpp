@@ -55,6 +55,7 @@ namespace I
 		register_list = **reinterpret_cast<InterfaceReg***>(jump_target + 6);
 
 		for (InterfaceReg* cur = register_list; cur; cur = cur->m_pNext) {
+			//L::Debug((std::string(mod_name) + std::string(" ") + cur->m_pName).c_str());
 			if (exact == true) {
 				if (strcmp(cur->m_pName, interface_name) == 0)
 					iface = reinterpret_cast<T*>(cur->m_CreateFn());

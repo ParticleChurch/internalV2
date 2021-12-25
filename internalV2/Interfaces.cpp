@@ -37,5 +37,6 @@ namespace I
 		modelinfo = GetInterface<IVModelInfo         >("engine.dll", "VModelInfoClient004");
 		input = *(IInput**)((*(DWORD**)client)[16] + 0x1);
 		debugoverlay = GetInterface<IVDebugOverlay      >("engine.dll", "VDebugOverlay004");
+		//bool sample = GetInterface2<bool>("materialsystem.dll", "CCommonHostState", true);
 	}
 }

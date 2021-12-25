@@ -239,16 +239,77 @@ void Menu::RenderESP()
 	ImGui::EndChild(); // end child
 }
 
+std::vector<std::string> GetSpectators()
+{
+	// If no localplayer or not in game, dont bother...
+	if (!I::engine->IsInGame()) return std::vector<std::string>();
+	if (!G::Localplayer) return std::vector<std::string>();
+
+	Entity* Player = G::Localplayer;
+	if (!G::Localplayer->IsAlive())
+	{
+		// if not observing crap, return nothing
+		Entity* ObserverTarget = Player->GetObserverTarget();
+		if (!ObserverTarget)
+		{
+			return std::vector<std::string>();
+		}
+
+		// set to person we are observing
+		Player = ObserverTarget;
+	}
+
+	// Get people :D
+	int spectators = 0;
+	std::vector<std::string> SpecList = {};
+
+	for (int i = 1; i <= I::globalvars->nMaxClients; i++) {
+		Entity* ent = I::entitylist->GetClientEntity(i);
+
+		if (!ent)
+			continue;
+
+		PlayerInfo_t info;
+
+		if (!I::engine->GetPlayerInfo(i, &info))
+			continue;
+
+		Entity* SpecatedPlayer = ent->GetObserverTarget();
+
+		if (!SpecatedPlayer)
+			continue;
+
+		// if the spectated player isn't the localplayer, don't bother
+		if (SpecatedPlayer != G::Localplayer)
+			continue;
+
+		if (ent->IsAlive() || ent->IsDormant())
+			continue;
+
+		PlayerInfo_t spectated_player_info;
+
+		if (!I::engine->GetPlayerInfo(SpecatedPlayer->GetIndex(), &spectated_player_info))
+			continue;
+
+		SpecList.push_back(info.szName);
+		spectators++;
+	}
+
+	return SpecList;
+}
+
 void Menu::Render()
 {
 	cfg->HandleKeybinds();
 
-	if (ConsoleWindow)
+	static float oldTime = I::globalvars->flCurrentTime;
+	if (fabsf(I::globalvars->flCurrentTime - oldTime) > 1)
 	{
-		ImGui::Begin("Console");
-		for (auto& a : H::console)
-			ImGui::Text(a.c_str());
-		ImGui::End();
+		oldTime = I::globalvars->flCurrentTime;
+		H::console.clear();
+		H::console.resize(0);
+		for (auto a : GetSpectators())
+			H::console.push_back(a);
 	}
 
 	if (G::MenuOpen)
