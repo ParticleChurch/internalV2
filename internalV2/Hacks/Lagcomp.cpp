@@ -4,6 +4,69 @@ LagComp* lagcomp = new LagComp();
 
 #define DEBUG_LAGCOMP true 
 
+void LagComp::Record::Extrapolate(Entity* ent)
+{
+	return; // for now we wont care because its causing issues
+
+	float velocity = ent->GetVecVelocity().Length2D();
+	if (velocity > 3)
+		return;
+
+	// tick delta (you can predict forward 3-4 ticks and hit them still lol)
+	int tick_delta = abs(TimeToTicks(ent->GetSimulationTime() - ent->GetOldSimulationTime()));
+
+	// if shit tick delta
+	if (tick_delta > 15 && tick_delta < 2)
+		return;
+
+	// change the simulated time to corrected one
+	this->SimulationTime += tick_delta * I::globalvars->flIntervalPerTick;
+
+	// Move the position for all of the bones...
+	this->HeadPos = Calc::ExtrapolateTick(this->HeadPos, this->Velocity, tick_delta);
+	for (auto a : this->bones)
+	{
+		a.vecBBMin = Calc::ExtrapolateTick(a.vecBBMin, this->Velocity, tick_delta);
+		a.vecBBMax = Calc::ExtrapolateTick(a.vecBBMax, this->Velocity, tick_delta);
+	}
+
+	if constexpr (DEBUG_LAGCOMP) L::Debug("Model Check");
+	Model_t* model = ent->GetModel();
+	if (!model)
+		return;
+
+	if constexpr (DEBUG_LAGCOMP) L::Debug("StudioModel Check");
+	studiohdr_t* StudioModel = I::modelinfo->GetStudioModel(model);
+	if (!StudioModel)
+		return;
+
+	// IDK Y I HAV TO PUT THIS HERE BUT IF I DONT IT SOMETIMES JUST CRASHES. FML
+	if (I::globalvars->flCurrentTime < 10.f)
+		return;
+
+	if constexpr (DEBUG_LAGCOMP) L::Debug("move bone positions");
+	for (int i = 0; i < StudioModel->nBones; i++)
+	{
+		if constexpr (DEBUG_LAGCOMP) L::Debug(std::to_string(i).c_str());
+		mstudiobone_t* Bone = StudioModel->GetBone(i);
+		if (!Bone /*|| !(Bone->iFlags & 256) || Bone->iParent == -1*/)
+			continue;
+
+		if (i >= MAXSTUDIOBONES) continue;
+
+		// get current bone position
+		Vector Pos = Vector(this->Matrix[i][0][3], this->Matrix[i][1][3], this->Matrix[i][2][3]);
+
+		// get predicted bone position
+		Vector NextPos = Calc::ExtrapolateTick(Pos, this->Velocity, tick_delta);
+
+		// set the values
+		this->Matrix[i].arrData[0][3] = NextPos.x;
+		this->Matrix[i].arrData[1][3] = NextPos.y;
+		this->Matrix[i].arrData[2][3] = NextPos.z;
+	}
+}
+
 void LagComp::Record::Update(Entity* ent)
 {
 	if constexpr (DEBUG_LAGCOMP) L::Debug("SETUP BONES");
@@ -16,79 +79,44 @@ void LagComp::Record::Update(Entity* ent)
 		if (model) {
 			studiohdr_t* StudioModel = I::modelinfo->GetStudioModel(model);
 			if (StudioModel) {
-				this->bones.Valid = true;
+				this->ValidBones = true;
 
-				static std::vector< EHitboxIndex> hitboxes = { HITBOX_HEAD, HITBOX_PELVIS, HITBOX_STOMACH, HITBOX_UPPER_CHEST };
+				static std::vector< int> hitboxes = { 
+					HITBOX_HEAD,
+					HITBOX_NECK,
+					HITBOX_PELVIS,
+					HITBOX_STOMACH,
+					HITBOX_THORAX,
+					HITBOX_CHEST,
+					HITBOX_UPPER_CHEST,
+					HITBOX_RIGHT_THIGH,
+					HITBOX_LEFT_THIGH,
+					HITBOX_RIGHT_CALF,
+					HITBOX_LEFT_CALF,
+					HITBOX_RIGHT_FOOT,
+					HITBOX_LEFT_FOOT,
+					HITBOX_RIGHT_HAND,
+					HITBOX_LEFT_HAND,
+					HITBOX_RIGHT_UPPER_ARM,
+					HITBOX_RIGHT_FOREARM,
+					HITBOX_LEFT_UPPER_ARM,
+					HITBOX_LEFT_FOREARM,
+				};
 
-				for (auto& HITBOX : hitboxes)
+				for (auto HITBOX : hitboxes)
 				{
-					mstudiobbox_t* StudioBox = StudioModel->GetHitboxSet(0)->GetHitbox(HITBOX_HEAD);
-					if (!StudioBox) continue;
-
-					Vector min = StudioBox->vecBBMin.Transform(this->Matrix[StudioBox->iBone]);
-					Vector max = StudioBox->vecBBMax.Transform(this->Matrix[StudioBox->iBone]);
-
-					Vector point = (min + max) / 2.f;
-
-					// special p100 multipoint
-					if (HITBOX == HITBOX_HEAD)
-					{
-						// go for upper echelons of hittin head
-						point = min.z > max.z ? min : max;
-
-						// arbitrary switch statement
-						switch (G::cmd->iTickCount % 2)
-						{
-						case 0: // target top left
-							point = ent->GetTopLeft(point, 0.45f, G::Localplayer);
-							break;
-						case 1: // target top right
-							point = ent->GetTopRight(point, 0.45f, G::Localplayer);
-							break;
-						}
-					}
-					// lame multipoint
-					else
-					{
-						switch (G::cmd->iTickCount % 2)
-						{
-						case 0: // target left
-							point = ent->GetLeft(point, 0.7f, G::Localplayer);
-							break;
-						case 1: // target right
-							point = ent->GetRight(point, 0.7f, G::Localplayer);
-							break;
-						}
-					}
-
-					// assign the points
-					switch (HITBOX)
-					{
-					case HITBOX_HEAD:
-						this->bones.Head = point;
-						break;
-					case HITBOX_PELVIS:
-						this->bones.Pelvis = point;
-						break;
-					case HITBOX_STOMACH:
-						this->bones.Stomach = point;
-						break;
-					case HITBOX_UPPER_CHEST:
-						this->bones.Chest = point;
-						break;
-					default:
-						break;
-					}
+					mstudiobbox_t* StudioBox = StudioModel->GetHitboxSet(0)->GetHitbox(HITBOX);
+					if (StudioBox) std::memcpy(&this->bones[HITBOX], StudioBox, sizeof(mstudiobbox_t));
 				}
 			}
 			else
-				this->bones.Valid = false;
+				this->ValidBones = false;
 		}
 		else
-			this->bones.Valid = false;
+			this->ValidBones = false;
 	}
 	else
-		this->bones.Valid = false;
+		this->ValidBones = false;
 		
 
 	if constexpr (DEBUG_LAGCOMP) L::Debug("GetVecOrigin");
@@ -99,6 +127,8 @@ void LagComp::Record::Update(Entity* ent)
 	this->Velocity = ent->GetVecVelocity();
 	if constexpr (DEBUG_LAGCOMP) L::Debug("GetVecVelocity");
 	this->Flags = ent->GetFlags();
+	if constexpr (DEBUG_LAGCOMP) L::Debug("Extrapolate");
+	this->Extrapolate(ent);
 }
 
 void LagComp::Update(Entity* ent, PlayerInfo_t* info)
@@ -129,12 +159,6 @@ void LagComp::Update(Entity* ent, PlayerInfo_t* info)
 
 	if constexpr (DEBUG_LAGCOMP) L::Debug("copy name");
 	std::memcpy(&player.Info, &info, sizeof(PlayerInfo_t));
-
-	// back up the entity position
-	Backup(ent);
-
-	// extrapolate if needed
-	Extrapolate(ent);
 
 	// add record
 	LagComp::Record NewRec;
@@ -228,50 +252,6 @@ void LagComp::CleanUp()
 	}
 }
 
-void LagComp::Backup(Entity* ent)
-{
-	render = reinterpret_cast<int*>(ent + 0x274);
-	this->backup = *render;
-
-	this->oAbsOrigin = ent->GetAbsOrigin();
-
-	*render = 0;
-}
-
-void LagComp::Restore(Entity* ent)
-{
-	ent->SetAbsOrigin(this->oAbsOrigin);
-
-	*render = this->backup;
-
-}
-
-Vector ExtrapolateTick(Vector p0, Vector v0, int ticks = 1) {
-	return p0 + (v0 * I::globalvars->flIntervalPerTick * ticks);
-}
-
-void LagComp::Extrapolate(Entity* ent)
-{
-	return;
-
-	float velocity = ent->GetVecVelocity().Length2D();
-	if (velocity > 3)
-		return;
-
-	// tick delta
-	int tick_delta = abs(TimeToTicks(ent->GetSimulationTime() - ent->GetOldSimulationTime()));
-
-	// if shit tick delta
-	if (tick_delta > 15 && tick_delta < 2)
-		return;
-
-	// get the next position
-	Vector nextPos = ExtrapolateTick(ent->GetVecOrigin(), ent->GetVecVelocity(), tick_delta);
-
-	// set the next position 
-	ent->SetAbsOrigin(nextPos);
-}
-
 void LagComp::ClearRecords()
 {
 	// clear all the records (whether valid or not)
@@ -321,9 +301,6 @@ void LagComp::Run_FSN(int stage)
 
 		// Update based on info
 		Update(ent, &info);
-
-		// restore the origins
-		Restore(ent);
 	}
 
 	// Clean up records

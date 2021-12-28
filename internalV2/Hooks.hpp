@@ -17,6 +17,7 @@ namespace H
 	typedef void(__thiscall* CamToFirstPeron)(void*);
 	typedef void(__thiscall* DoPostScreenEffects)(void*, int);
 
+	// orig func ptrs
 	extern Reset oReset;
 	extern LockCursor oLockCursor;
 	extern EndScene oEndScene;

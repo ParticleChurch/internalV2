@@ -239,6 +239,135 @@ void Menu::RenderESP()
 	ImGui::EndChild(); // end child
 }
 
+void Menu::RenderAimbot()
+{
+	static float propersize = 500.f;
+
+	ImGui::BeginChild("##AimbotArea", ImVec2(0, propersize), true);
+
+	float pos1 = ImGui::GetCursorPosY();
+
+	ImGui::Text("Aimbot");
+	ImGui::Separator();
+
+	ImGui::Columns(2, "##AimCols"); // 4-ways, with border
+
+	ImGui::Text("Enable");
+	ImGui::NextColumn();
+	{
+		int total_w = ImGui::GetContentRegionAvail().x;
+		ImGui::SetNextItemWidth(total_w);
+	}
+	C::HotKey(cfg->Keybinds["Aimbot"]);
+	ImGui::NextColumn();
+
+	ImGui::Text("Hitchance");
+	ImGui::NextColumn();
+	{
+		int total_w = ImGui::GetContentRegionAvail().x;
+		ImGui::SetNextItemWidth(total_w);
+	}
+	ImGui::SliderFloat("##AimHitchance", &cfg->aimbot.Hitchance, 0, 100);
+	ImGui::NextColumn();
+
+	ImGui::Text("MinDamage");
+	ImGui::NextColumn();
+	{
+		int total_w = ImGui::GetContentRegionAvail().x;
+		ImGui::SetNextItemWidth(total_w);
+	}
+	ImGui::SliderInt("##AimMinDamage", &cfg->aimbot.MinDamage, 1, 120);
+	ImGui::NextColumn();
+
+	static std::vector<std::string> priority_hitboxes =
+	{
+		"NONE",
+		"HEAD",
+		"NECK",
+		"PELVIS",
+		"STOMACH",
+		"LOWER_CHEST",
+		"CHEST",
+		"UPPER_CHEST",
+		"THIGH",
+		"CALF",
+		"FOOT",
+		"HAND",
+		"UPPER_ARM",
+		"FOREARM"
+	};
+
+	ImGui::Text("Pirority Hitbox");
+	ImGui::NextColumn();
+	{
+		int total_w = ImGui::GetContentRegionAvail().x;
+		ImGui::SetNextItemWidth(total_w);
+	}
+	ImGui::Combo("##AimPriority", &cfg->aimbot.Priority, priority_hitboxes);
+	ImGui::NextColumn();
+	
+	/*
+
+	ImGui::Text("Hitboxes");
+	ImGui::NextColumn();
+	{
+		int total_w = ImGui::GetContentRegionAvail().x;
+		ImGui::SetNextItemWidth(total_w);
+	}
+	static std::string preview = "";
+	static std::vector<std::string> hitboxes =
+	{
+		"HEAD",
+		"NECK",
+		"PELVIS",
+		"STOMACH",
+		"LOWER_CHEST",
+		"CHEST",
+		"UPPER_CHEST",
+		"THIGH",
+		"CALF",
+		"FOOT",
+		"HAND",
+		"UPPER_ARM",
+		"FOREARM"
+	};
+	if (ImGui::BeginCombo("##AimHitboxes", preview.c_str())) {
+		preview = "";
+		for (size_t i = 0; i < hitboxes.size(); i++) {
+			ImGui::Selectable(hitboxes[i].c_str(), &cfg->aimbot.Hitboxes[i], ImGuiSelectableFlags_::ImGuiSelectableFlags_DontClosePopups);
+			if (cfg->aimbot.Hitboxes[i])
+				preview += hitboxes[i] + ",";
+		}
+		ImGui::EndCombo();
+	}
+	ImGui::NextColumn();*/
+
+	ImGui::Text("Head Point Scale");
+	ImGui::NextColumn();
+	{
+		int total_w = ImGui::GetContentRegionAvail().x;
+		ImGui::SetNextItemWidth(total_w);
+	}
+	ImGui::SliderFloat("##AimHeadPointScale", &cfg->aimbot.HeadPointScale, 0, 100);
+	ImGui::NextColumn();
+
+	ImGui::Text("Body Point Scale");
+	ImGui::NextColumn();
+	{
+		int total_w = ImGui::GetContentRegionAvail().x;
+		ImGui::SetNextItemWidth(total_w);
+	}
+	ImGui::SliderFloat("##AimBodyPointScale", &cfg->aimbot.BodyPointScale, 0, 100);
+	ImGui::NextColumn();
+
+	ImGui::EndColumns(); // end columns
+
+	float pos2 = ImGui::GetCursorPosY();
+	propersize = pos2 - pos1 + 20.f;
+
+	ImGui::EndChild(); // end child
+}
+
 std::vector<std::string> GetSpectators()
 {
 	// If no localplayer or not in game, dont bother...
@@ -298,19 +427,33 @@ std::vector<std::string> GetSpectators()
 	return SpecList;
 }
 
-void Menu::Render()
+void Menu::RenderSpectators()
 {
-	cfg->HandleKeybinds();
+	if (!cfg->vis.SpectatorList) return;
 
+	static std::vector<std::string> specs;
 	static float oldTime = I::globalvars->flCurrentTime;
 	if (fabsf(I::globalvars->flCurrentTime - oldTime) > 1)
 	{
 		oldTime = I::globalvars->flCurrentTime;
-		H::console.clear();
-		H::console.resize(0);
+		specs.clear();
+		specs.resize(0);
 		for (auto a : GetSpectators())
-			H::console.push_back(a);
+			specs.push_back(a);
 	}
+
+	ImGui::SetNextWindowBgAlpha(cfg->vis.SpecOpacity);
+	ImGui::Begin("Spectators", 0, ImGuiWindowFlags_NoTitleBar);
+	for (auto a : specs)
+		ImGui::Text(a.c_str());
+	ImGui::End();
+}
+
+void Menu::Render()
+{
+	cfg->HandleKeybinds();
+
+	RenderSpectators();
 
 	if (G::MenuOpen)
 	{
@@ -363,17 +506,21 @@ void Menu::Render()
 
 		ImGui::Text("Backtrack");
 		ImGui::SameLine();
-		C::Checkbox("###Backtrack", &cfg->offense.Backtrack);
+		C::Checkbox("###Backtrack", &cfg->backtrack.Enable);
 
-		if (cfg->offense.Backtrack) {
+		if (cfg->backtrack.Enable) {
 			ImGui::Text("Backtrack Time");
 			ImGui::SameLine();
-			ImGui::SliderFloat("##BacktrackTIme", &cfg->offense.BacktrackTime, 10, 200);
+			ImGui::SliderFloat("##BacktrackTIme", &cfg->backtrack.BacktrackTime, 10, 200);
 		}
 
 		ImGui::Separator();
 
 		RenderESP();
+
+		ImGui::Separator();
+
+		RenderAimbot();
 
 		ImGui::Separator();
 
@@ -389,10 +536,14 @@ void Menu::Render()
 
 		ImGui::Separator();
 
-		ImGui::Text("Aimbot");
-		ImGui::NextColumn();
-		C::HotKey(cfg->Keybinds["Aimbot"]);
-		ImGui::NextColumn();
+		ImGui::Text("SpectatorList");
+		ImGui::SameLine();
+		ImGui::Checkbox("##SpecListEnable", &cfg->vis.SpectatorList);
+		if (cfg->vis.SpectatorList)
+		{
+			ImGui::SameLine();
+			ImGui::SliderFloat("##SpecListOpaq", &cfg->vis.SpecOpacity, 0.f, 1.f);
+		}
 
 		ImGui::Separator();
 

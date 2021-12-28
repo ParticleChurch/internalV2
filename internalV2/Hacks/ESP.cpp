@@ -145,6 +145,8 @@ void ESP::DrawSkeleton(Entity* Ent, int userid)
 	if (!StudioModel)
 		return;
 
+	Vector velocity = Ent->GetVecVelocity();
+
 	static matrix3x4_t BoneToWorldOut[128];
 	if (Ent->SetupBones(BoneToWorldOut, 128, 256, 0))
 	{

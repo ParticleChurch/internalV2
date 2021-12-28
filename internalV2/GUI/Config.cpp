@@ -61,7 +61,7 @@ Config::Config()
 	Keybind Aimbot = { false, false, "Aimbot", 0, 0 };
 	Keybinds.insert(std::make_pair(Aimbot.name, Aimbot));
 
-	Keybind ThirdPerson{ false, false, "Thirdperson", 0, 0 };
+	Keybind ThirdPerson{ false, false, "Thirdperson", 1, 0 };
 	Keybinds.insert(std::make_pair(ThirdPerson.name, ThirdPerson));
 
 }

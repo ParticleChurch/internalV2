@@ -4,25 +4,34 @@
 class IInput
 {
 public:
-	std::byte			pad0[0xC];				//0x00
-	bool				bTrackIRAvailable;		//0x0C
-	bool				bMouseInitialized;		//0x0D
-	bool				bMouseActive;			//0x0E
-	std::byte			pad1[0x9E];				//0x0F
-	bool				bCameraInThirdPerson;	//0xAD
-	std::byte			pad2[0x2];				//0xAE
-	Vector				vecCameraOffset;		//0xB0
-	std::byte			pad3[0x38];				//0xBC
-	CUserCmd* pCommands;				//0xF4
-	CVerifiedUserCmd* pVerifiedCommands;		//0xF8
+	char _pad0[12];
+	bool isTrackIRAvailable;
+	bool isMouseInitialized;
+	bool isMouseActive;
+	char _pad1[178];
+	bool m_fCameraInThirdPerson;
+	bool m_fCameraMovingWithMouse;
+	Vector m_vecCameraOffset;
+	bool m_fCameraDistanceMove;
+	int m_nCameraOldX;
+	int m_nCameraOldY;
+	int m_nCameraX;
+	int m_nCameraY;
+	bool m_CameraIsOrthographic;
+	Vector m_angPreviousViewAngles;
+	Vector m_angPreviousViewAnglesTilt;
+	float m_flLastForwardMove{};
+	int m_nClearInputState{};
+	CUserCmd* commands{};
+	CVerifiedUserCmd* verified_commands{};
 
 	CUserCmd* GetUserCmd(int nSequenceNumber)
 	{
-		return &pCommands[nSequenceNumber % MULTIPLAYER_BACKUP];
+		return &commands[nSequenceNumber % MULTIPLAYER_BACKUP];
 	}
 
 	CVerifiedUserCmd* GetVerifiedCmd(int nSequenceNumber)
 	{
-		return &pVerifiedCommands[nSequenceNumber % MULTIPLAYER_BACKUP];
+		return &verified_commands[nSequenceNumber % MULTIPLAYER_BACKUP];
 	}
 };

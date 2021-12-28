@@ -1,12 +1,10 @@
 #pragma once
-struct BoneStruct
-{
-	bool Valid = false;
-	Vector Head;
-	Vector Pelvis;
-	Vector Stomach;
-	Vector Chest;
-};
+
+/*
+Record is kinda janky, currently holds
+both a matrix, as well as bones, idk,
+lotta data but c++ is fast 
+*/
 
 class LagComp
 {
@@ -18,7 +16,8 @@ public:
 	{
 		Entity* pEntity; // parent entity
 		matrix3x4_t Matrix[MAXSTUDIOBONES];
-		BoneStruct bones;
+		bool ValidBones = false;
+		mstudiobbox_t bones[19];
 		Vector Origin;
 		Vector HeadPos;
 		float SimulationTime;
@@ -26,6 +25,7 @@ public:
 		int Flags;
 
 		void Update(Entity* ent);
+		void Extrapolate(Entity* ent);
 	};
 
 	struct Player
@@ -49,13 +49,6 @@ private:
 	void Update(Entity* ent, PlayerInfo_t* info);
 	// cleans up playerlist to remove crappy records / players
 	void CleanUp();
-	// Deal with lagging...
-	Vector oAbsOrigin;
-	int* render;
-	int backup;
-	void Backup(Entity* ent);
-	void Restore(Entity* ent);
-	void Extrapolate(Entity* ent);
 public:
 	// clears/removes all records (basically if spectating)
 	void ClearRecords();

@@ -27,9 +27,9 @@ namespace CFG
 		float StrafeAng = 5.f;
 	};
 
-	struct Offense
+	struct Backtrack
 	{
-		bool Backtrack = true;
+		bool Enable = true;
 		float BacktrackTime = 200.f;
 	};
 
@@ -47,6 +47,8 @@ namespace CFG
 
 	struct Visuals {
 		float ThirdPersonDistance = 150.f;
+		bool SpectatorList = false;
+		float SpecOpacity = 1.f;
 	};
 
 	struct Performance {
@@ -58,6 +60,16 @@ namespace CFG
 	struct Antiaim {
 		bool Enable = false;
 	};
+
+	struct Aimbot
+	{
+		float Hitchance = 0.f;
+		int MinDamage = 1;
+		int Priority = 0; // 0 is none
+		bool Hitboxes[13] = { false, false, false, false, false, false, false, false, false, false, false, false, false };
+		float HeadPointScale = 0.f;
+		float BodyPointScale = 0.f;
+	};
 }
 
 class Config
@@ -66,11 +78,12 @@ public:
 	std::map<std::string, Keybind> Keybinds;
 
 	CFG::Movement movement;
-	CFG::Offense offense;
+	CFG::Backtrack backtrack;
 	CFG::ESP esp;
 	CFG::Performance performance;
 	CFG::Visuals vis;
 	CFG::Antiaim aa;
+	CFG::Aimbot aimbot;
 
 	Config();
 	void HandleKeybinds();

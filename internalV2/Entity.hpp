@@ -553,9 +553,16 @@ public: // OTHERS
 		return bIsArmored;
 	}
 	bool IsBreakable() {
-		return false; // TEMPORARY
+		//return false; // TEMPORARY
 		if constexpr (DEBUG_ENTITY) L::Debug("IsBreakable");
+		//
 
+		using IsBreakableFn = bool(__thiscall*)(void*);
+		static auto oIsBreakable = reinterpret_cast<IsBreakableFn>(FindPattern("client.dll", "55 8B EC 51 56 8B F1 85 F6 74 ? 83"));
+		return oIsBreakable(this);
+		
+
+		
 		// @ida isbreakableentity: client.dll @ 55 8B EC 51 56 8B F1 85 F6 74 68
 		/*
 		const int iHealth = this->GetHealth();

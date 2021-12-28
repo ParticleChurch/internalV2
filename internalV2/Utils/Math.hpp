@@ -50,6 +50,10 @@ namespace Calc
 		//gets the total distance (in degrees)
 		return sqrtf(powf(min(a, b), 2) + powf(c, 2));
 	}
+
+	static Vector ExtrapolateTick(Vector p0, Vector v0, int ticks = 1) {
+		return p0 + (v0 * I::globalvars->flIntervalPerTick * ticks);
+	}
 }
 
 static float GetLerp()

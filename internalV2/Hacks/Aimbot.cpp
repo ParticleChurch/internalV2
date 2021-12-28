@@ -80,6 +80,79 @@ static void CapsuleOverlay(Entity* pPlayer, Color col, float duration, matrix3x4
 	}
 }
 
+void Aimbot::UpdateVals()
+{
+	this->MinHitchance = cfg->aimbot.Hitchance / 100.f;
+	this->MinDamage = cfg->aimbot.MinDamage;
+	this->HeadPointScale = cfg->aimbot.HeadPointScale / 100.f;
+	this->BodyPointScale = cfg->aimbot.BodyPointScale / 100.f;
+	
+	// only update everytime we change our choice
+	static int LastPriorityChoice = -1;
+	if (cfg->aimbot.Priority != LastPriorityChoice)
+	{
+		LastPriorityChoice = cfg->aimbot.Priority;
+		// clear the list
+		this->Priority.clear();
+		this->Priority.resize(0);
+
+		// send to priority the relavent hitboxes
+		switch (cfg->aimbot.Priority)
+		{
+		case 0:
+			break;
+		case 1:
+			this->Priority.push_back(HITBOX_HEAD);
+			break;
+		case 2:
+			this->Priority.push_back(HITBOX_NECK);
+			break;
+		case 3:
+			this->Priority.push_back(HITBOX_PELVIS);
+			break;
+		case 4:
+			this->Priority.push_back(HITBOX_STOMACH);
+			break;
+		case 5:
+			this->Priority.push_back(HITBOX_THORAX); // aka lower chest
+			break;
+		case 6:
+			this->Priority.push_back(HITBOX_CHEST);
+			break;
+		case 7:
+			this->Priority.push_back(HITBOX_UPPER_CHEST);
+			break;
+		case 8:
+			this->Priority.push_back(HITBOX_LEFT_THIGH);
+			this->Priority.push_back(HITBOX_RIGHT_THIGH);
+			break;
+		case 9:
+			this->Priority.push_back(HITBOX_LEFT_CALF);
+			this->Priority.push_back(HITBOX_RIGHT_CALF);
+			break;
+		case 10:
+			this->Priority.push_back(HITBOX_LEFT_FOOT);
+			this->Priority.push_back(HITBOX_RIGHT_FOOT);
+			break;
+		case 11:
+			this->Priority.push_back(HITBOX_LEFT_HAND);
+			this->Priority.push_back(HITBOX_RIGHT_HAND);
+			break;
+		case 12:
+			this->Priority.push_back(HITBOX_RIGHT_UPPER_ARM);
+			this->Priority.push_back(HITBOX_LEFT_UPPER_ARM);
+			break;
+		case 13:
+			this->Priority.push_back(HITBOX_RIGHT_FOREARM);
+			this->Priority.push_back(HITBOX_LEFT_FOREARM);
+			break;
+		default:
+			break;
+		}
+	}
+
+}
+
 float Aimbot::CalculateHitchance(Vector vangles, const Vector& point, Entity* player, int hbox)
 {
 	auto weapon = G::LocalplayerWeapon;
@@ -141,6 +214,26 @@ float Aimbot::CalculateHitchance(Vector vangles, const Vector& point, Entity* pl
 	}
 
 	return (hits / NumTraces);
+}
+
+float Aimbot::GetPointScale(int Hitbox)
+{
+	switch (Hitbox)
+	{
+	case HITBOX_HEAD:
+		return this->HeadPointScale;
+		break;
+	case HITBOX_CHEST:
+	case HITBOX_THORAX:
+	case HITBOX_UPPER_CHEST:
+	case HITBOX_PELVIS:
+	case HITBOX_STOMACH:
+		return this->BodyPointScale;
+	default:
+		return 0.f;
+	}
+	// just in case a sneaky boi gets by (it wont but whatev)
+	return 0.f;
 }
 
 float Aimbot::CalculatePsudoHitchance()
@@ -271,6 +364,14 @@ float Aimbot::CalculatePsudoHitchance()
 	return inaccuracy;
 }
 
+/*
+std::string get_active_window() {
+	char window_title[256];
+	GetWindowTextA(GetForegroundWindow(), window_title, 256);
+	return window_title;
+}
+*/
+
 void Aimbot::Run()
 {
 	if constexpr (DEBUG_AIMBOT) L::Debug("Run");
@@ -279,7 +380,7 @@ void Aimbot::Run()
 
 	if (!G::Localplayer->CanShoot()) return;
 
-	if (CalculatePsudoHitchance() < 0.66f) return; //p100 hitchance
+	UpdateVals();
 
 	// Start timer
 	auto start = std::chrono::steady_clock::now();
@@ -301,42 +402,71 @@ void Aimbot::Run()
 		if (player.LifeState != LIFE_ALIVE) continue;		// do live check
 		if (!(player.Health > 0)) continue;					// do another live check
 		if (player.Dormant) continue;						// do dormant check
-		if (!player.records.front().bones.Valid) continue;  // bad front record bones
 
-		// get correct record, also dumb
+		// get given record
 		auto& record = player.records[0];
 
-		// look at the target bitch
-		Vector Angle = Calc::CalculateAngle(record.bones.Head);
-		Angle -= (G::Localplayer->GetAimPunchAngle() * 2);
+		// check if valid bones
+		if (!record.ValidBones) continue;
 
-		// traceray
-		Trace_t ExitTrace;
-		Ray_t Ray(G::Localplayer->GetEyePosition(), record.HeadPos);
-		CTraceFilter filter((IHandleEntity*)G::Localplayer);
-		I::enginetrace->TraceRay(Ray, MASK_SHOT_HULL, &filter, &ExitTrace);
+		for (auto HITBOX : this->Priority)
+		{
+			// BREAK the moment we have scanned too much
+			if (NumScan > MaxScan) break;
 
-		// we just did autowall scan
-		NumScan++;
+			//Vector Aimpoint = record.HeadPos;// Calc::ExtrapolateTick(record.HeadPos, record.Velocity, 4);
+			Vector min = record.bones[HITBOX].vecBBMin.Transform(record.Matrix[record.bones[HITBOX].iBone]);
+			Vector max = record.bones[HITBOX].vecBBMax.Transform(record.Matrix[record.bones[HITBOX].iBone]);
+			Vector mid = (min + max / 2);
+			Vector top = min.z > max.z ? min : max;
+			float PointScale = GetPointScale(HITBOX);
+			Vector top_left = player.pEntity->GetTopLeft(top, record.bones[0].flRadius * PointScale, G::Localplayer);
+			Vector top_right = player.pEntity->GetTopRight(top, record.bones[0].flRadius * PointScale, G::Localplayer);
+			Vector Aimpoint = G::cmd->iTickCount % 2 ? top_left : top_right;
 
-		// skip if trace isn't visible
-		if (!ExitTrace.IsVisible()) continue;
+			// angle to the target bitch
+			Vector Angle = Calc::CalculateAngle(Aimpoint);
+			Angle -= (G::Localplayer->GetAimPunchAngle() * 2);
 
-		// silent aim
-		G::cmd->angViewAngle = QAngle(Angle.x, Angle.y);
+			// shit hitchance, nah
+			if constexpr (DEBUG_AIMBOT) L::Debug("hitchance");
+			float hitchance = CalculateHitchance(Angle, Aimpoint, player.pEntity, HITBOX);
+			if (hitchance < this->MinHitchance) continue;
 
-		// FIRE POW POW POW!
-		G::cmd->iButtons |= IN_ATTACK;
+			float Damage = autowall->GetDamage(G::Localplayer, Aimpoint);
+			H::console.push_back(std::to_string(Damage));
+			while (H::console.size() > 10)
+				H::console.erase(H::console.begin());
+			L::Debug(("Autowal Damage: " + std::to_string(Damage)).c_str());
 
-		// deal with lag comp
-		G::cmd->iTickCount = TimeToTicks(record.SimulationTime /*+ GetLerp()*/) - 1; // magic math 0_0
+			// we just did autowall scan
+			NumScan++;
 
-		// show the shot :D
-		CapsuleOverlay(player.pEntity, Color(255, 0, 0, 255), 4, record.Matrix);
+			// damage check
+			if (Damage < this->MinDamage) continue;
 
-		// we found a good scan, shoot at it bitch
-		break;
+			// silent aim
+			G::cmd->angViewAngle = QAngle(Angle.x, Angle.y);
+
+			// FIRE POW POW POW!
+			G::cmd->iButtons |= IN_ATTACK;
+
+			// deal with lag comp
+			G::cmd->iTickCount = TimeToTicks(record.SimulationTime /*+ GetLerp()*/) - 1; // magic math 0_0
+
+			if constexpr (DEBUG_AIMBOT) L::Debug("CapsuleOverlay");
+			// show the shot :D
+			//CapsuleOverlay(player.pEntity, Color(255, 0, 0, 255), 4, record.Matrix);
+
+			/*std::string msg = "Shot at [" + (std::string)player.Info.szName + "] with hitchance [" + std::to_string(hitchance) + "]\n";
+			ConsoleColorMsg(Color(0, 255, 0, 255), msg.c_str());*/
+
+			// we found a good scan, shoot at it bitch
+			goto END_AIM;
+		}
 	}
+
+	END_AIM:
 
 	// do timer/scan analysis
 	TimerStop(start);

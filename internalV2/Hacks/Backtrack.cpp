@@ -40,9 +40,25 @@ void Backtrack::GetTargTick()
 	}
 }
 
+template<typename ...Args>
+void ConsoleColorMsg(const Color& color, const char* fmt, Args ...args)
+{
+	using ConColorMsg = void(*)(const Color&, const char*, ...);
+	static ConColorMsg con_color_msg = nullptr;
+	if (!con_color_msg) {
+		con_color_msg = reinterpret_cast<ConColorMsg>(GetProcAddress(
+			GetModuleHandleA("tier0.dll"),
+			"?ConColorMsg@@YAXABVColor@@PBDZZ")
+			);
+	}
+
+	con_color_msg(color, fmt, args...);
+}
+
+
 void Backtrack::Run()
 {
-	if (!cfg->offense.Backtrack) return;
+	if (!cfg->backtrack.Enable) return;
 
 	if (!G::LocalplayerAlive) return;
 
@@ -61,8 +77,11 @@ void Backtrack::Run()
 	float TargTime = TargTick.SimulationTime + GetLerp();
 	float delta = fabsf(TargTime - I::globalvars->flCurrentTime);
 
-	if (delta > cfg->offense.BacktrackTime / 1000.f)
+	if (delta > cfg->backtrack.BacktrackTime / 1000.f)
 		return;
+
+	if (delta > 0.1f)
+		ConsoleColorMsg(Color(0, 255, 0, 255), ("Backtrack: " + std::to_string(delta) + "\n").c_str());
 
 	G::cmd->iTickCount = TimeToTicks(TargTime);
 }

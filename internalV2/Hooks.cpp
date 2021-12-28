@@ -116,6 +116,7 @@ void H::Free()
 	if (panelVMT) delete panelVMT;
 	if (inputVMT) delete inputVMT;
 
+	// special detour shit
 	L::Debug("Freeing Hacks");
 
 	// now delete hacks
@@ -130,6 +131,9 @@ void H::Free()
 	// let user use mouse again?
 	if (I::engine->IsInGame())
 		I::surface->LockCursor();
+
+	// let user do input lol
+	I::inputsystem->EnableInput(true);
 }
 
 long __stdcall H::ResetHook(IDirect3DDevice9* device, D3DPRESENT_PARAMETERS* pPresentationParameters)
@@ -286,6 +290,7 @@ void __stdcall H::FrameStageNotifyHook(int stage)
 		G::LocalplayerTeam = 0;
 		G::LocalplayerWeapon = nullptr;
 		G::LocalplayerWeapondata = nullptr;
+
 		return oFrameStageNotify(stage);
 	}
 
@@ -346,10 +351,14 @@ bool __stdcall H::CreateMoveHook(float flInputSampleTime, CUserCmd* cmd)
 			cmd->iButtons &= ~IN_ZOOM;
 		}
 
-		if (DEBUG_HOOKS) L::Debug("CM_Start");
+		if constexpr (DEBUG_HOOKS) L::Debug("CM_Start");
 		// movmeent fix
 		movement->CM_Start(cmd, pSendPacket);
 
+		// rank reveal
+		if ((G::cmd->iButtons & IN_SCORE))
+			I::client->DispatchUserMessage(50, 0, 0, nullptr);
+		
 		// movement
 		if (DEBUG_HOOKS) L::Debug("Bunnyhop");
 		movement->Bunnyhop();
@@ -388,10 +397,6 @@ bool __stdcall H::CreateMoveHook(float flInputSampleTime, CUserCmd* cmd)
 	}
 
 	return false; //silent aim on false (only for client)
-}
-
-Vector ExtrapolateTick2(Vector p0, Vector v0, int ticks = 1) {
-	return p0 + (v0 * I::globalvars->flIntervalPerTick * ticks);
 }
 
 void __stdcall H::PaintTraverseHook(int vguiID, bool force, bool allowForcing)
@@ -439,6 +444,23 @@ void __stdcall H::PaintTraverseHook(int vguiID, bool force, bool allowForcing)
 		}*/
 
 		esp->RunPaintTraverse();
+
+		// draw predicted positions
+		//I::surface->DrawSetColor(Color(255,0,0,255)); // red
+		//for (auto a : lagcomp->PlayerList)
+		//{
+		//	if (a.second.records.empty())
+		//		continue;
+
+		//	Vector pos = a.second.records.back().HeadPos;
+		//	//Calc::ExtrapolateTick(pos, a.second.records.front().Velocity, 4);
+		//	Vector screen;
+		//	if (!WorldToScreen(pos, screen))
+		//		continue;
+
+		//	I::surface->DrawLine(screen.x-2, screen.y, screen.x + 2, screen.y);
+		//	I::surface->DrawLine(screen.x, screen.y - 2, screen.x, screen.y + 2);
+		//}
 	}
 }
 
@@ -447,6 +469,7 @@ void __fastcall H::CamToFirstPeronHook()
 	if  (DEBUG_HOOKS) L::Debug("CamToFirstPeronHook");
 
 	thirdperson->Run_hkCamToFirstPeron();
+	/*oCamToFirstPeron(I::input);*/
 }
 
 void __stdcall H::DoPostScreenEffectsHook(int param)

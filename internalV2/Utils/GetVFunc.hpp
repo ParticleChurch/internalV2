@@ -1,6 +1,16 @@
 #pragma once
 
 /*
+	 * virtual function implementation
+	 * returns native function of specified class at given index
+	 */
+template <typename T = void*>
+constexpr T GetVFunc(void* thisptr, std::size_t nIndex)
+{
+	return (*static_cast<T**>(thisptr))[nIndex];
+}
+
+/*
 * virtual function implementation
 * returns native function of specified class at given index
 */

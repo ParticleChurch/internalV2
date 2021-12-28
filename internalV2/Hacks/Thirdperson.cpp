@@ -74,14 +74,14 @@ void Thirdperson::Run_DoPostScreenEffects()
 		if (cfg->Keybinds["Thirdperson"].boolean)
 		{
 			isInThirdperson = true;
-			I::input->bCameraInThirdPerson = true;
-			I::input->vecCameraOffset = Vector(G::StartAngle.x, G::StartAngle.y, GetCameraBoomLength(cfg->vis.ThirdPersonDistance));
+			I::input->m_fCameraInThirdPerson = true;
+			I::input->m_vecCameraOffset = Vector(G::StartAngle.x, G::StartAngle.y, GetCameraBoomLength(cfg->vis.ThirdPersonDistance));
 		}
 		else
 		{
 			isInThirdperson = false;
-			I::input->bCameraInThirdPerson = false;
-			I::input->vecCameraOffset = Vector(G::StartAngle.x, G::StartAngle.y, 0);
+			I::input->m_fCameraInThirdPerson = false;
+			I::input->m_vecCameraOffset = Vector(G::StartAngle.x, G::StartAngle.y, 0);
 		}
 	}
 }
