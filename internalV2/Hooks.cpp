@@ -104,7 +104,7 @@ void H::Free()
 	if (inputVMT) inputVMT->UnhookAll();
 
 	// do some last minute adjustments
-	// will do later lol
+	if (G::pSendpacket) *G::pSendpacket = true;
 
 	L::Debug("Freeing VMTs");
 
@@ -128,12 +128,12 @@ void H::Free()
 	delete aimbot;
 	delete thirdperson;
 
+	// let user do input lol
+	I::inputsystem->EnableInput(true);
+
 	// let user use mouse again?
 	if (I::engine->IsInGame())
 		I::surface->LockCursor();
-
-	// let user do input lol
-	I::inputsystem->EnableInput(true);
 }
 
 long __stdcall H::ResetHook(IDirect3DDevice9* device, D3DPRESENT_PARAMETERS* pPresentationParameters)
@@ -165,6 +165,8 @@ long __stdcall H::EndSceneHook(IDirect3DDevice9* device)
 {
 	//if (DEBUG_HOOKS) L::Debug("EndSceneHook");
 
+	static void* firstReturn = _ReturnAddress();
+
 	// init imgui
 	if (!D3dInit) {
 		D3dInit = true;
@@ -177,7 +179,10 @@ long __stdcall H::EndSceneHook(IDirect3DDevice9* device)
 		ImGui_ImplDX9_Init(device);
 	}
 
+	
+
 	// draw imgui 
+	if (firstReturn != _ReturnAddress())
 	{
 		ImGui_ImplDX9_NewFrame();
 		ImGui_ImplWin32_NewFrame();
@@ -186,6 +191,7 @@ long __stdcall H::EndSceneHook(IDirect3DDevice9* device)
 		if (menu->ConsoleWindow)
 		{
 			ImGui::Begin("Console");
+			ImGui::Text(("Aimbot Scans (per tick): " + std::to_string(aimbot->TheoreticalScans)).c_str());
 			for (auto& a : H::console)
 				ImGui::Text(a.c_str());
 			ImGui::End();
@@ -299,7 +305,15 @@ void __stdcall H::FrameStageNotifyHook(int stage)
 	static int deadflagOffset = N::GetOffset("DT_BasePlayer", "deadflag");
 	if (stage == FRAME_RENDER_START) {
 		if (cfg->Keybinds["Thirdperson"].boolean)
-			*(QAngle*)((DWORD)G::Localplayer + deadflagOffset + 4) = G::EndAngle;
+		{
+			// if no aa...
+			if(!cfg->aa.Enable)
+				*(QAngle*)((DWORD)G::Localplayer + deadflagOffset + 4) = G::EndAngle;
+			// if aa
+			else
+				*(QAngle*)((DWORD)G::Localplayer + deadflagOffset + 4) = QAngle(89.f, G::real.y);
+		}
+			
 	}
 
 	lagcomp->Run_FSN(stage);
@@ -326,23 +340,6 @@ bool __stdcall H::CreateMoveHook(float flInputSampleTime, CUserCmd* cmd)
 		bool* pSendPacket = (bool*)(*(DWORD*)pebp - 0x1C);
 		bool& bSendPacket = *pSendPacket;
 
-		bSendPacket = true;
-		/*static int LagVal = 0;
-		static int LastTickCount = I::globalvars->iTickCount;
-		if (LastTickCount != I::globalvars->iTickCount)
-		{
-			LastTickCount = I::globalvars->iTickCount;
-			LagVal++;
-		}
-
-		if (LagVal >= 5)
-		{
-			LagVal = 0;
-			bSendPacket = true;
-		}
-		else
-			bSendPacket = false;*/
-
 		// Menu fix
 		if (G::MenuOpen && (cmd->iButtons & IN_ATTACK | IN_ATTACK2 | IN_ZOOM))
 		{
@@ -352,8 +349,12 @@ bool __stdcall H::CreateMoveHook(float flInputSampleTime, CUserCmd* cmd)
 		}
 
 		if constexpr (DEBUG_HOOKS) L::Debug("CM_Start");
+
 		// movmeent fix
 		movement->CM_Start(cmd, pSendPacket);
+
+		// aa movement
+		antiaim->RunMovement();
 
 		// rank reveal
 		if ((G::cmd->iButtons & IN_SCORE))
@@ -366,26 +367,58 @@ bool __stdcall H::CreateMoveHook(float flInputSampleTime, CUserCmd* cmd)
 		if (DEBUG_HOOKS) L::Debug("AutoStrafe");
 		movement->AutoStrafe();
 
+		// movement
+		movement->SlowWalk();
+
 		// movmeent fix
 		if (DEBUG_HOOKS) L::Debug("CM_MoveFixStart");
 		movement->CM_MoveFixStart();
 
-		// lol
-		if (cfg->aa.Enable)
-		{
-			G::cmd->angViewAngle.x = 89;
-			G::cmd->angViewAngle.y = G::StartAngle.y + 180.f;
-			// p100 legit aa
-			/*if (!bSendPacket)
-				G::cmd->angViewAngle.y += 30.f;*/
-		}
+		// fakelag
+		antiaim->FakelagStart();
+		// put stuff like exploit start here (for predicted and actual value of sendpacket)
+		bSendPacket = antiaim->FakelagEnd();
+
+		// run antiaim aa
+		antiaim->Run();
 
 		// offensive 
 		if (DEBUG_HOOKS) L::Debug("backtrack");
 		backtrack->Run();
 
+		// Manual Shot fix
+		if (G::cmd->iButtons & IN_ATTACK && G::Localplayer->CanShoot())
+		{
+			G::cmd->angViewAngle = G::StartAngle;
+			G::real = Vector(G::cmd->angViewAngle.x, G::cmd->angViewAngle.y);
+			G::fake = Vector(G::cmd->angViewAngle.x, G::cmd->angViewAngle.y);
+		}
+
+		// E fix
+		if (G::cmd->iButtons & IN_USE)
+		{
+			G::cmd->angViewAngle = G::StartAngle;
+			G::real = Vector(G::cmd->angViewAngle.x, G::cmd->angViewAngle.y);
+			G::fake = Vector(G::cmd->angViewAngle.x, G::cmd->angViewAngle.y);
+		}
+
 		if (DEBUG_HOOKS) L::Debug("aimbot");
 		aimbot->Run();
+
+		// Shot fix
+		static bool LastTickShot = false;
+		if (LastTickShot)
+		{
+			G::real = Vector(G::cmd->angViewAngle.x, G::cmd->angViewAngle.y);
+			G::fake = Vector(G::cmd->angViewAngle.x, G::cmd->angViewAngle.y);
+			LastTickShot = false;
+		}
+		if (G::cmd->iButtons & IN_ATTACK)
+		{
+			LastTickShot = true;
+			G::real = Vector(G::cmd->angViewAngle.x, G::cmd->angViewAngle.y);
+			G::fake = Vector(G::cmd->angViewAngle.x, G::cmd->angViewAngle.y);
+		}
 
 		// movmeent fix
 		if (DEBUG_HOOKS) L::Debug("CM_MoveFixEnd");
@@ -404,8 +437,8 @@ void __stdcall H::PaintTraverseHook(int vguiID, bool force, bool allowForcing)
 	if  (DEBUG_HOOKS) L::Debug("PaintTraverseHook");
 
 	// noscope
-	/*if (strcmp("HudZoom", I::panel->GetName(vguiID)) == 0 && false && G::LocalplayerAlive)
-		return;*/
+	if (strcmp("HudZoom", I::panel->GetName(vguiID)) == 0 && cfg->vis.NoScope && G::LocalplayerAlive)
+		return;
 
 	oPaintTraverse(I::panel, vguiID, force, allowForcing);
 	if (I::panel && strcmp(I::panel->GetName(vguiID), "MatSystemTopPanel") == 0) {
@@ -422,7 +455,7 @@ void __stdcall H::PaintTraverseHook(int vguiID, bool force, bool allowForcing)
 		if (framerate <= 0.0f)
 			framerate = 1.0f;
 
-		std::string TEXT = "FPS: " + std::to_string(1.f / framerate);
+		std::string TEXT = "FPS: " + std::to_string((int)(1.f / framerate));
 		static std::wstring wide_string;
 		wide_string = std::wstring(TEXT.begin(), TEXT.end());
 
@@ -434,33 +467,43 @@ void __stdcall H::PaintTraverseHook(int vguiID, bool force, bool allowForcing)
 		if (!G::Localplayer || !I::engine->IsInGame())
 			return;
 
-		/*Vector origin = G::Localplayer->GetVecOrigin();
-		Vector nextPos = ExtrapolateTick2(origin, G::Localplayer->GetVecVelocity(), H::slider);
+		esp->RunPaintTraverse();
+
+		antiaim->Visualize();
+
+		// if player isn't scoped, or the value isnt checked, dont draw it
+		if (!G::Localplayer->IsScoped() || !cfg->vis.NoScope)
+			return;
+
+		int xSize;
+		int ySize;
+		I::engine->GetScreenSize(xSize, ySize);
+		I::surface->DrawSetColor(Color(0, 0, 0, 255));
+		I::surface->DrawLine(xSize / 2, ySize / 4, xSize / 2, ySize * 3 / 4); //Top - Bottom
+		I::surface->DrawLine(xSize / 4, ySize / 2, xSize * 3 / 4, ySize / 2); //Left - Right
+
+		Vector origin = G::Localplayer->GetVecOrigin();
+		Vector nextPos = Calc::ExtrapolateTick(origin, G::Localplayer->GetVecVelocity(), 10);
 		Vector screen1, screen2;
 		if (WorldToScreen(nextPos, screen1) && WorldToScreen(origin, screen2))
 		{
 			I::surface->DrawSetColor(Color(255,255,255,255));
 			I::surface->DrawLine(screen1.x, screen1.y, screen2.x, screen2.y);
+		}
+
+		/*if (G::Localplayer->ScopeLevel() > 0)
+		{
+			int width, height;
+			I::engine->GetScreenSize(width, height);
+
+			I::surface->DrawSetColor(Color(0, 0, 0, 255));
+			I::surface->DrawLine(width / 2, 0, width / 2, height);
+			I::surface->DrawLine(0, height / 2, width, height / 2);
 		}*/
+		
 
-		esp->RunPaintTraverse();
+		
 
-		// draw predicted positions
-		//I::surface->DrawSetColor(Color(255,0,0,255)); // red
-		//for (auto a : lagcomp->PlayerList)
-		//{
-		//	if (a.second.records.empty())
-		//		continue;
-
-		//	Vector pos = a.second.records.back().HeadPos;
-		//	//Calc::ExtrapolateTick(pos, a.second.records.front().Velocity, 4);
-		//	Vector screen;
-		//	if (!WorldToScreen(pos, screen))
-		//		continue;
-
-		//	I::surface->DrawLine(screen.x-2, screen.y, screen.x + 2, screen.y);
-		//	I::surface->DrawLine(screen.x, screen.y - 2, screen.x, screen.y + 2);
-		//}
 	}
 }
 

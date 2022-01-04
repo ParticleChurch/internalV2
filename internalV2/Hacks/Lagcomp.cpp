@@ -6,10 +6,8 @@ LagComp* lagcomp = new LagComp();
 
 void LagComp::Record::Extrapolate(Entity* ent)
 {
-	return; // for now we wont care because its causing issues
-
 	float velocity = ent->GetVecVelocity().Length2D();
-	if (velocity > 3)
+	if (velocity < 1.f)
 		return;
 
 	// tick delta (you can predict forward 3-4 ticks and hit them still lol)
@@ -18,6 +16,9 @@ void LagComp::Record::Extrapolate(Entity* ent)
 	// if shit tick delta
 	if (tick_delta > 15 && tick_delta < 2)
 		return;
+
+	// set extrapolated flag
+	this->extrapolated = true;
 
 	// change the simulated time to corrected one
 	this->SimulationTime += tick_delta * I::globalvars->flIntervalPerTick;
@@ -70,7 +71,7 @@ void LagComp::Record::Extrapolate(Entity* ent)
 void LagComp::Record::Update(Entity* ent)
 {
 	if constexpr (DEBUG_LAGCOMP) L::Debug("SETUP BONES");
-	bool FixBones = ent->GetVecVelocity().Length2D() > 1.f;
+	bool FixBones = ent->GetVecVelocity().Length2D() > 1.f && !ent->IsDormant();
 	if (ent->SetupBones(this->Matrix, MAXSTUDIOBONES, 0x100, 0, false))
 	{
 		this->HeadPos = Vector(this->Matrix[8][0][3], this->Matrix[8][1][3], this->Matrix[8][2][3]);
@@ -117,7 +118,6 @@ void LagComp::Record::Update(Entity* ent)
 	}
 	else
 		this->ValidBones = false;
-		
 
 	if constexpr (DEBUG_LAGCOMP) L::Debug("GetVecOrigin");
 	this->Origin = ent->GetVecOrigin();
@@ -163,12 +163,21 @@ void LagComp::Update(Entity* ent, PlayerInfo_t* info)
 	// add record
 	LagComp::Record NewRec;
 	NewRec.Update(ent);
+	if constexpr (DEBUG_LAGCOMP) L::Debug("player.records.push_front");
 	player.records.push_front(NewRec);
+
+	if constexpr (DEBUG_LAGCOMP) L::Debug("player updated");
 }
 
 void LagComp::CleanUp()
 {
+	if (PlayerList.empty()) return;
+
+	if constexpr (DEBUG_LAGCOMP) L::Debug("lagcomp->CleanUp()");
+
 	auto CleanAllRecords = [](int userid) {
+		if constexpr (DEBUG_LAGCOMP) L::Debug("lagcomp->CleanAllRecords()");
+
 		// return false if there is no records for that
 		if (lagcomp->PlayerList.find(userid) == lagcomp->PlayerList.end())
 			return false;
@@ -184,13 +193,19 @@ void LagComp::CleanUp()
 	};
 
 	auto CleanAndDeletePlayer = [](int userid) {
+		if constexpr (DEBUG_LAGCOMP) L::Debug("lagcomp->CleanAndDeletePlayer()");
+
 		// return false if there is no records for that
 		if (lagcomp->PlayerList.find(userid) == lagcomp->PlayerList.end())
 			return false;
 		// otherwise clear records and erase the item, then return true
 		lagcomp->PlayerList[userid].records.clear();
 		lagcomp->PlayerList[userid].records.resize(0);
+
+		if constexpr (DEBUG_LAGCOMP) L::Debug("lagcomp->erase()");
 		lagcomp->PlayerList.erase(lagcomp->PlayerList.find(userid)); // remove current item
+
+		if constexpr (DEBUG_LAGCOMP) L::Debug("lagcomp->cleananddelete return");
 		return true;
 	};
 
@@ -254,6 +269,8 @@ void LagComp::CleanUp()
 
 void LagComp::ClearRecords()
 {
+	if (PlayerList.empty()) return;
+
 	// clear all the records (whether valid or not)
 	for (auto& item : PlayerList)
 	{

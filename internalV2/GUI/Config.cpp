@@ -64,4 +64,10 @@ Config::Config()
 	Keybind ThirdPerson{ false, false, "Thirdperson", 1, 0 };
 	Keybinds.insert(std::make_pair(ThirdPerson.name, ThirdPerson));
 
+	Keybind SlowWalk = { false, false, "Slowwalk", 0, 0 };
+	Keybinds.insert(std::make_pair(SlowWalk.name, SlowWalk));
+
+	Keybind InvertAA = { false, false, "Invert AA", 0, 0 };
+	Keybinds.insert(std::make_pair(InvertAA.name, InvertAA));
+
 }

@@ -2,6 +2,7 @@
 class INetChannelInfo
 {
 public:
+	/*
 	enum
 	{
 		GENERIC = 0,	// must be first and is default group
@@ -51,17 +52,21 @@ public:
 	virtual void		GetPacketResponseLatency(int iFlow, int frame_number, int* pnLatencyMsecs, int* pnChoke) const = 0;
 	virtual void		GetRemoteFramerate(float* pflFrameTime, float* pflFrameTimeStdDeviation, float* pflFrameStartTimeStdDeviation) const = 0;
 	virtual float		GetTimeoutSeconds() const = 0;
+	*/
+	//std::byte	pad0[0x14];				//0x0000
+	//bool		bProcessingMessages;	//0x0014
+	//bool		bShouldDelete;			//0x0015
+	//std::byte pad1[0x2];
+	//int			iOutSequenceNr;			//0x0018 last send outgoing sequence number
+	//int			iInSequenceNr;			//0x001C last received incoming sequence number
+	//int			iOutSequenceNrAck;		//0x0020 last received acknowledge outgoing sequence number
+	//int			iOutReliableState;		//0x0024 state of outgoing reliable data (0/1) flip flop used for loss detection
+	//int			iInReliableState;		//0x0028 state of incoming reliable data
+	//int			iChokedPackets;			//0x002C number of choked packets
+	//std::byte	pad2[0x414];			//0x0030
 
-	std::byte	pad0[0x14];				//0x0000
-	bool		bProcessingMessages;	//0x0014
-	bool		bShouldDelete;			//0x0015
-	bool		bStopProcessing;		//0x0016
-	std::byte	pad1[0x1];				//0x0017
-	int			iOutSequenceNr;			//0x0018 last send outgoing sequence number
-	int			iInSequenceNr;			//0x001C last received incoming sequence number
-	int			iOutSequenceNrAck;		//0x0020 last received acknowledge outgoing sequence number
-	int			iOutReliableState;		//0x0024 state of outgoing reliable data (0/1) flip flop used for loss detection
-	int			iInReliableState;		//0x0028 state of incoming reliable data
-	int			iChokedPackets;			//0x002C number of choked packets
-	std::byte	pad2[0x414];			//0x0030
+	std::byte pad[44];
+	int chokedPackets;
+
+	
 };

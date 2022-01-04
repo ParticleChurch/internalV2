@@ -129,6 +129,9 @@
     <ClCompile Include="Valve\Interfaces\IGlobalVars.cpp">
       <Filter>Source Files\Valve\Interfaces</Filter>
     </ClCompile>
+    <ClCompile Include="Hacks\AntiAim.cpp">
+      <Filter>Source Files\Hacks</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Utils\Logger.hpp">
@@ -367,6 +370,9 @@
     </ClInclude>
     <ClInclude Include="Valve\Interfaces\IVDebugOverlay.hpp">
       <Filter>Header Files\Valve\Interfaces</Filter>
+    </ClInclude>
+    <ClInclude Include="Hacks\AntiAim.hpp">
+      <Filter>Header Files\Hacks</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

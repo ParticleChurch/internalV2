@@ -21,6 +21,10 @@ namespace G {
 	extern Entity* LocalplayerWeapon;
 	extern CCSWeaponData* LocalplayerWeapondata;
 
+	// Antiaim stuff
+	extern Vector real;
+	extern Vector fake;
+
 	// Createmove Stuff
 	extern CUserCmd* cmd;
 	extern QAngle StartAngle;

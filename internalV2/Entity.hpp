@@ -731,15 +731,27 @@ public: // OTHERS
 			return 0;
 		return *(int*)(weap + offset);
 	}
-	CCSGOPlayerAnimState* GetAnimationState() {
-		if (DEBUG_ENTITY) L::Debug("GetSpread");
-		static DWORD offset = N::GetOffset("DT_CSPlayer", "m_bIsScoped") - 0x14;
-		return (CCSGOPlayerAnimState*)((DWORD)this + offset);
-	}
-	float GetMaxDesyncDelta() {
-		CCSGOPlayerAnimState* pAnimState = this->GetAnimationState();
-		if (!pAnimState) return 0.f;
 
+	CCSGOPlayerAnimState* GetAnimState(Entity* ent)
+	{
+		//if constexpr  (DEBUG_ENTITY) L::Debug("GetAnimState2");
+		//0x9960
+		//0x3914
+		return *reinterpret_cast<CCSGOPlayerAnimState**>(ent + 0x9960);
+	}
+
+	float GetMaxDesyncDelta() {
+
+		 L::Debug("GetAnimState");
+
+		 CCSGOPlayerAnimState* pAnimState = GetAnimState(this);
+
+		L::Debug("Got AnimState");
+		 
+		if (!pAnimState)
+			return 0.f;
+
+		L::Debug("GetAnimState start calc");
 		float flDuckAmount = pAnimState->flDuckAmount;
 		float flRunningSpeed = std::clamp(pAnimState->flRunningSpeed, 0.0f, 1.0f);
 		float flDuckingSpeed = std::clamp(pAnimState->flDuckingSpeed, 0.0f, 1.0f);
@@ -749,7 +761,25 @@ public: // OTHERS
 			flYawModifier += ((flDuckAmount * flDuckingSpeed) * (0.5f - flYawModifier));
 
 		float flMaxYawModifier = flYawModifier * pAnimState->flMaxBodyYaw;
-		return flMaxYawModifier;
+		return fabsf(flMaxYawModifier);
 	}
+	bool IsScoped() {
+		if (DEBUG_ENTITY) L::Debug("IsScoped");
+
+		static DWORD offset = N::GetOffset("DT_CSPlayer", "m_bIsScoped");
+		if ((bool*)((DWORD)this + offset))
+			return *(bool*)((DWORD)this + offset);
+		return false;
+	}
+	float MaxAccurateSpeed()
+	{
+		if (DEBUG_ENTITY) L::Debug("MaxAccurateSpeed");
+
+		Entity* weap = this->GetActiveWeapon();
+		if (!weap) return 0.f;
+		const CCSWeaponData* WeaponData = weap->GetWeaponData();
+		return (this->IsScoped() ? WeaponData->flMaxSpeed[1] : WeaponData->flMaxSpeed[0]); //alt and regular might be flipped lol
+	}
+
 };
 

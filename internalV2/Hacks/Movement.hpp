@@ -5,6 +5,8 @@ public:
 	// Hacks
 	void Bunnyhop();
 	void AutoStrafe();
+	void FastStop();
+	void SlowWalk();
 	// Other
 	void CM_Clamp();
 	void CM_Start(CUserCmd* cmd, bool* pSendPacket);

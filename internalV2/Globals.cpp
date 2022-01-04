@@ -21,6 +21,10 @@ namespace G
 	Entity* LocalplayerWeapon;
 	CCSWeaponData* LocalplayerWeapondata;
 
+	// antiaim
+	Vector real;
+	Vector fake;
+
 	// Createmove Stuff
 	CUserCmd* cmd;
 	QAngle StartAngle;

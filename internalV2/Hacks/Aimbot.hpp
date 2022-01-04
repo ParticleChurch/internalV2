@@ -2,17 +2,16 @@
 class Aimbot
 {
 private: // optimization
-	//var
-	int MaxScan = 30;			// max number of times we can scan (per tick)
-	int NumScan = 0;			// number of scans so far
-	float DeltaTime = 0.f;		// how long it took for us to scan
-	bool ScanTimeBad = false;
-
-	// functions for managing the number of scans
-	void TimerStop(std::chrono::steady_clock::time_point start);
+	// Restrict bad Times
+	int NumScan = 0;			// number of scans done
+	std::chrono::steady_clock::time_point StartTime;
+	float DeltaTime;
+	void TimerStart();
+	bool TimerStop();
 private: // essential var/funcs
 	// var
 	std::deque< EHitboxIndex> Priority;
+	std::deque< EHitboxIndex> Hitboxes;
 	float MinHitchance;
 	int MinDamage;
 	float HeadPointScale;
@@ -23,6 +22,7 @@ private: // essential var/funcs
 	float CalculatePsudoHitchance();
 	float GetPointScale(int Hitbox);
 public:
+	int TheoreticalScans;
 	void Run();
 	void RenderStats();
 };

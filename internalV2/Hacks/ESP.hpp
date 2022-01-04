@@ -8,9 +8,11 @@ private:
 
 	void DrawName(char name[128], int userid);
 	void DrawSkeleton(Entity*, int userid);
+	void DrawExtrapolatedSkeletons();
 	void DrawHealth(int health, int userid);
 	void DrawWeapon(Entity*, int userid);
 
+	
 public:
 	std::map<int, float> Dormant;
 	void RunPaintTraverse();

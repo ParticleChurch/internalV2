@@ -86,7 +86,8 @@ public:
 
 	INetChannelInfo* GetNetChannelInfo()
 	{
-		return CallVFunc<INetChannelInfo*>(this, 78);
+		typedef INetChannelInfo* (__thiscall* oGetNetChannelInfo)(void*);
+		return GetVFunc<oGetNetChannelInfo>(this, 78)(this);
 	}
 
 	bool IsPlayingDemo()

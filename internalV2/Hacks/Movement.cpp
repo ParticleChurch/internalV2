@@ -123,6 +123,89 @@ void Movement::AutoStrafe()
 	}
 }
 
+void Movement::FastStop()
+{
+	int movetype = G::Localplayer->GetMoveType();
+	if (movetype == MOVETYPE_NOCLIP || movetype == MOVETYPE_LADDER || !(G::Localplayer->GetFlags() & 1) || G::cmd->iButtons & IN_JUMP)
+		return;
+
+	/*if (G::cmd->buttons & (IN_MOVELEFT | IN_MOVERIGHT | IN_FORWARD | IN_BACK))
+		return;*/
+
+	Vector velocity = G::Localplayer->GetVecVelocity();
+	const float speed = velocity.VecLength2D();
+	if (speed < 15.0f)
+		return;
+
+	Vector direction = Vector(0, RAD2DEG(atan2(velocity.y, velocity.x)), 0);
+
+	//direction.y now holds delta between current viewangle, and velocity angle
+	direction.y = G::cmd->angViewAngle.y - direction.y;
+
+	//direction now holds forward/sidemove to achieve velocity angle (mentioned above)
+	float SIN = sinf(DEG2RAD(direction.y)) * 450;
+	float COS = cosf(DEG2RAD(direction.y)) * 450;
+	direction.x = COS;
+	direction.y = SIN;
+
+	Vector negated_direction = direction * -speed;
+	G::cmd->flForwardMove = negated_direction.x;
+	G::cmd->flSideMove = negated_direction.y;
+}
+
+void Movement::SlowWalk()
+{
+	if (!cfg->Keybinds["Slowwalk"].boolean) return;
+
+	Vector velocity = G::Localplayer->GetVecVelocity();
+	const float speed = velocity.VecLength2D();
+	if (speed < 15.0f)
+		return;
+
+	// valid to slowwalk check
+	int movetype = G::Localplayer->GetMoveType();
+	if (movetype == MOVETYPE_NOCLIP || movetype == MOVETYPE_LADDER || !(G::Localplayer->GetFlags() & 1) || G::cmd->iButtons & IN_JUMP)
+		return;
+
+	// Do some big brain smoothing
+	float maxSpeed = G::Localplayer->MaxAccurateSpeed() / 3.f;
+	maxSpeed -= 5;
+	maxSpeed *= (cfg->movement.SlowWalkSpeed / 100.f);
+
+	if (G::cmd->flForwardMove && G::cmd->flSideMove) {
+		const float maxSpeedRoot = maxSpeed * static_cast<float>(M_SQRT1_2);
+		G::cmd->flForwardMove = G::cmd->flForwardMove < 0.0f ? -maxSpeedRoot : maxSpeedRoot;
+		G::cmd->flSideMove = G::cmd->flSideMove < 0.0f ? -maxSpeedRoot : maxSpeedRoot;
+	}
+	else if (G::cmd->flForwardMove) {
+		G::cmd->flForwardMove = G::cmd->flForwardMove < 0.0f ? -maxSpeed : maxSpeed;
+	}
+	else if (G::cmd->flSideMove) {
+		G::cmd->flSideMove = G::cmd->flSideMove < 0.0f ? -maxSpeed : maxSpeed;
+	}
+
+	// get some stuff
+	Entity* weapon = G::Localplayer->GetActiveWeapon();
+	if (!weapon) return;
+
+	CCSWeaponData* data = weapon->GetWeaponData();
+	if (!data) return;
+
+	// big calculations
+	auto get_standing_accuracy = [&]() -> const float
+	{
+		const auto max_speed = G::Localplayer->IsScoped() ? data->flMaxSpeed[1] : data->flMaxSpeed[0];
+		return max_speed / 3.f;
+	};
+
+	// if going slow enough, chill
+	if (speed < get_standing_accuracy())
+		return;
+
+	// STOP UR GOING WAY TO FAST MISTER
+	FastStop();
+}
+
 void Movement::CM_Clamp()
 {
 	//Angle stuff

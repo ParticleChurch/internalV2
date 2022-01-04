@@ -23,6 +23,7 @@ public:
 		float SimulationTime;
 		Vector Velocity;
 		int Flags;
+		bool extrapolated = false;
 
 		void Update(Entity* ent);
 		void Extrapolate(Entity* ent);

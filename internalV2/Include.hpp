@@ -61,6 +61,7 @@
 #include "Hacks/ESP.hpp"
 #include "Hacks/Aimbot.hpp"
 #include "Hacks/Thirdperson.hpp"
+#include "Hacks/AntiAim.hpp"
 
 // Hooks
 #include "Hooks.hpp"            //hooking ingame functions
