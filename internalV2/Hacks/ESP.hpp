@@ -11,6 +11,7 @@ private:
 	void DrawExtrapolatedSkeletons();
 	void DrawHealth(int health, int userid);
 	void DrawWeapon(Entity*, int userid);
+	void DrawProjectiles(Entity* ent);
 
 	
 public:

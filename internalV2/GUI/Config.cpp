@@ -70,4 +70,7 @@ Config::Config()
 	Keybind InvertAA = { false, false, "Invert AA", 0, 0 };
 	Keybinds.insert(std::make_pair(InvertAA.name, InvertAA));
 
+	Keybind FakeDuck = { false, false, "Fake Duck", 0, 0 };
+	Keybinds.insert(std::make_pair(FakeDuck.name, FakeDuck));
+
 }

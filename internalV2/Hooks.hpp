@@ -16,6 +16,7 @@ namespace H
 	typedef void(__thiscall* PaintTraverse)(void*, int, bool, bool);
 	typedef void(__thiscall* CamToFirstPeron)(void*);
 	typedef void(__thiscall* DoPostScreenEffects)(void*, int);
+	typedef bool(__thiscall* WriteUsercmdDeltaToBuffer)(void*, int, void*, int, int, bool);
 
 	// orig func ptrs
 	extern Reset oReset;
@@ -26,6 +27,7 @@ namespace H
 	extern PaintTraverse oPaintTraverse;
 	extern CamToFirstPeron oCamToFirstPeron;
 	extern DoPostScreenEffects oDoPostScreenEffects;
+	extern WriteUsercmdDeltaToBuffer oWriteUsercmdDeltaToBuffer;
 
 	//our functions
 	extern long __stdcall ResetHook(IDirect3DDevice9* device, D3DPRESENT_PARAMETERS* pPresentationParameters);
@@ -37,4 +39,6 @@ namespace H
 	extern void __stdcall PaintTraverseHook(int vguiID, bool force, bool allowForcing);
 	extern void __fastcall CamToFirstPeronHook();
 	extern void __stdcall DoPostScreenEffectsHook(int param);
+	extern	bool __fastcall WriteUsercmdDeltaToBufferHook(void* ecx, void* edx, int slot, void* buffer, int from, int to, bool isnewcommand);
+
 }

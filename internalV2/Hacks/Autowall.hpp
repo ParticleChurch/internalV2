@@ -11,7 +11,8 @@ struct FireBulletData_t
 class CAutoWall
 {
 public:
-	// Get
+	/* returns damage at point and simulated bullet data (if given) */
+	static float GetDamage(Vector start, Entity* pLocal, const Vector& vecPoint, FireBulletData_t* pDataOut = nullptr);
 	/* returns damage at point and simulated bullet data (if given) */
 	static float GetDamage(Entity* pLocal, const Vector& vecPoint, FireBulletData_t* pDataOut = nullptr);
 	/* calculates damage factor */

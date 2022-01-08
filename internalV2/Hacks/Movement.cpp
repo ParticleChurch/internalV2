@@ -222,7 +222,7 @@ void Movement::CM_Clamp()
 	while ((G::cmd->angViewAngle).y < -180) {
 		(G::cmd->angViewAngle).y += 360;
 	}
-	(G::cmd->angViewAngle).z = 0;
+	//(G::cmd->angViewAngle).z = 0;
 
 	//side/forwardMove/upmove
 	if (G::cmd->flSideMove > 450.f) {
@@ -306,10 +306,14 @@ void Movement::CM_MoveFixEnd()
 
 void Movement::CM_End()
 {
+	// save the z
+	float z = G::cmd->angViewAngle.z;
 	G::cmd->angViewAngle.NormalizeAngle(); //prevent csgo from hating us
+	G::cmd->angViewAngle.z = z;
 	CM_Clamp();
 	G::EndAngle.x = G::cmd->angViewAngle.x;
 	G::EndAngle.y = G::cmd->angViewAngle.y;
+	G::EndAngle.z = G::cmd->angViewAngle.z;
 
 
 	/*if (*G::pSendPacket) {

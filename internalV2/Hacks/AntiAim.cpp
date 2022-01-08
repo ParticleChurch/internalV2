@@ -7,7 +7,7 @@ AntiAim* antiaim = new AntiAim();
 bool AntiAim::DistanceBreaker()
 {
 	// If our next position breaks it...(64 units) (64*64 = 4096)
-	if ((NextPos - PrevPos).VecLength() > 64.f)
+	if ((NextPos - PrevPos).VecLength() > max(TrigDistance, 4096.f))
 		return true;
 	return false;
 }
@@ -19,6 +19,91 @@ bool AntiAim::TimeBreaker()
 	if (I::engine->GetNetChannelInfo()->chokedPackets > LagAmount)
 		return true;
 	return false;
+}
+
+void AntiAim::LagOnPeak()
+{
+	if (!cfg->fakelag.LagOnPeak) return;
+
+	if (!G::Localplayer)
+		return;
+	if (!G::LocalplayerAlive)
+		return;
+
+	// no point in lagging if velocity is too low
+	if (int(G::Localplayer->GetVecVelocity().VecLength2D()) < 100)
+	{
+		LaggingOnPeak = false;
+		return;
+	}
+
+	bool DamageOutgoing = false;
+
+	// create psudo point for lp to be
+	Vector newPos = Calc::ExtrapolateTick(G::Localplayer->GetEyePosition(), G::Localplayer->GetVecVelocity(), 8);
+
+	std::map<int, LagComp::Player>::iterator it;
+	for (it = lagcomp->PlayerList.begin(); it != lagcomp->PlayerList.end(); it++)
+	{
+		if (it->second.Index == G::LocalplayerIndex) // entity is Localplayer
+			continue;
+
+		if (!(it->second.pEntity)) // entity DOES NOT exist
+			continue;
+
+		if (!(it->second.Health > 0)) // entity is NOT alive
+			continue;
+
+		if (it->second.Team == G::LocalplayerTeam) // Entity is on same team
+			continue;
+
+		if (it->second.Dormant)	// Entity is dormant
+			continue;
+
+		/*if (autowall2->CanHitFloatingPoint(it->second.EyePos, NextPos))
+		{
+
+			H::console.push_back("BOOM HITTIN A POINT!");
+			DamageOutgoing = true;
+			break;
+		}*/
+		if (autowall->GetDamage(newPos, G::Localplayer, it->second.pEntity->GetEyePosition()) > 0)
+		{
+			DamageOutgoing = true;
+			/*break;*/
+		}
+		// if we are going to scan too many people, skip
+		/*if (scans > aimbot->maxplayerscan / 3)
+			continue;*/
+	}
+	
+	L::Debug("Fakelag autowall - end");
+
+	static bool ChokeOnce = false;
+
+	// If there is damage incoming, we are about to send packets, and we have not choked before
+	if (DamageOutgoing && PredictedVal && !ChokeOnce)
+	{
+		ChokeOnce = true;				// We have choked once
+		LaggingOnPeak = true;
+	}
+	else if (!DamageOutgoing && ChokeOnce) // no damage incoming, reset the choke once
+	{
+		ChokeOnce = false;
+	}
+
+	// we've done the lag
+	if (PredictedVal && !ChokeOnce)
+		LaggingOnPeak = false;
+
+	// If there we should lag on peak... 
+	if (LaggingOnPeak && ChokeOnce)
+	{
+		
+		TrigDistance = (64.f * 64.f * 0.9f);
+		TrigTicks = 14;
+		LagAmount = TrigTicks;
+	}
 }
 
 #define HEADEDGE 30.f
@@ -155,7 +240,6 @@ void AntiAim::Rage()
 
 	if constexpr (DEBUG_AA) L::Debug("OTHER SHIT");
 
-
 	// massive huge brain switch statement
 	switch (cfg->aa.AAType)
 	{
@@ -258,21 +342,62 @@ void AntiAim::Rage()
 		break;
 	}
 
+	// lean that Thang
+	if(*G::pSendpacket)
+		G::cmd->angViewAngle.z = cfg->aa.LeanAngle;
+
 	G::cmd->angViewAngle.y = NormalizeYaw(G::cmd->angViewAngle.y);
 
 	//H::console.push_back(std::to_string(G::cmd->angViewAngle.y));
 
 	// update fake and real lol
 	if (*G::pSendpacket)
-		G::fake = Vector(G::cmd->angViewAngle.x, G::cmd->angViewAngle.y);
+		G::fake = Vector(G::cmd->angViewAngle.x, G::cmd->angViewAngle.y, G::cmd->angViewAngle.z);
 	else
-		G::real = Vector(G::cmd->angViewAngle.x, G::cmd->angViewAngle.y);
+		G::real = Vector(G::cmd->angViewAngle.x, G::cmd->angViewAngle.y, G::cmd->angViewAngle.z);
+}
+
+void AntiAim::Legit()
+{
+	// skip if no localplayer
+	if (!G::Localplayer) return;
+
+	// skip if localplayer not alive
+	if (!G::LocalplayerAlive) return;
+
+	// skip if shitty sendpacket ptr
+	if (!G::pSendpacket) return;
+
+	// skip if on ladder or nocliping
+	int movetype = G::Localplayer->GetMoveType();
+	if (movetype == MOVETYPE_LADDER || movetype == MOVETYPE_NOCLIP) return;
+
+	float MaxDesync = G::Localplayer->GetMaxDesyncDelta();
+
+	float DesyncOffset = cfg->aa.LegitAmount; 
+	std::clamp(DesyncOffset, -MaxDesync, MaxDesync);
+
+	// lean bitch
+	if (*G::pSendpacket)
+		G::cmd->angViewAngle.z = cfg->aa.LeanAngle;
+
+	// desync bitch
+	if (!*G::pSendpacket)
+	{
+		G::cmd->angViewAngle.y += DesyncOffset;
+	}
+
+	// update fake and real lol
+	if (*G::pSendpacket)
+		G::fake = Vector(G::cmd->angViewAngle.x, G::cmd->angViewAngle.y, G::cmd->angViewAngle.z);
+	else
+		G::real = Vector(G::cmd->angViewAngle.x, G::cmd->angViewAngle.y, G::cmd->angViewAngle.z);
 }
 
 void AntiAim::RunMovement()
 {
 	// if no anti-aim, return
-	if(!cfg->aa.Enable)
+	if(!cfg->aa.Enable && !cfg->aa.LegitAA)
 		return;
 
 	// If the localplayer is not alive...
@@ -290,24 +415,32 @@ void AntiAim::RunMovement()
 
 void AntiAim::Run()
 {
-	if (!cfg->aa.Enable)
+	if (cfg->aa.Enable) {
+		Rage();
+		return;
+	}
+	else if (cfg->aa.LegitAA)
+	{
+		Legit();
+		return;
+	}
+	else
 	{
 		G::real = Vector(G::cmd->angViewAngle.x, G::cmd->angViewAngle.y);
 		G::fake = Vector(G::cmd->angViewAngle.x, G::cmd->angViewAngle.y);
 		return;
-	} else
-		Rage();
+	}	
 }
 
 void AntiAim::FakelagStart()
 {
 	// fakelag exception
-	/*if (cfg->movement.Fakeduck.boolean)
+	if (cfg->Keybinds["Fake Duck"].boolean)
 	{
 		LagAmount = 14;
-		PredictedVal = I::engine->GetNetChannelInfo()->ChokedPackets >= LagAmount;
+		PredictedVal = I::engine->GetNetChannelInfo()->chokedPackets >= LagAmount;
 		return;
-	}*/
+	}
 
 	// only update every tick
 	static int oldTickCount = I::globalvars->iTickCount;
@@ -319,7 +452,6 @@ void AntiAim::FakelagStart()
 	if (fabsf(oldTime - I::globalvars->flCurrentTime) > 0.2)
 	{
 		oldTime = I::globalvars->flCurrentTime;
-
 
 		LagAmount = cfg->fakelag.LagTicks;
 
@@ -339,9 +471,14 @@ void AntiAim::FakelagStart()
 	// Updating our next position
 	NextPos = G::Localplayer->GetEyePosition() + velocity;
 
+
 	// If breaking distance or time --> Send packets
 	bool distancebreak = DistanceBreaker();
 	bool timebreak = TimeBreaker();
+
+	// Updating Limits if trigger 
+	LagOnPeak();
+
 	PredictedVal = timebreak || distancebreak;
 
 	if (PredictedVal)
@@ -410,9 +547,9 @@ void AntiAim::Visualize()
 
 	// DRAW THE LAG
 	point = Vector(PrevPos.x, PrevPos.y, origin.z);
-	if (WorldToScreen(origin, sPoint1) && WorldToScreen(point, sPoint2))
+	if (this->LaggingOnPeak && WorldToScreen(origin, sPoint1) && WorldToScreen(point, sPoint2))
 	{
-		I::surface->DrawSetColor(Color(255.f, 255.f, 0, 255.f));
+		I::surface->DrawSetColor(Color(0.f, 255.f, 0, 255.f));
 		I::surface->DrawLine(sPoint1.x, sPoint1.y, sPoint2.x, sPoint2.y);
 	}
 }

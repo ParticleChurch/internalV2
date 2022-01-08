@@ -292,8 +292,6 @@ float Aimbot::CalculatePsudoHitchance()
 	if (!G::LocalplayerWeapondata)
 		return 0;
 
-	int a = WEAPONTYPE_C4;
-
 	float inaccuracy = 0;
 	int weapIndex = GetWeaponIndex(G::LocalplayerWeapon->GetWeaponId());
 
@@ -431,6 +429,8 @@ void Aimbot::Run()
 
 	if (!G::Localplayer->CanShoot()) return;
 
+	if (antiaim->LaggingOnPeak) return;
+
 	UpdateVals();
 
 	// Start timer
@@ -466,6 +466,7 @@ void Aimbot::Run()
 			if (!record.ValidBones) continue;
 
 			// priority scan
+			if constexpr (DEBUG_AIMBOT) L::Debug("priority hitbox scan");
 			for (auto HITBOX : this->Priority)
 			{
 				// BREAK the moment we have scanned too much
@@ -488,12 +489,13 @@ void Aimbot::Run()
 				// shit hitchance, nah
 				if constexpr (DEBUG_AIMBOT) L::Debug("hitchance");
 				float hitchance = 0;
-				if (i == 0)
+				/*if (i == 0)
 					hitchance = CalculateHitchance(Angle, Aimpoint, player.pEntity, HITBOX);
-				else
-					hitchance = CalculatePsudoHitchance();
+				else*/
+				hitchance = CalculatePsudoHitchance();
 				if (hitchance < this->MinHitchance) continue;
 
+				if constexpr (DEBUG_AIMBOT) L::Debug("GetDamage");
 				float Damage = 0;
 				if (i == 0)
 					Damage = autowall->GetDamage(G::Localplayer, Aimpoint);
@@ -528,10 +530,14 @@ void Aimbot::Run()
 				G::cmd->iButtons |= IN_ATTACK;
 
 				// deal with lag comp
+				if constexpr (DEBUG_AIMBOT) L::Debug("iTickCount");
 				if (i == 0)
 					G::cmd->iTickCount = TimeToTicks(record.SimulationTime /*+ GetLerp()*/) - 1; // magic math 0_0
 				else
 					G::cmd->iTickCount = TimeToTicks(record.SimulationTime + GetLerp());
+
+				if (!cfg->Keybinds["Fake Duck"].boolean)
+					*G::pSendpacket = true;
 
 				if constexpr (DEBUG_AIMBOT) L::Debug("CapsuleOverlay");
 				// show the shot :D
@@ -545,6 +551,7 @@ void Aimbot::Run()
 			}
 
 			// general hitbox scan
+			if constexpr (DEBUG_AIMBOT) L::Debug("general hitbox scan");
 			for (auto HITBOX : this->Hitboxes)
 			{
 				// Dont scan something that we have already scanned in priority
@@ -577,9 +584,9 @@ void Aimbot::Run()
 				// shit hitchance, nah
 				if constexpr (DEBUG_AIMBOT) L::Debug("hitchance");
 				float hitchance = 0;
-				if (i == 0)
+				/*if (i == 0)
 					hitchance = CalculateHitchance(Angle, Aimpoint, player.pEntity, HITBOX);
-				else
+				else*/
 					hitchance = CalculatePsudoHitchance();
 				if (hitchance < this->MinHitchance) continue;
 
@@ -621,6 +628,9 @@ void Aimbot::Run()
 					G::cmd->iTickCount = TimeToTicks(record.SimulationTime /*+ GetLerp()*/) - 1; // magic math 0_0
 				else
 					G::cmd->iTickCount = TimeToTicks(record.SimulationTime + GetLerp());
+
+				if(!cfg->Keybinds["Fake Duck"].boolean)
+					*G::pSendpacket = true;
 
 				if constexpr (DEBUG_AIMBOT) L::Debug("CapsuleOverlay");
 				// show the shot :D

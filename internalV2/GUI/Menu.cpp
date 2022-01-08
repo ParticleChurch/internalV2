@@ -540,6 +540,15 @@ void Menu::RenderMovement()
 		ImGui::NextColumn();
 	}
 
+	ImGui::Text("Fake Duck");
+	ImGui::NextColumn();
+	C::HotKey(cfg->Keybinds["Fake Duck"]);
+	{
+		int total_w = ImGui::GetContentRegionAvail().x;
+		ImGui::SetNextItemWidth(total_w);
+	}
+	ImGui::NextColumn();
+
 	ImGui::EndColumns(); // end columns
 
 	float pos2 = ImGui::GetCursorPosY();
@@ -808,6 +817,26 @@ void Menu::RenderAimbot()
 	C::SliderFloat("##AimBodyPointScale", &cfg->aimbot.BodyPointScale, 0, 100);
 	ImGui::NextColumn();
 
+	ImGui::Separator();
+
+	ImGui::Text("Enable Double Tap");
+	ImGui::NextColumn();
+	{
+		int total_w = ImGui::GetContentRegionAvail().x;
+		ImGui::SetNextItemWidth(total_w);
+	}
+	C::Checkbox("##Aim_DT", &cfg->aimbot.EnableDt);
+	ImGui::NextColumn();
+
+	ImGui::Text("Enable Hideshots");
+	ImGui::NextColumn();
+	{
+		int total_w = ImGui::GetContentRegionAvail().x;
+		ImGui::SetNextItemWidth(total_w);
+	}
+	C::Checkbox("##AIM_HS", &cfg->aimbot.EnableHs);
+	ImGui::NextColumn();
+
 	ImGui::EndColumns(); // end columns
 
 	float pos2 = ImGui::GetCursorPosY();
@@ -979,6 +1008,37 @@ void Menu::RenderAA()
 	C::Checkbox("##AntiaimAntiBrute", &cfg->aa.AntiBrute);
 	ImGui::NextColumn();
 
+	ImGui::Separator();
+
+	ImGui::Text("Legit AA");
+	ImGui::NextColumn();
+	{
+		int total_w = ImGui::GetContentRegionAvail().x;
+		ImGui::SetNextItemWidth(total_w);
+	}
+	C::Checkbox("##ANTIAIM_LEGITAA", &cfg->aa.LegitAA);
+	ImGui::NextColumn();
+
+	ImGui::Separator();
+
+	ImGui::Text("Lean that thang");
+	ImGui::NextColumn();
+	{
+		int total_w = ImGui::GetContentRegionAvail().x;
+		ImGui::SetNextItemWidth(total_w);
+	}
+	C::SliderFloat("##AntiAimLeanAngle", &cfg->aa.LeanAngle, 0, 180);
+	ImGui::NextColumn();
+
+	ImGui::Text("Real Offset");
+	ImGui::NextColumn();
+	{
+		int total_w = ImGui::GetContentRegionAvail().x;
+		ImGui::SetNextItemWidth(total_w);
+	}
+	C::SliderFloat("##AntiaimLegitAmount", &cfg->aa.LegitAmount, -58, 58);
+	ImGui::NextColumn();
+
 	ImGui::EndColumns(); // end columns
 
 	float pos2 = ImGui::GetCursorPosY();
@@ -1099,13 +1159,14 @@ void Menu::RenderFakelag()
 	C::SliderInt("##FakelagRandomLagTime", &cfg->fakelag.RandomTicks, 0, 13);
 	ImGui::NextColumn();
 
-	// GYTE time extension for now
-	//ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.f, 1.f, 1.f, 1.00f));
-	//ImGui::Text("Extend Time");
-	//ImGui::PopStyleColor();
-	//ImGui::NextColumn();
-	//C::Checkbox("##BacktrackExtendTime", &cfg->backtrack.ExtendTime);
-	//ImGui::NextColumn();
+	ImGui::Text("Lag On Peek");
+	ImGui::NextColumn();
+	{
+		int total_w = ImGui::GetContentRegionAvail().x;
+		ImGui::SetNextItemWidth(total_w);
+	}
+	C::Checkbox("##FakelagLagOnPeak", &cfg->fakelag.LagOnPeak);
+	ImGui::NextColumn();
 
 	ImGui::EndColumns(); // end columns
 

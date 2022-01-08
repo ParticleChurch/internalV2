@@ -25,9 +25,21 @@ public:
 	CUserCmd* commands{};
 	CVerifiedUserCmd* verified_commands{};
 
-	CUserCmd* GetUserCmd(int nSequenceNumber)
+	/*CUserCmd* GetUserCmd(int nSequenceNumber)
 	{
 		return &commands[nSequenceNumber % MULTIPLAYER_BACKUP];
+	}*/
+
+	CUserCmd* GetUserCmd(int sequence_number)
+	{
+		using OriginalFn = CUserCmd * (__thiscall*)(void*, int, int);
+		return GetVFunc<OriginalFn>(this, 8)(this, 0, sequence_number);
+	}
+
+	CUserCmd* GetUserCmd(int nSlot, int sequence_number)
+	{
+		typedef CUserCmd* (__thiscall* GetUserCmd_t)(void*, int, int);
+		return GetVFunc<GetUserCmd_t>(this, 8)(this, nSlot, sequence_number);
 	}
 
 	CVerifiedUserCmd* GetVerifiedCmd(int nSequenceNumber)

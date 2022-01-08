@@ -40,11 +40,18 @@ namespace H
 	PaintTraverse oPaintTraverse;
 	CamToFirstPeron oCamToFirstPeron;
 	DoPostScreenEffects oDoPostScreenEffects;
+	WriteUsercmdDeltaToBuffer oWriteUsercmdDeltaToBuffer;
 	
 	// special GUI Vars
 	bool D3dInit = false;
 	HWND CSGOWindow = NULL;
 	std::vector<std::string> console;
+
+	// special vars
+	void* WriteUsercmdDeltaToBufferReturn;
+	uintptr_t WriteUsercmd;
+	int TicksToShift = 0;
+	int TicksToRecharge = 0;
 }
 
 void H::Init()
@@ -58,6 +65,8 @@ void H::Init()
 	PDWORD pD3d9Device = *(PDWORD*)(pD3d9DevicePattern + 1);
 	IDirect3DDevice9* D3d9Device = (IDirect3DDevice9*)*pD3d9Device;
 	while (!(CSGOWindow = FindWindowW(L"Valve001", nullptr))) Sleep(10);
+	WriteUsercmdDeltaToBufferReturn = *(reinterpret_cast<void**>(FindPattern("engine.dll", "84 C0 74 04 B0 01 EB 02 32 C0 8B FE 46 3B F3 7E C9 84 C0 0F 84")));
+	WriteUsercmd = FindPattern("client.dll", " 55 8B EC 83 E4 F8 51 53 56 8B D9 8B 0D");
 
 	// do VMTs
 	L::Debug("-->VMT's");
@@ -87,6 +96,9 @@ void H::Init()
 	oCamToFirstPeron = (CamToFirstPeron)inputVMT->Hook(36, &CamToFirstPeronHook);
 	L::Debug("-->DoPostScreenEffects");
 	oDoPostScreenEffects = (DoPostScreenEffects)clientmodeVMT->Hook(44, &DoPostScreenEffectsHook);
+	L::Debug("-->WriteUsercmdDeltaToBuffer");
+	oWriteUsercmdDeltaToBuffer = (WriteUsercmdDeltaToBuffer)clientVMT->Hook(24, &WriteUsercmdDeltaToBufferHook);
+
 }
 
 void H::Free()
@@ -127,6 +139,7 @@ void H::Free()
 	delete esp;
 	delete aimbot;
 	delete thirdperson;
+	delete zeusbot;
 
 	// let user do input lol
 	I::inputsystem->EnableInput(true);
@@ -198,6 +211,7 @@ long __stdcall H::EndSceneHook(IDirect3DDevice9* device)
 		}
 
 		menu->Render();
+		esp->RunEndScene();
 
 
 		/*aimbot->RenderStats();
@@ -260,6 +274,11 @@ LRESULT __stdcall H::WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 	return CallWindowProc(oWndProc, hWnd, uMsg, wParam, lParam);
 }
 
+
+//sigs
+#define sig_player_by_index "85 C9 7E 2A A1"
+#define sig_draw_server_hitboxes "55 8B EC 81 EC ? ? ? ? 53 56 8B 35 ? ? ? ? 8B D9 57 8B CE"
+
 void __stdcall H::FrameStageNotifyHook(int stage)
 {
 	if  (DEBUG_HOOKS) L::Debug("FrameStageNotifyHook");
@@ -300,25 +319,53 @@ void __stdcall H::FrameStageNotifyHook(int stage)
 		return oFrameStageNotify(stage);
 	}
 
-	
-
 	static int deadflagOffset = N::GetOffset("DT_BasePlayer", "deadflag");
 	if (stage == FRAME_RENDER_START) {
 		if (cfg->Keybinds["Thirdperson"].boolean)
 		{
 			// if no aa...
-			if(!cfg->aa.Enable)
+			if(!cfg->aa.Enable && !cfg->aa.LegitAA)
 				*(QAngle*)((DWORD)G::Localplayer + deadflagOffset + 4) = G::EndAngle;
 			// if aa
 			else
-				*(QAngle*)((DWORD)G::Localplayer + deadflagOffset + 4) = QAngle(89.f, G::real.y);
+				*(QAngle*)((DWORD)G::Localplayer + deadflagOffset + 4) = QAngle(G::real.x, G::real.y);
 		}
-			
 	}
 
-	lagcomp->Run_FSN(stage);
+	if (stage == FRAME_RENDER_START && G::Localplayer && G::LocalplayerAlive && cfg->Keybinds["Thirdperson"].boolean)
+	{
+		static auto util_playerbyindex = FindPattern("server.dll", "85 C9 7E 32 A1"); 
+		static auto draw_server_hitboxes = FindPattern("server.dll", "55 8B EC 81 EC ? ? ? ? 53 56 8B 35 ? ? ? ? 8B D9 57 8B CE");
+
+		auto t = -1.0f;
+
+		auto idx = I::engine->GetLocalPlayer();
+
+		L::Debug("asm bitches");
+
+		__asm {
+			mov ecx, idx
+			call util_playerbyindex
+			cmp eax, 0
+			je gay
+			pushad
+			movss xmm1, t
+			push 0
+			mov ecx, eax
+			call draw_server_hitboxes
+			popad
+		}
+
+	gay:
+		{
+
+		}
+	}
+	
 
 	oFrameStageNotify(stage);
+
+	lagcomp->Run_FSN(stage);
 }
 
 bool __stdcall H::CreateMoveHook(float flInputSampleTime, CUserCmd* cmd)
@@ -377,10 +424,24 @@ bool __stdcall H::CreateMoveHook(float flInputSampleTime, CUserCmd* cmd)
 		// fakelag
 		antiaim->FakelagStart();
 		// put stuff like exploit start here (for predicted and actual value of sendpacket)
+		if (TicksToShift > 0 || TicksToRecharge)
+			antiaim->PredictedVal = true;
+
 		bSendPacket = antiaim->FakelagEnd();
 
 		// run antiaim aa
 		antiaim->Run();
+
+		// run fakeduck
+		if (cfg->Keybinds["Fake Duck"].boolean)
+		{
+			G::cmd->iButtons |= IN_BULLRUSH;
+			if (I::engine->GetNetChannelInfo()->chokedPackets > 7) // usually 7
+				G::cmd->iButtons |= IN_DUCK;
+			else
+				G::cmd->iButtons &= ~IN_DUCK;
+		}
+		
 
 		// offensive 
 		if (DEBUG_HOOKS) L::Debug("backtrack");
@@ -427,6 +488,37 @@ bool __stdcall H::CreateMoveHook(float flInputSampleTime, CUserCmd* cmd)
 		// movmeent fix
 		if (DEBUG_HOOKS) L::Debug("CM_End");
 		movement->CM_End();
+
+		if ((G::cmd->iButtons & IN_ATTACK) && G::Localplayer->CanShoot())
+		{
+			if (cfg->aimbot.EnableHs)
+				TicksToShift = 3;
+			if (cfg->aimbot.EnableDt)
+				TicksToShift = 16;
+			bSendPacket = true;
+		}
+		
+		// recharge dt (but if we NEED to shoot, and can... shoot)
+		static int LastChargeTickcount = G::cmd->iTickCount;
+		if (TicksToRecharge > 0 && !(G::cmd->iButtons & IN_ATTACK) && G::Localplayer->CanShoot())
+		{
+			if (G::cmd->iTickCount != LastChargeTickcount)
+			{
+				TicksToRecharge-= 1; // dummy thicc maths
+				LastChargeTickcount = G::cmd->iTickCount;
+			}
+			G::cmd->iTickCount = INT_MAX;
+		}
+		
+		// dummy aimbot fix?
+		if (TicksToShift > 0)
+			G::cmd->iButtons |= IN_ATTACK;
+
+		H::console.clear();
+		H::console.resize(0);
+		H::console.push_back("TicksToShift: " + std::to_string(TicksToShift));
+		H::console.push_back("TicksToRecharge: " + std::to_string(TicksToRecharge));
+
 	}
 
 	return false; //silent aim on false (only for client)
@@ -522,4 +614,77 @@ void __stdcall H::DoPostScreenEffectsHook(int param)
 	thirdperson->Run_DoPostScreenEffects();
 
 	return oDoPostScreenEffects(I::clientmode, param);
+}
+
+static void CWriteUsercmd(void* buf, CUserCmd* Cin, CUserCmd* Cout)
+{
+	static auto WriteUsercmdF = H::WriteUsercmd;
+
+	__asm
+	{
+		mov ecx, buf
+		mov edx, Cin
+		push Cout
+		call WriteUsercmdF
+		add esp, 4
+	}
+}
+
+bool __fastcall H::WriteUsercmdDeltaToBufferHook(void* ecx, void* edx, int slot, void* buf, int from, int to, bool isnewcommand)
+{
+	//return oWriteUsercmdDeltaToBuffer(ecx, slot, buf, from, to, isnewcommand);
+	static auto ofunct = oWriteUsercmdDeltaToBuffer;
+
+	// if no shift...
+	if (TicksToShift <= 0)
+		return ofunct(ecx, slot, buf, from, to, isnewcommand);
+
+	if (from != -1)
+		return true;
+
+	auto CL_SendMove = []() {
+		using CL_SendMove_t = void(__fastcall*)(void);
+		static CL_SendMove_t CL_SendMoveF = (CL_SendMove_t)FindPattern("engine.dll", "55 8B EC A1 ? ? ? ? 81 EC ? ? ? ? B9 ? ? ? ? 53 8B 98");
+
+		CL_SendMoveF();
+	};
+
+	int* pNumBackupCommands = (int*)(reinterpret_cast<uintptr_t>(buf) - 0x30);
+	int* pNumNewCommands = (int*)(reinterpret_cast<uintptr_t>(buf) - 0x2C);
+	auto net_channel = *reinterpret_cast<INetChannelInfo**>(reinterpret_cast<uintptr_t>(I::clientstate) + 0x9C);
+	int32_t new_commands = *pNumNewCommands;
+
+	int32_t next_cmdnr = I::clientstate->iLastOutgoingCommand + I::clientstate->nChokedCommands + 1;
+	int32_t total_new_commands = TicksToShift;//min(doubletap->m_tick_to_shift, 16);
+	TicksToShift -= total_new_commands;
+	TicksToRecharge += total_new_commands;
+
+	from = -1;
+	*pNumNewCommands = total_new_commands;
+	*pNumBackupCommands = 0;
+
+	for (to = next_cmdnr - new_commands + 1; to <= next_cmdnr; to++) {
+		if (!ofunct(ecx, slot, buf, from, to, isnewcommand))
+			return false;
+
+		from = to;
+	}
+
+	CUserCmd* last_realCmd = I::input->GetUserCmd(slot, from);
+	CUserCmd fromCmd;
+
+	if (last_realCmd)
+		fromCmd = *last_realCmd;
+
+	CUserCmd toCmd = fromCmd;
+	toCmd.iCommandNumber++;
+	toCmd.iTickCount++;
+
+	for (int i = new_commands; i <= total_new_commands; i++) {
+		CWriteUsercmd(buf, &toCmd, &fromCmd);
+		fromCmd = toCmd;
+		toCmd.iCommandNumber++;
+		toCmd.iTickCount++;
+	}
+	return true;
 }

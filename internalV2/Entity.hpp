@@ -357,7 +357,7 @@ public: // NETVARS
 		static DWORD offset = N::GetOffset("DT_BasePlayer", "m_vecVelocity[0]");
 		return *(Vector*)((DWORD)this + offset);
 	}
-	Vector GetVecOrigin() {
+	Vector& GetVecOrigin() {
 		if constexpr (DEBUG_ENTITY) L::Debug("GetVecOrigin");
 		static DWORD offset = N::GetOffset("DT_BasePlayer", "m_vecOrigin");
 		return *(Vector*)((DWORD)this + offset);

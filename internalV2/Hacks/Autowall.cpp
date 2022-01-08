@@ -4,6 +4,26 @@ CAutoWall* autowall = new CAutoWall();
 
 #define DEBUG_AUTOWALL false
 
+float CAutoWall::GetDamage(Vector start, Entity* pLocal, const Vector& vecPoint, FireBulletData_t* pDataOut)
+{
+	if constexpr (DEBUG_AUTOWALL) L::Debug("GetDamage");
+
+	const Vector vecPosition = start;
+
+	// setup data
+	FireBulletData_t data = { };
+	data.vecPosition = vecPosition;
+	data.vecDirection = (vecPoint - vecPosition).Normalized();
+
+	if (Entity* pWeapon = pLocal->GetActiveWeapon(); pWeapon == nullptr || !SimulateFireBullet(pLocal, pWeapon, data))
+		return -1.0f;
+
+	if (pDataOut != nullptr)
+		*pDataOut = data;
+
+	return data.flCurrentDamage;
+}
+
 float CAutoWall::GetDamage(Entity* pLocal, const Vector& vecPoint, FireBulletData_t* pDataOut)
 {
 	if constexpr (DEBUG_AUTOWALL) L::Debug("GetDamage");

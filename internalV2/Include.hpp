@@ -62,6 +62,8 @@
 #include "Hacks/Aimbot.hpp"
 #include "Hacks/Thirdperson.hpp"
 #include "Hacks/AntiAim.hpp"
+#include "Hacks/ZeusBot.hpp"
+#include "Hacks/AnimFix.hpp"
 
 // Hooks
 #include "Hooks.hpp"            //hooking ingame functions

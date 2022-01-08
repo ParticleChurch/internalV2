@@ -198,8 +198,12 @@ void LagComp::CleanUp()
 		// return false if there is no records for that
 		if (lagcomp->PlayerList.find(userid) == lagcomp->PlayerList.end())
 			return false;
+
 		// otherwise clear records and erase the item, then return true
+		if constexpr (DEBUG_LAGCOMP) L::Debug("lagcomp->clear()");
 		lagcomp->PlayerList[userid].records.clear();
+
+		if constexpr (DEBUG_LAGCOMP) L::Debug("lagcomp->resize()");
 		lagcomp->PlayerList[userid].records.resize(0);
 
 		if constexpr (DEBUG_LAGCOMP) L::Debug("lagcomp->erase()");

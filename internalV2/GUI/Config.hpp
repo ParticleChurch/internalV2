@@ -85,10 +85,16 @@ namespace CFG
 		float RandomUpdateTime = 10.f;	// random update time
 		float SpinStep = 1.f;			// spin step
 		bool AntiBrute = false;		// Antibrute
+		float LeanAngle = 0.f;
+
+		bool LegitAA = false;
+		float LegitAmount = 0;
 	};
 
 	struct Aimbot
 	{
+		bool EnableHs = false;
+		bool EnableDt = false;
 		float Hitchance = 66.f;
 		int MinDamage = 1;
 		int Priority = 0; // 0 is none
@@ -101,6 +107,7 @@ namespace CFG
 	{
 		int LagTicks = 1;
 		int RandomTicks = 0;
+		bool LagOnPeak = false;
 	};
 }
 

@@ -174,6 +174,7 @@
     <ClCompile Include="Hacks\Lagcomp.cpp" />
     <ClCompile Include="Hacks\Movement.cpp" />
     <ClCompile Include="Hacks\Thirdperson.cpp" />
+    <ClCompile Include="Hacks\ZeusBot.cpp" />
     <ClCompile Include="Hooks.cpp" />
     <ClCompile Include="ImGui\imgui.cpp" />
     <ClCompile Include="ImGui\imgui_demo.cpp" />
@@ -201,6 +202,7 @@
     <ClInclude Include="Hacks\Lagcomp.hpp" />
     <ClInclude Include="Hacks\Movement.hpp" />
     <ClInclude Include="Hacks\Thirdperson.hpp" />
+    <ClInclude Include="Hacks\ZeusBot.hpp" />
     <ClInclude Include="Hooks.hpp" />
     <ClInclude Include="ImGui\imconfig.h" />
     <ClInclude Include="ImGui\imgui.h" />

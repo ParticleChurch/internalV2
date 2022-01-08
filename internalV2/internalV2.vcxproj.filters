@@ -132,6 +132,9 @@
     <ClCompile Include="Hacks\AntiAim.cpp">
       <Filter>Source Files\Hacks</Filter>
     </ClCompile>
+    <ClCompile Include="Hacks\ZeusBot.cpp">
+      <Filter>Source Files\Hacks</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Utils\Logger.hpp">
@@ -372,6 +375,9 @@
       <Filter>Header Files\Valve\Interfaces</Filter>
     </ClInclude>
     <ClInclude Include="Hacks\AntiAim.hpp">
+      <Filter>Header Files\Hacks</Filter>
+    </ClInclude>
+    <ClInclude Include="Hacks\ZeusBot.hpp">
       <Filter>Header Files\Hacks</Filter>
     </ClInclude>
   </ItemGroup>

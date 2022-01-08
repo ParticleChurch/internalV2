@@ -22,11 +22,22 @@ private:
 	// lag funcs
 	bool DistanceBreaker();
 	bool TimeBreaker();
+	void LagOnPeak();
+
+	// Trigger Limits
+	float TrigDistance;
+	float TrigTicks;
+
 private:
 	// AA funcs
 	float GetYawBase();
 	void Rage();
+
+	void Legit();
+
 public:
+	bool LaggingOnPeak = false;
+
 	void RunMovement();
 	void Run();
 	void FakelagStart();
