@@ -41,8 +41,10 @@ public:
 		std::deque<LagComp::Record> records;
 
 		// resolver crap
-		int Shots = 0; // shots made on player in general
-		int ShotsMissed = 0;
+		int shots = 0;		// shots attempted
+		int goodShots = 0;	// good shots that we hit
+		int spreadShots = 0;// spread shots on this targ
+
 	};
 
 private:

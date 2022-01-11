@@ -64,6 +64,17 @@ public:
 	//int			iInReliableState;		//0x0028 state of incoming reliable data
 	//int			iChokedPackets;			//0x002C number of choked packets
 	//std::byte	pad2[0x414];			//0x0030
+	float GetLatency(int flow)
+	{
+		typedef float(__thiscall* ogetLatency)(void*, int);
+		return GetVFunc<ogetLatency>(this, 9)(this, flow);
+	}
+
+	float GetAvgLatency(int flow)
+	{
+		typedef float(__thiscall* oGetAvgLatency)(void*, int);
+		return GetVFunc<oGetAvgLatency>(this, 10)(this, flow);
+	}
 
 	std::byte pad[44];
 	int chokedPackets;

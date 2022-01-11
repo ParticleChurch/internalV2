@@ -14,3 +14,5 @@
 #include "IVModelInfo.hpp"
 #include "IInput.hpp"
 #include "IVDebugOverlay.hpp"
+#include "CEffects.hpp"
+#include "GameEventManager.hpp"

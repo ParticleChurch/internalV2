@@ -28,6 +28,8 @@ namespace I
 	extern IInput* input;
 	extern IVDebugOverlay* debugoverlay;
 	extern IClientState* clientstate;
+	extern CEffects* effects;
+	extern GameEventManager* gameeventmanager;
 
 	// func
 	typedef void* (*InterfaceCreator)(const char*, int);

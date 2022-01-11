@@ -64,6 +64,8 @@
 #include "Hacks/AntiAim.hpp"
 #include "Hacks/ZeusBot.hpp"
 #include "Hacks/AnimFix.hpp"
+#include "Hacks/DlightManager.hpp"
+#include "Hacks/Resolver.hpp"
 
 // Hooks
 #include "Hooks.hpp"            //hooking ingame functions

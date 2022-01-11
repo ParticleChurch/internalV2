@@ -20,6 +20,10 @@ public:
 class Vector
 {
 public:
+	std::string str()
+	{
+		return "(" + std::to_string(x) + ", " +  std::to_string(y) + ", " + std::to_string(z) + ")";
+	}
 	constexpr Vector(float x = 0.f, float y = 0.f, float z = 0.f) :
 		x(x), y(y), z(z) { }
 

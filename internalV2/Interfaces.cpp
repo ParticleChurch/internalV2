@@ -19,6 +19,8 @@ namespace I
 	IInput* input = nullptr;
 	IVDebugOverlay* debugoverlay = nullptr;
 	IClientState* clientstate = nullptr;
+	CEffects* effects = nullptr;
+	GameEventManager* gameeventmanager = nullptr;
 
 	void Init()
 	{
@@ -41,6 +43,8 @@ namespace I
 		//bool sample = GetInterface2<bool>("materialsystem.dll", "CCommonHostState", true);
 		clientstate = **reinterpret_cast<IClientState***>(FindPattern("engine.dll", "A1 ? ? ? ? 8B 88 ? ? ? ? 85 C9 75 07") + 0x1);
 		//= **reinterpret_cast<ClientState***>(FindPattern("engine.dll", "A1 ? ? ? ? 8B 80 ? ? ? ? C3") + 1);
-	
+		effects = GetInterface2<CEffects>("engine.dll", "VEngineEffects0", false); // i got lazy lol
+		gameeventmanager = GetInterface<GameEventManager    >("engine.dll", "GAMEEVENTSMANAGER002");
+
 	}
 }

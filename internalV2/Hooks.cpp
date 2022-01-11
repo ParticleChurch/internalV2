@@ -20,6 +20,124 @@ void ConsoleColorMsg(const Color& color, const char* fmt, Args ...args)
 	con_color_msg(color, fmt, args...);
 }
 
+class EventListener : public GameEventListener
+{
+public:
+	EventListener()
+	{
+		I::gameeventmanager->AddListener(this, "bullet_impact");	// Resolver
+		I::gameeventmanager->AddListener(this, "player_hurt");		// Resolver/Hitmarker
+		I::gameeventmanager->AddListener(this, "weapon_fire");		// Resolver
+		I::gameeventmanager->AddListener(this, "player_death");		// Hitmarker
+		I::gameeventmanager->AddListener(this, "round_freeze_end");	// AA (freezetime)
+		I::gameeventmanager->AddListener(this, "round_prestart");	// AA (freezetime)
+	}
+	~EventListener()
+	{
+		I::gameeventmanager->RemoveListener(this);
+	}
+
+	virtual void FireGameEvent(GameEvent* event)
+	{
+		switch (StrHash::HashRuntime(event->GetName())) {
+		case StrHash::Hash("bullet_impact"):
+		{
+			int UserID = event->GetInt("userid");
+
+			if (I::engine->GetPlayerForUserID(UserID) != G::LocalplayerIndex)
+				return;
+
+
+			Vector loc = Vector(event->GetFloat("x"), event->GetFloat("y"), event->GetFloat("z"));
+			resolver->Impact(loc);
+		}
+		break;
+		case StrHash::Hash("weapon_fire"):
+		{
+			/*
+			Name:	weapon_fire
+			Structure:	
+			short	userid	
+			string	weapon	weapon name used
+			bool	silenced	is weapon silenced
+			*/
+			int UserID = event->GetInt("userid");
+
+			if (I::engine->GetPlayerForUserID(UserID) != G::LocalplayerIndex)
+				return;
+
+			resolver->Shot();
+		}
+		break;
+		case StrHash::Hash("player_hurt"):
+		{
+			/*
+			player_hurt
+			Name:	player_hurt
+			Structure:
+			short	userid	user ID of who was hurt
+			short	attacker	user ID of who attacked
+			byte	health	remaining health points
+			byte	armor	remaining armor points
+			string	weapon	weapon name attacker used, if not the world
+			short	dmg_health	damage done to health
+			byte	dmg_armor	damage done to armor
+			byte	hitgroup	hitgroup that was damaged
+			*/
+			// if the localplayer gets hurt, return
+			int UserID = event->GetInt("userid");
+			if (I::engine->GetPlayerForUserID(UserID) == G::LocalplayerIndex)
+				return;
+
+			// if the localplayer isn't shootin, return
+			int iAttacker = event->GetInt("attacker");
+			if (I::engine->GetPlayerForUserID(iAttacker) != G::LocalplayerIndex)
+				return;
+
+			resolver->Hurt(event->GetInt("userid"), event->GetInt("hitgroup"), event->GetInt("dmg_health"));
+
+		}
+		break;
+		case StrHash::Hash("player_death"):
+		{
+			/*
+			player_death
+			Note: When a client dies
+
+			Name:	player_death
+			Structure:
+			short	userid	user ID who died
+			short	attacker	user ID who killed
+			short	assister	user ID who assisted in the kill
+			bool	assistedflash	assister helped with a flash
+			string	weapon	weapon name killer used
+			string	weapon_itemid	inventory item id of weapon killer used
+			string	weapon_fauxitemid	faux item id of weapon killer used
+			string	weapon_originalowner_xuid
+			bool	headshot	singals a headshot
+			short	dominated	did killer dominate victim with this kill
+			short	revenge	did killer get revenge on victim with this kill
+			short	wipe	To do: check if indicates on a squad wipeout in Danger Zone
+			short	penetrated	number of objects shot penetrated before killing target
+			bool	noreplay	if replay data is unavailable, this will be present and set to false
+			bool	noscope	kill happened without a scope, used for death notice icon
+			bool	thrusmoke	hitscan weapon went through smoke grenade
+			bool	attackerblind	attacker was blind from flashbang
+			*/
+
+
+		}
+		break;
+		case StrHash::Hash("round_freeze_end"):
+
+			break;
+		case StrHash::Hash("round_prestart"):
+
+			break;
+		}
+	}
+};
+
 namespace H
 {
 	// VMT Managers
@@ -52,6 +170,7 @@ namespace H
 	uintptr_t WriteUsercmd;
 	int TicksToShift = 0;
 	int TicksToRecharge = 0;
+	EventListener* g_EventListener;
 }
 
 void H::Init()
@@ -99,6 +218,8 @@ void H::Init()
 	L::Debug("-->WriteUsercmdDeltaToBuffer");
 	oWriteUsercmdDeltaToBuffer = (WriteUsercmdDeltaToBuffer)clientVMT->Hook(24, &WriteUsercmdDeltaToBufferHook);
 
+	// special lol
+	g_EventListener = new EventListener();
 }
 
 void H::Free()
@@ -140,6 +261,8 @@ void H::Free()
 	delete aimbot;
 	delete thirdperson;
 	delete zeusbot;
+	delete dlightManager;
+	delete g_EventListener;
 
 	// let user do input lol
 	I::inputsystem->EnableInput(true);
@@ -204,7 +327,7 @@ long __stdcall H::EndSceneHook(IDirect3DDevice9* device)
 		if (menu->ConsoleWindow)
 		{
 			ImGui::Begin("Console");
-			ImGui::Text(("Aimbot Scans (per tick): " + std::to_string(aimbot->TheoreticalScans)).c_str());
+			//ImGui::Text(("Aimbot Scans (per tick): " + std::to_string(aimbot->TheoreticalScans)).c_str());
 			for (auto& a : H::console)
 				ImGui::Text(a.c_str());
 			ImGui::End();
@@ -362,6 +485,7 @@ void __stdcall H::FrameStageNotifyHook(int stage)
 		}
 	}
 	
+	resolver->Run();
 
 	oFrameStageNotify(stage);
 
@@ -379,6 +503,10 @@ bool __stdcall H::CreateMoveHook(float flInputSampleTime, CUserCmd* cmd)
 		/*return oFunc;*/
 		return false;
 	}
+
+	//Anti exploiting, will need to deal with later lol
+	/*static CConVar* cl_lagcompensation = I::convar->FindVar("cl_lagcompensation");
+	cl_lagcompensation->SetValue(0);*/
 
 	if (I::engine->IsInGame() && cmd && G::Localplayer)
 	{
@@ -514,10 +642,7 @@ bool __stdcall H::CreateMoveHook(float flInputSampleTime, CUserCmd* cmd)
 		if (TicksToShift > 0)
 			G::cmd->iButtons |= IN_ATTACK;
 
-		H::console.clear();
-		H::console.resize(0);
-		H::console.push_back("TicksToShift: " + std::to_string(TicksToShift));
-		H::console.push_back("TicksToRecharge: " + std::to_string(TicksToRecharge));
+		
 
 	}
 
@@ -558,6 +683,11 @@ void __stdcall H::PaintTraverseHook(int vguiID, bool force, bool allowForcing)
 
 		if (!G::Localplayer || !I::engine->IsInGame())
 			return;
+
+		if (DEBUG_HOOKS) L::Debug("manager start");
+		dlightManager->Run();
+		if (DEBUG_HOOKS) L::Debug("manager end");
+
 
 		esp->RunPaintTraverse();
 

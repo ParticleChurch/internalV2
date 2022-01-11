@@ -33,7 +33,7 @@ namespace Calc
 		static Vector cur;
 		cur = { G::StartAngle.x, G::StartAngle.y,0 };
 		cur.NormalizeAngle();
-		cur += G::Localplayer->GetAimPunchAngle();
+		cur += G::Localplayer->GetAimPunchAngle()*2;
 		cur.NormalizeAngle();
 
 		//turn to 0-360 degrees

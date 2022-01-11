@@ -195,7 +195,12 @@ void LagComp::CleanUp()
 	auto CleanAndDeletePlayer = [](int userid) {
 		if constexpr (DEBUG_LAGCOMP) L::Debug("lagcomp->CleanAndDeletePlayer()");
 
+		// make sure this fucker isn't emtpy
+		if constexpr (DEBUG_LAGCOMP) L::Debug("CleanAndDeletePlayer->empty check");
+		if (lagcomp->PlayerList.empty()) return false;
+
 		// return false if there is no records for that
+		if constexpr (DEBUG_LAGCOMP) L::Debug("CleanAndDeletePlayer->PlayerList find check");
 		if (lagcomp->PlayerList.find(userid) == lagcomp->PlayerList.end())
 			return false;
 

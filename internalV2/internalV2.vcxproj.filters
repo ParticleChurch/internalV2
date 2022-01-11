@@ -135,6 +135,12 @@
     <ClCompile Include="Hacks\ZeusBot.cpp">
       <Filter>Source Files\Hacks</Filter>
     </ClCompile>
+    <ClCompile Include="Hacks\DlightManager.cpp">
+      <Filter>Source Files\Hacks</Filter>
+    </ClCompile>
+    <ClCompile Include="Hacks\Resolver.cpp">
+      <Filter>Source Files\Hacks</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Utils\Logger.hpp">
@@ -356,9 +362,6 @@
     <ClInclude Include="Valve\SDK\Animations.h">
       <Filter>Header Files\Valve\SDK</Filter>
     </ClInclude>
-    <ClInclude Include="Valve\SDK\Vector.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Hacks\Aimbot.hpp">
       <Filter>Header Files\Hacks</Filter>
     </ClInclude>
@@ -379,6 +382,24 @@
     </ClInclude>
     <ClInclude Include="Hacks\ZeusBot.hpp">
       <Filter>Header Files\Hacks</Filter>
+    </ClInclude>
+    <ClInclude Include="Valve\Interfaces\CEffects.hpp">
+      <Filter>Header Files\Valve\Interfaces</Filter>
+    </ClInclude>
+    <ClInclude Include="Valve\SDK\Vector.hpp">
+      <Filter>Header Files\Valve\SDK</Filter>
+    </ClInclude>
+    <ClInclude Include="Hacks\DlightManager.hpp">
+      <Filter>Header Files\Hacks</Filter>
+    </ClInclude>
+    <ClInclude Include="Hacks\Resolver.hpp">
+      <Filter>Header Files\Hacks</Filter>
+    </ClInclude>
+    <ClInclude Include="Valve\Interfaces\GameEventManager.hpp">
+      <Filter>Header Files\Valve\Interfaces</Filter>
+    </ClInclude>
+    <ClInclude Include="Utils\StrHash.hpp">
+      <Filter>Header Files\Utils</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
