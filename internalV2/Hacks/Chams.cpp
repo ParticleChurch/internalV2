@@ -53,17 +53,16 @@ void Chams::Init()
 
 void Chams::Run(void* thisptr, int edx, void* ctx, void* state, const ModelRenderInfo& info, matrix3x4_t* customBoneToWorld)
 {
-	bool is_arm = strstr(info.model->szName + 17, "arms") != nullptr;
 	bool is_player = strstr(info.model->szName, "models/player") != nullptr;
-	bool is_sleeve = strstr(info.model->szName + 17, "sleeve") != nullptr;
-	bool is_weapon = strstr(info.model->szName, "models/weapons") != nullptr;
-
+	
 	static Color color_blocked = Color(200, 100, 100);
 	static Color color_visible(100, 200, 100);
 	Entity* ent = I::entitylist->GetClientEntity(info.entityIndex);
 	Entity* local = I::entitylist->GetClientEntity(I::engine->GetLocalPlayer());
 	static PlayerInfo_t bInfo;
 	bool ValidInfo = I::engine->GetPlayerInfo(info.entityIndex, &bInfo);
+
+	bool AppliedChams = false;
 
 	if (ent && local && ent->GetHealth() > 0 && ent->IsPlayer() && ValidInfo)
 	{
@@ -121,47 +120,53 @@ void Chams::Run(void* thisptr, int edx, void* ctx, void* state, const ModelRende
 			// no need to change teamate chams lol
 		}
 	}
-	else if (is_sleeve)
+	else if (strstr(info.model->szName, "models/weapons/v_") != nullptr)
 	{
-
-		if (cfg->chams.Sleeves)
+		bool is_sleeve = strstr(info.model->szName + 17, "sleeve") != nullptr;
+		bool is_arm = strstr(info.model->szName + 17, "arms") != nullptr;
+		if (is_sleeve)
 		{
-			OverideMat(
-				false,
-				cfg->chams.SleeveType,
-				cfg->chams.SleevesColor.a() / 255.f,	//transparent?
-				cfg->chams.SleevesColor,
-				thisptr, ctx, state, info, customBoneToWorld);
+
+			if (cfg->chams.Sleeves)
+			{
+				OverideMat(
+					false,
+					cfg->chams.SleeveType,
+					cfg->chams.SleevesColor.a() / 255.f,	//transparent?
+					cfg->chams.SleevesColor,
+					thisptr, ctx, state, info, customBoneToWorld);
+			}
+
 		}
-
-	}
-	else if (is_arm)
-	{
-
-		if (cfg->chams.Arms)
+		else if (is_arm)
 		{
-			OverideMat(
-				false,
-				cfg->chams.ArmType,
-				cfg->chams.ArmColor.a() / 255.f,	//transparent?
-				cfg->chams.ArmColor,
-				thisptr, ctx, state, info, customBoneToWorld);
-		}
 
-	}
-	else if (is_weapon)
-	{
-		if (cfg->chams.Weapon && false)
+			if (cfg->chams.Arms)
+			{
+				OverideMat(
+					false,
+					cfg->chams.ArmType,
+					cfg->chams.ArmColor.a() / 255.f,	//transparent?
+					cfg->chams.ArmColor,
+					thisptr, ctx, state, info, customBoneToWorld);
+			}
+
+		}
+		else
 		{
-			//ValidInfo = true;
-			OverideMat(
-				false,
-				cfg->chams.WeaponType,
-				cfg->chams.WeaponColor.a() / 255.f,	//transparent?
-				cfg->chams.WeaponColor,
-				thisptr, ctx, state, info, customBoneToWorld);
+			if (cfg->chams.Weapon)
+			{
+				ValidInfo = true;
+				OverideMat(
+					false,
+					cfg->chams.WeaponType,
+					cfg->chams.WeaponColor.a() / 255.f,	//transparent?
+					cfg->chams.WeaponColor,
+					thisptr, ctx, state, info, customBoneToWorld);
+			}
 		}
 	}
+	
 
 	H::oDrawModelExecute(thisptr, ctx, state, info, customBoneToWorld);
 	if (ValidInfo)

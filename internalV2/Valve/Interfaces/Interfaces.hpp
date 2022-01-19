@@ -18,3 +18,4 @@
 #include "GameEventManager.hpp"
 #include "MaterialSystem.hpp"
 #include "ModelRender.hpp"
+#include "GlowObjectManager .hpp"

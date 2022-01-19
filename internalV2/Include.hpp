@@ -67,6 +67,7 @@
 #include "Hacks/DlightManager.hpp"
 #include "Hacks/Resolver.hpp"
 #include "Hacks/Chams.hpp"
+#include "Hacks/Glow.hpp"
 
 // Hooks
 #include "Hooks.hpp"            //hooking ingame functions

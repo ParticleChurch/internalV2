@@ -279,6 +279,7 @@ void H::Free()
 	delete dlightManager;
 	delete g_EventListener;
 	delete chams;
+	delete glow;
 
 	// let user do input lol
 	I::inputsystem->EnableInput(true);
@@ -766,6 +767,8 @@ void __stdcall H::DoPostScreenEffectsHook(int param)
 	{
 		static auto brightness = I::convar->FindVar("mat_force_tonemap_scale");
 		brightness->SetValue(cfg->world_vis.brightness);
+
+		glow->run();
 	}
 
 	return oDoPostScreenEffects(I::clientmode, param);

@@ -144,6 +144,9 @@
     <ClCompile Include="Hacks\Chams.cpp">
       <Filter>Source Files\Hacks</Filter>
     </ClCompile>
+    <ClCompile Include="Hacks\Glow.cpp">
+      <Filter>Source Files\Hacks</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Utils\Logger.hpp">
@@ -421,6 +424,12 @@
     </ClInclude>
     <ClInclude Include="Valve\SDK\ModelRenderInfo.hpp">
       <Filter>Header Files\Valve\SDK</Filter>
+    </ClInclude>
+    <ClInclude Include="Valve\Interfaces\GlowObjectManager .hpp">
+      <Filter>Header Files\Valve\Interfaces</Filter>
+    </ClInclude>
+    <ClInclude Include="Hacks\Glow.hpp">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

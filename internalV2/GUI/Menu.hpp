@@ -15,6 +15,7 @@ private: // actual rendering
 	void RenderFakelag();
 	void RenderChams();
 	void RenderWorldVisuals();
+	void RenderGlow();
 public:
 	bool ConsoleWindow = true;
 	void Render();

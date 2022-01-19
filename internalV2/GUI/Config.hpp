@@ -57,6 +57,21 @@ namespace CFG
 		Color WeaponColor = Color();
 	};
 
+	struct Glow
+	{
+		bool EnemyGlow = false;
+		int EnemyStyle;
+		Color EnemyColor;
+
+		bool FriendGlow = false;
+		int FriendStyle;
+		Color FriendColor;
+
+		bool LocalGlow = false;
+		int LocalStyle;
+		Color LocalColor;;
+	};
+
 	struct Visuals {
 		float ThirdPersonDistance = 150.f;
 		bool SpectatorList = false;
@@ -156,6 +171,7 @@ public:
 	CFG::Fakelag fakelag;
 	CFG::Chams chams;
 	CFG::WorldVisuals world_vis;
+	CFG::Glow glow;
 
 	Config();
 	void HandleKeybinds();

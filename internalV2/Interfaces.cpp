@@ -1,4 +1,4 @@
-#include "Include.hpp"
+	#include "Include.hpp"
 
 namespace I
 {
@@ -23,6 +23,7 @@ namespace I
 	GameEventManager* gameeventmanager = nullptr;
 	MaterialSystem* materialsystem = nullptr;
 	ModelRender* modelrender = nullptr;
+	GlowObjectManager* glowobjectmanager = nullptr;
 
 	void Init()
 	{
@@ -49,5 +50,6 @@ namespace I
 		gameeventmanager = GetInterface<GameEventManager    >("engine.dll", "GAMEEVENTSMANAGER002");
 		materialsystem = GetInterface<MaterialSystem      >("materialsystem.dll", "VMaterialSystem080");
 		modelrender = GetInterface<ModelRender         >("engine.dll", "VEngineModel016");
+		glowobjectmanager = *reinterpret_cast<GlowObjectManager**>(FindPattern("client.dll", "0F 11 05 ? ? ? ? 83 C8 01") + 3);
 	}
 }

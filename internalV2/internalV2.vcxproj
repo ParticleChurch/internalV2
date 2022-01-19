@@ -166,6 +166,7 @@
     <ClCompile Include="Globals.cpp" />
     <ClCompile Include="GUI\Config.cpp" />
     <ClCompile Include="GUI\Menu.cpp" />
+    <ClCompile Include="Hacks\Glow.cpp" />
     <ClCompile Include="Hacks\Ragebot.cpp" />
     <ClCompile Include="Hacks\AntiAim.cpp" />
     <ClCompile Include="Hacks\Autowall.cpp" />
@@ -197,6 +198,7 @@
     <ClInclude Include="Globals.hpp" />
     <ClInclude Include="GUI\Config.hpp" />
     <ClInclude Include="GUI\Menu.hpp" />
+    <ClInclude Include="Hacks\Glow.hpp" />
     <ClInclude Include="Hacks\Ragebot.hpp" />
     <ClInclude Include="Hacks\AntiAim.hpp" />
     <ClInclude Include="Hacks\Autowall.hpp" />
@@ -233,6 +235,7 @@
     <ClInclude Include="Valve\Interfaces\CEffects.hpp" />
     <ClInclude Include="Valve\Interfaces\Convar.hpp" />
     <ClInclude Include="Valve\Interfaces\GameEventManager.hpp" />
+    <ClInclude Include="Valve\Interfaces\GlowObjectManager .hpp" />
     <ClInclude Include="Valve\Interfaces\IBaseClientDll.hpp" />
     <ClInclude Include="Valve\Interfaces\IClientEntityList.hpp" />
     <ClInclude Include="Valve\Interfaces\IClientModeShared.hpp" />

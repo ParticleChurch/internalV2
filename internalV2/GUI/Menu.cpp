@@ -1225,7 +1225,7 @@ void Menu::RenderChams()
 	ImGui::Text("Chams");
 	ImGui::Separator();
 
-	ImGui::Columns(2, "##ChamCols"); // 4-ways, with border
+	ImGui::Columns(2, "##ChamCols", false); // 4-ways, with border
 
 	static std::vector<std::string> ChamTypes = { "Flat", "Normal", "Glow", "Animated", "Glass", "Crystal", "chrome" };
 
@@ -1321,16 +1321,74 @@ void Menu::RenderWorldVisuals()
 {
 	static float propersize = 100.f;
 	static float pos1 = 0.f;
-	mfw::StartSection("World Brightness", pos1, propersize);
+	mfw::StartSection("World Modulation", pos1, propersize);
 
 	int total_w = ImGui::GetContentRegionAvail().x - 20;
 
-	ImGui::Columns(2, "##WorldVisCols", false); // 4-ways, with border
+	ImGui::Columns(2, "##WorldModCols", false);
 
 	ImGui::Text("World Brightness");
 	ImGui::NextColumn();
 	mfw::SliderFloat("##World Brightness", &cfg->world_vis.brightness, 0.f, 1.f);
 	ImGui::NextColumn();
+
+	ImGui::EndColumns(); // end columns
+
+	mfw::EndSection(propersize, pos1);
+}
+
+void Menu::RenderGlow()
+{
+	static float propersize = 100.f;
+	static float pos1 = 0.f;
+	mfw::StartSection("Glow", pos1, propersize);
+
+	ImGui::Columns(2, "##GlowCols", false);
+
+	static std::vector<std::string> styles =
+	{
+		"Default",
+		"Rim3D",
+		"Edge",
+		"Pulsing Edge"	
+	};
+
+	ImGui::Text("Enemy Glow");
+	ImGui::NextColumn();
+	mfw::Checkbox("##EnemyGlow", &cfg->glow.EnemyGlow);
+	if (cfg->glow.EnemyGlow)
+	{
+		ImGui::SameLine();
+		ImGui::Combo("##EnemyStyle", &cfg->glow.EnemyStyle, styles);
+		ImGui::SameLine();
+		mfw::ColorPicker("##EnemyGlowColor", &cfg->glow.EnemyColor);
+	}
+	ImGui::NextColumn();
+
+	ImGui::Text("Friend Glow");
+	ImGui::NextColumn();
+	mfw::Checkbox("##FriendGlow", &cfg->glow.FriendGlow);
+	if (cfg->glow.EnemyGlow)
+	{
+		ImGui::SameLine();
+		ImGui::Combo("##FriendStyle", &cfg->glow.FriendStyle, styles);
+		ImGui::SameLine();
+		mfw::ColorPicker("##FriendGlowColor", &cfg->glow.FriendColor);
+	}
+	ImGui::NextColumn();
+
+	ImGui::Text("Local Glow");
+	ImGui::NextColumn();
+	mfw::Checkbox("##LocalGlow", &cfg->glow.LocalGlow);
+	if (cfg->glow.EnemyGlow)
+	{
+		ImGui::SameLine();
+		ImGui::Combo("##LocalStyle", &cfg->glow.LocalStyle, styles);
+		ImGui::SameLine();
+		mfw::ColorPicker("##LocalGlowColor", &cfg->glow.LocalColor);
+	}
+	ImGui::NextColumn();
+
 
 	ImGui::EndColumns(); // end columns
 
@@ -1379,6 +1437,7 @@ void Menu::Render()
 		{
 			RenderChams();
 			RenderESP();
+			RenderGlow();
 		}	
 		if (mfw::Tab == 4)
 			RenderMovement();
