@@ -2,6 +2,11 @@
 
 Resolver* resolver = new Resolver();
 
+void Resolver::AimbotShot(aim_shot_log shot)
+{
+	aim_shots.push_back(shot);
+}
+
 void Resolver::Shot()
 {
 	static int last_shot = 0;
@@ -128,6 +133,7 @@ void Resolver::MatchImpacts()
 		new_match.hurt = hurt ? *hurt : player_hurt_log();
 
 		new_matches.push_back(new_match);
+		H::console.push_back(new_match.print());
 		this->shots.pop_front();
 	}
 
@@ -139,80 +145,146 @@ void Resolver::MatchImpacts()
 		this->matches.push_back(new_matches[i]);
 }
 
+void Resolver::ResolveMatches()
+{
+	for (size_t i = 0; i < this->matches.size(); i++)
+	{
+		match_log& match = this->matches[i];
+
+		int AimbotShotIndex = -1;
+		for (int j = 0; j < this->aim_shots.size(); j++)
+		{
+			if (match.shot.time == this->aim_shots[j].time)
+				AimbotShotIndex = j;
+		}
+
+		// prob just a normal shot, ignore
+		if (AimbotShotIndex == -1) continue;
+
+		aim_shot_log aim = this->aim_shots[AimbotShotIndex];
+
+		H::console.push_back("____________________");
+
+		// we actually hit something
+		bool did_hit = false;
+		if (!match.miss)
+		{
+			// right higroup, right person...
+			if (match.hurt.hitgroup == aim.hitgroup && match.hurt.userid == aim.userID)
+			{
+				lagcomp->PlayerList[match.hurt.userid].goodShots++;
+				H::console.push_back("good resolve");
+				continue;
+			} 
+			else if (match.hurt.userid == aim.userID)
+			{
+				// lucky spread hit
+				lagcomp->PlayerList[match.hurt.userid].luckShots++;
+				H::console.push_back("lucky hit");
+				continue;
+			}
+			// otherwise its gonna be a spread/resolve issue
+			did_hit = true;
+		}
+
+		bool IntersectsHitbox = DoesRayIntersectHitbox(aim.min_bone, aim.max_bone, aim.radius_bone, aim.shootPos, match.impact.end_pos);
+		if (IntersectsHitbox)
+		{
+			// resolve error
+			lagcomp->PlayerList[aim.userID].badShots++;
+			H::console.push_back("bad resolve");
+			continue;
+		}
+
+		if ((aim.shootPos - aim.shootPoint).VecLength() > (aim.shootPos - match.impact.end_pos).VecLength() + 5.f && aim.hitchance > 50.f)
+		{
+			// ray didn't reach far enough --> autowall error, not resolver error
+			H::console.push_back("trace error");
+			continue;
+		}
+
+		// spread error
+		H::console.push_back("spread error");
+	}
+
+	/*this->aim_shots.clear();
+	this->aim_shots.resize(0);*/
+
+	
+}
+
 void Resolver::LogicResolve(Entity* ent, int missedShots)
 {
-	CCSGOPlayerAnimState* animstate = ent->GetAnimState(ent);
+	return;
+	if (!ent) return;
+	if (!(ent->GetHealth() > 0)) return;
+	if (ent->GetLifeState() != LIFE_ALIVE) return;
+	if (ent->IsDormant()) return;
+
+	auto animstate = ent->GetAnimState();
+	if (!animstate) return;
 
 	// in air fix
-	bool onGround = ent->GetFlags() & FL_ONGROUND;
+	/*bool onGround = ent->GetFlags() & FL_ONGROUND;
 	if (!onGround)
 	{
 		animstate->flGoalFeetYaw = ent->GetLBY();
 		return;
-	}
-
+	}*/
+		
 	Vector velocity = ent->GetVecVelocity();
 	float horizontalVelocity = velocity.VecLength2D();
 	float maxSpeed = ent->MaxAccurateSpeed() / 3.f;
-	float maxDesync = ent->GetMaxDesyncDelta();
+	float maxDesync = ent->GetMaxDesyncDelta(animstate);
+	
+
+	float eye_yaw = animstate->flEyeYaw;
+	float value = eye_yaw;
 
 	// slowwalk check --> actually do proper bruteforce
-	bool slowWalking = horizontalVelocity >= 1.f && horizontalVelocity <= maxSpeed;
-	if (slowWalking)
+	//bool slowWalking = horizontalVelocity >= 1.f && horizontalVelocity <= maxSpeed;
+	switch (missedShots % 5)
 	{
-		switch (missedShots % 5)
-		{
-		case 0:
-			animstate->flGoalFeetYaw = ent->GetLBY();
-			break;
-		case 1:
-			animstate->flGoalFeetYaw += maxDesync;
-			break;
-		case 2:
-			animstate->flGoalFeetYaw -= maxDesync;
-			break;
-		case 3:
-			animstate->flGoalFeetYaw += maxDesync / 3;
-			break;
-		case 4:
-			animstate->flGoalFeetYaw -= maxDesync / 3;
-			break;
-		}
-		return;
+	case 0:
+		value = ent->GetLBY();
+		break;
+	case 1:
+		value = eye_yaw + maxDesync;
+		break;
+	case 2:
+		value = eye_yaw - maxDesync;
+		break;
+	case 3:
+		value = eye_yaw + maxDesync / 3;
+		break;
+	case 4:
+		value = eye_yaw - maxDesync / 3;
+		break;
 	}
-	else
-	{
-		switch (missedShots % 3)
-		{
-		case 0:
-			animstate->flGoalFeetYaw = ent->GetLBY();
-			break;
-		case 1:
-			animstate->flGoalFeetYaw += maxDesync;
-			break;
-		case 2:
-			animstate->flGoalFeetYaw -= maxDesync;
-			break;
-		}
-	}
+
+	animstate->flGoalFeetYaw = NormalizeYaw(value);
 }
 
 void Resolver::Run()
 { 
+	return;
 	// sort all the events before making a decision
 	SortImpacts();
 	MatchImpacts();
-
-	if (this->matches.size() > 0)
-	{
-		H::console.clear();
-		H::console.resize(0);
-
-		H::console.push_back("matches: ");
-		for (auto a : this->matches)
-		{
-			H::console.push_back(a.print());
-		}
-	}
+	ResolveMatches();
 	
+	// make decision
+	for (auto a : lagcomp->PlayerList)
+	{
+		auto& player = a.second;
+		
+		if (!player.pEntity) return;
+		if (player.Dormant) return;
+		if (!(player.Health > 0)) return;
+		if (player.Team == G::LocalplayerTeam) return;
+		if (player.LifeState != LIFE_ALIVE) return;
+
+		LogicResolve(player.pEntity, player.badShots);
+	}
+
 }

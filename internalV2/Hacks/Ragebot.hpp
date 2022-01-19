@@ -16,7 +16,9 @@ private: // essential var/funcs
 	int MinDamage;
 	float HeadPointScale;
 	float BodyPointScale;
+	std::vector<std::pair<int, float>> players;
 	// func
+	void SortPlayers(std::vector<std::pair<int, float>>& values);
 	void UpdateVals();
 	float CalculateHitchance(Vector vangles, const Vector& point, Entity* player, int hbox);
 	float CalculatePsudoHitchance();
@@ -27,7 +29,7 @@ public:
 	void RenderStats();
 };
 
-extern Aimbot* aimbot;
+extern Aimbot* rage;
 
 /*
 NOTES: this prioritizes a given player, and their backtrack, then given players,

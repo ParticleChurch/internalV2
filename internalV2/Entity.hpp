@@ -732,22 +732,21 @@ public: // OTHERS
 		return *(int*)(weap + offset);
 	}
 
-	CCSGOPlayerAnimState* GetAnimState(Entity* ent)
+	CCSGOPlayerAnimState* GetAnimState()
 	{
 		//if constexpr  (DEBUG_ENTITY) L::Debug("GetAnimState2");
 		//0x9960
 		//0x3914
-		return *reinterpret_cast<CCSGOPlayerAnimState**>(ent + 0x9960);
+		return *reinterpret_cast<CCSGOPlayerAnimState**>(this + 0x9960);
 	}
 
 	float GetMaxDesyncDelta() {
+		L::Debug("GetMaxDesyncDelta");
 
-		 L::Debug("GetAnimState");
-
-		 CCSGOPlayerAnimState* pAnimState = GetAnimState(this);
+		CCSGOPlayerAnimState* pAnimState = GetAnimState();
 
 		L::Debug("Got AnimState");
-		 
+
 		if (!pAnimState)
 			return 0.f;
 
@@ -763,6 +762,26 @@ public: // OTHERS
 		float flMaxYawModifier = flYawModifier * pAnimState->flMaxBodyYaw;
 		return fabsf(flMaxYawModifier);
 	}
+	float GetMaxDesyncDelta(CCSGOPlayerAnimState* pAnimState) {
+
+		L::Debug("Got AnimState");
+
+		if (!pAnimState)
+			return 0.f;
+
+		L::Debug("GetAnimState start calc");
+		float flDuckAmount = pAnimState->flDuckAmount;
+		float flRunningSpeed = std::clamp(pAnimState->flRunningSpeed, 0.0f, 1.0f);
+		float flDuckingSpeed = std::clamp(pAnimState->flDuckingSpeed, 0.0f, 1.0f);
+		float flYawModifier = (((pAnimState->flWalkToRunTransition * -0.3f) - 0.2f) * flRunningSpeed) + 1.0f;
+
+		if (flDuckAmount > 0.0f)
+			flYawModifier += ((flDuckAmount * flDuckingSpeed) * (0.5f - flYawModifier));
+
+		float flMaxYawModifier = flYawModifier * pAnimState->flMaxBodyYaw;
+		return fabsf(flMaxYawModifier);
+	}
+
 	bool IsScoped() {
 		if (DEBUG_ENTITY) L::Debug("IsScoped");
 
@@ -780,6 +799,12 @@ public: // OTHERS
 		const CCSWeaponData* WeaponData = weap->GetWeaponData();
 		return (this->IsScoped() ? WeaponData->flMaxSpeed[1] : WeaponData->flMaxSpeed[0]); //alt and regular might be flipped lol
 	}
-
+	Vector* PGetEyeAngles() //GetEyeAngles
+	{
+		static DWORD offset = N::GetOffset("DT_CSPlayer", "m_angEyeAngles[0]");
+		Vector* a = (Vector*)((DWORD)this + offset);
+		a->Normalize();
+		return a;
+	}
 };
 

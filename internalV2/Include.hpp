@@ -59,13 +59,14 @@
 #include "Hacks/Lagcomp.hpp"
 #include "Hacks/Backtrack.hpp"
 #include "Hacks/ESP.hpp"
-#include "Hacks/Aimbot.hpp"
+#include "Hacks/Ragebot.hpp"
 #include "Hacks/Thirdperson.hpp"
 #include "Hacks/AntiAim.hpp"
 #include "Hacks/ZeusBot.hpp"
 #include "Hacks/AnimFix.hpp"
 #include "Hacks/DlightManager.hpp"
 #include "Hacks/Resolver.hpp"
+#include "Hacks/Chams.hpp"
 
 // Hooks
 #include "Hooks.hpp"            //hooking ingame functions

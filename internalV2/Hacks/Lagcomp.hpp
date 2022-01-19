@@ -23,6 +23,7 @@ public:
 		float SimulationTime;
 		Vector Velocity;
 		int Flags;
+		float MaxDesync;
 		bool extrapolated = false;
 
 		void Update(Entity* ent);
@@ -41,10 +42,9 @@ public:
 		std::deque<LagComp::Record> records;
 
 		// resolver crap
-		int shots = 0;		// shots attempted
+		int badShots = 0;	// bad resolve shots
 		int goodShots = 0;	// good shots that we hit
-		int spreadShots = 0;// spread shots on this targ
-
+		int luckShots = 0;	// shots we shouldn't have hit, but did
 	};
 
 private:

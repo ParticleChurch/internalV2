@@ -29,3 +29,6 @@
 #include "EClientFrameStage.hpp"
 #include "EFontFlags.hpp"
 #include "Animations.h"
+#include "Material.hpp"
+#include "KeyValues.hpp"
+#include "ModelRenderInfo.hpp"

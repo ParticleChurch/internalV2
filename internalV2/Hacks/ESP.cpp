@@ -117,7 +117,10 @@ void ESP::DrawName(char name[128], int userid)
 		I::surface->SetFontGlyphSet(FONT, "Verdana", 12, 1, 0, 0, FONTFLAG_DROPSHADOW);// FONTFLAG_ANTIALIAS | FONTFLAG_OUTLINE);
 	}
 
-	std::string TEXT = name + (std::string)" " /*+ resolver->PlayerInfo[userid].flag*/;
+
+	std::string TEXT = name;
+	if (lagcomp->PlayerList.find(userid) != lagcomp->PlayerList.end())
+		TEXT += " " + std::to_string((float)lagcomp->PlayerList[userid].goodShots / ((float)lagcomp->PlayerList[userid].goodShots + lagcomp->PlayerList[userid].badShots) * 100.f);
 	static std::wstring wide_string;
 	wide_string = std::wstring(TEXT.begin(), TEXT.end());
 

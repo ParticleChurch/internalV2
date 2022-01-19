@@ -17,6 +17,7 @@ namespace H
 	typedef void(__thiscall* CamToFirstPeron)(void*);
 	typedef void(__thiscall* DoPostScreenEffects)(void*, int);
 	typedef bool(__thiscall* WriteUsercmdDeltaToBuffer)(void*, int, void*, int, int, bool);
+	typedef void(__thiscall* DrawModelExecute)(void*, void*, void*, const ModelRenderInfo& info, matrix3x4_t* customBoneToWorld);
 
 	// orig func ptrs
 	extern Reset oReset;
@@ -28,6 +29,7 @@ namespace H
 	extern CamToFirstPeron oCamToFirstPeron;
 	extern DoPostScreenEffects oDoPostScreenEffects;
 	extern WriteUsercmdDeltaToBuffer oWriteUsercmdDeltaToBuffer;
+	extern DrawModelExecute oDrawModelExecute;
 
 	//our functions
 	extern long __stdcall ResetHook(IDirect3DDevice9* device, D3DPRESENT_PARAMETERS* pPresentationParameters);
@@ -40,5 +42,5 @@ namespace H
 	extern void __fastcall CamToFirstPeronHook();
 	extern void __stdcall DoPostScreenEffectsHook(int param);
 	extern	bool __fastcall WriteUsercmdDeltaToBufferHook(void* ecx, void* edx, int slot, void* buffer, int from, int to, bool isnewcommand);
-
+	extern void __fastcall DrawModelExecuteHook(void* thisptr, int edx, void* ctx, void* state, const ModelRenderInfo& info, matrix3x4_t* customBoneToWorld);
 }

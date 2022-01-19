@@ -211,7 +211,6 @@ static int HitboxToHitgroup(int hbox)
 	{
 	case HITBOX_CHEST:
 	case HITBOX_UPPER_CHEST:
-	case HITBOX_THORAX:
 		return HITGROUP_CHEST;
 	case HITBOX_LEFT_THIGH:
 	case HITBOX_LEFT_CALF:
@@ -233,8 +232,10 @@ static int HitboxToHitgroup(int hbox)
 	case HITBOX_NECK:
 		return HITGROUP_HEAD;
 	case HITBOX_STOMACH:
-		return HITGROUP_STOMACH;
+	case HITBOX_THORAX:
 	case HITBOX_PELVIS:
+		return HITGROUP_STOMACH;
+	default:
 		return HITGROUP_GENERIC;
 	}
 	return 0;

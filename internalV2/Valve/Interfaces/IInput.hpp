@@ -8,7 +8,7 @@ public:
 	bool isTrackIRAvailable;
 	bool isMouseInitialized;
 	bool isMouseActive;
-	char _pad1[178];
+	char _pad1[0x9E];
 	bool m_fCameraInThirdPerson;
 	bool m_fCameraMovingWithMouse;
 	Vector m_vecCameraOffset;

@@ -21,6 +21,8 @@ namespace I
 	IClientState* clientstate = nullptr;
 	CEffects* effects = nullptr;
 	GameEventManager* gameeventmanager = nullptr;
+	MaterialSystem* materialsystem = nullptr;
+	ModelRender* modelrender = nullptr;
 
 	void Init()
 	{
@@ -45,6 +47,7 @@ namespace I
 		//= **reinterpret_cast<ClientState***>(FindPattern("engine.dll", "A1 ? ? ? ? 8B 80 ? ? ? ? C3") + 1);
 		effects = GetInterface2<CEffects>("engine.dll", "VEngineEffects0", false); // i got lazy lol
 		gameeventmanager = GetInterface<GameEventManager    >("engine.dll", "GAMEEVENTSMANAGER002");
-
+		materialsystem = GetInterface<MaterialSystem      >("materialsystem.dll", "VMaterialSystem080");
+		modelrender = GetInterface<ModelRender         >("engine.dll", "VEngineModel016");
 	}
 }

@@ -57,6 +57,9 @@ void Thirdperson::Run_hkCamToFirstPeron()
 {
 	if (cfg->Keybinds["Thirdperson"].boolean && G::Localplayer && G::LocalplayerAlive)
 		return;
+	H::console.clear();
+	H::console.resize(0);
+	H::console.push_back("CAMTOFIRSTPERSON");
 	H::oCamToFirstPeron(I::input);
 }
 

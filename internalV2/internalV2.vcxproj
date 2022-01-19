@@ -166,10 +166,11 @@
     <ClCompile Include="Globals.cpp" />
     <ClCompile Include="GUI\Config.cpp" />
     <ClCompile Include="GUI\Menu.cpp" />
-    <ClCompile Include="Hacks\Aimbot.cpp" />
+    <ClCompile Include="Hacks\Ragebot.cpp" />
     <ClCompile Include="Hacks\AntiAim.cpp" />
     <ClCompile Include="Hacks\Autowall.cpp" />
     <ClCompile Include="Hacks\Backtrack.cpp" />
+    <ClCompile Include="Hacks\Chams.cpp" />
     <ClCompile Include="Hacks\DlightManager.cpp" />
     <ClCompile Include="Hacks\ESP.cpp" />
     <ClCompile Include="Hacks\Lagcomp.cpp" />
@@ -196,10 +197,11 @@
     <ClInclude Include="Globals.hpp" />
     <ClInclude Include="GUI\Config.hpp" />
     <ClInclude Include="GUI\Menu.hpp" />
-    <ClInclude Include="Hacks\Aimbot.hpp" />
+    <ClInclude Include="Hacks\Ragebot.hpp" />
     <ClInclude Include="Hacks\AntiAim.hpp" />
     <ClInclude Include="Hacks\Autowall.hpp" />
     <ClInclude Include="Hacks\Backtrack.hpp" />
+    <ClInclude Include="Hacks\Chams.hpp" />
     <ClInclude Include="Hacks\DlightManager.hpp" />
     <ClInclude Include="Hacks\ESP.hpp" />
     <ClInclude Include="Hacks\Lagcomp.hpp" />
@@ -246,6 +248,8 @@
     <ClInclude Include="Valve\Interfaces\IVModelInfo.hpp" />
     <ClInclude Include="Valve\Interfaces\IVPanel.hpp" />
     <ClInclude Include="Valve\Interfaces\IWeaponSystem.hpp" />
+    <ClInclude Include="Valve\Interfaces\MaterialSystem.hpp" />
+    <ClInclude Include="Valve\Interfaces\ModelRender.hpp" />
     <ClInclude Include="Valve\SDK\Animations.h" />
     <ClInclude Include="Valve\SDK\BSPFlags.hpp" />
     <ClInclude Include="Valve\SDK\CBaseTrace.hpp" />
@@ -265,7 +269,10 @@
     <ClInclude Include="Valve\SDK\ICollideable.hpp" />
     <ClInclude Include="Valve\SDK\INetChannelInfo.hpp" />
     <ClInclude Include="Valve\SDK\ITraceFilter.hpp" />
+    <ClInclude Include="Valve\SDK\KeyValues.hpp" />
+    <ClInclude Include="Valve\SDK\Material.hpp" />
     <ClInclude Include="Valve\SDK\Matrix.hpp" />
+    <ClInclude Include="Valve\SDK\ModelRenderInfo.hpp" />
     <ClInclude Include="Valve\SDK\Model_t.hpp" />
     <ClInclude Include="Valve\SDK\PlayerInfo_t.hpp" />
     <ClInclude Include="Valve\SDK\Prototypes.hpp" />

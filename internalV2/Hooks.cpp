@@ -47,7 +47,6 @@ public:
 			if (I::engine->GetPlayerForUserID(UserID) != G::LocalplayerIndex)
 				return;
 
-
 			Vector loc = Vector(event->GetFloat("x"), event->GetFloat("y"), event->GetFloat("z"));
 			resolver->Impact(loc);
 		}
@@ -87,7 +86,11 @@ public:
 			// if the localplayer gets hurt, return
 			int UserID = event->GetInt("userid");
 			if (I::engine->GetPlayerForUserID(UserID) == G::LocalplayerIndex)
+			{
+				/*if(event->GetInt("dmg_health") < 100)
+					I::engine->ExecuteClientCmd("kill");*/
 				return;
+			}
 
 			// if the localplayer isn't shootin, return
 			int iAttacker = event->GetInt("attacker");
@@ -147,6 +150,7 @@ namespace H
 	VMT::Manager* clientmodeVMT = nullptr;
 	VMT::Manager* panelVMT = nullptr;
 	VMT::Manager* inputVMT = nullptr;
+	VMT::Manager* modelrenderVMT = nullptr;
 
 	// Original Functions
 	Reset oReset;
@@ -159,6 +163,7 @@ namespace H
 	CamToFirstPeron oCamToFirstPeron;
 	DoPostScreenEffects oDoPostScreenEffects;
 	WriteUsercmdDeltaToBuffer oWriteUsercmdDeltaToBuffer;
+	DrawModelExecute oDrawModelExecute;
 	
 	// special GUI Vars
 	bool D3dInit = false;
@@ -195,6 +200,7 @@ void H::Init()
 	clientmodeVMT = new VMT::Manager((VMT::VMT*)I::clientmode);
 	panelVMT = new VMT::Manager((VMT::VMT*)I::panel);
 	inputVMT = new VMT::Manager((VMT::VMT*)I::input);
+	modelrenderVMT = new VMT::Manager((VMT::VMT*)I::modelrender);
 
 	// do hooks
 	L::Debug("-->oReset");
@@ -217,9 +223,13 @@ void H::Init()
 	oDoPostScreenEffects = (DoPostScreenEffects)clientmodeVMT->Hook(44, &DoPostScreenEffectsHook);
 	L::Debug("-->WriteUsercmdDeltaToBuffer");
 	oWriteUsercmdDeltaToBuffer = (WriteUsercmdDeltaToBuffer)clientVMT->Hook(24, &WriteUsercmdDeltaToBufferHook);
+	L::Debug("-->DrawModelExecute");
+	oDrawModelExecute = (DrawModelExecute)modelrenderVMT->Hook(21, &DrawModelExecuteHook);
 
 	// special lol
 	g_EventListener = new EventListener();
+
+	ConsoleColorMsg(Color(0, 255, 0, 255), "Hooks hooked :D\n");
 }
 
 void H::Free()
@@ -235,6 +245,7 @@ void H::Free()
 	// get user out of thirdperson
 	oCamToFirstPeron(I::input);
 	if (inputVMT) inputVMT->UnhookAll();
+	if (modelrenderVMT) modelrenderVMT->UnhookAll();
 
 	// do some last minute adjustments
 	if (G::pSendpacket) *G::pSendpacket = true;
@@ -248,6 +259,10 @@ void H::Free()
 	if (clientmodeVMT) delete clientmodeVMT;
 	if (panelVMT) delete panelVMT;
 	if (inputVMT) delete inputVMT;
+	if (modelrenderVMT) delete modelrenderVMT;
+
+	static auto brightness = I::convar->FindVar("mat_force_tonemap_scale");
+	brightness->SetValue(1.f);
 
 	// special detour shit
 	L::Debug("Freeing Hacks");
@@ -258,11 +273,12 @@ void H::Free()
 	delete backtrack;
 	delete lagcomp;
 	delete esp;
-	delete aimbot;
+	delete rage;
 	delete thirdperson;
 	delete zeusbot;
 	delete dlightManager;
 	delete g_EventListener;
+	delete chams;
 
 	// let user do input lol
 	I::inputsystem->EnableInput(true);
@@ -326,6 +342,7 @@ long __stdcall H::EndSceneHook(IDirect3DDevice9* device)
 
 		if (menu->ConsoleWindow)
 		{
+			ImGui::SetNextWindowSizeConstraints(ImVec2(400, 400), ImVec2(1920, 1080));
 			ImGui::Begin("Console");
 			//ImGui::Text(("Aimbot Scans (per tick): " + std::to_string(aimbot->TheoreticalScans)).c_str());
 			for (auto& a : H::console)
@@ -397,16 +414,20 @@ LRESULT __stdcall H::WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 	return CallWindowProc(oWndProc, hWnd, uMsg, wParam, lParam);
 }
 
-
 //sigs
 #define sig_player_by_index "85 C9 7E 2A A1"
 #define sig_draw_server_hitboxes "55 8B EC 81 EC ? ? ? ? 53 56 8B 35 ? ? ? ? 8B D9 57 8B CE"
-
 void __stdcall H::FrameStageNotifyHook(int stage)
 {
 	if  (DEBUG_HOOKS) L::Debug("FrameStageNotifyHook");
 
 	G::IsInGame = I::engine->IsInGame();
+
+	static bool* disablePostProcessing = *reinterpret_cast<bool**>(FindPattern("client.dll", "83 EC 4C 80 3D") + 5);
+	if (stage == FRAME_RENDER_START || stage == FRAME_RENDER_END)
+	{
+		*disablePostProcessing = stage == FRAME_RENDER_START;
+	}
 
 	// Do menu input fix
 	if (!G::IsInGame && G::MenuOpen)
@@ -455,6 +476,7 @@ void __stdcall H::FrameStageNotifyHook(int stage)
 		}
 	}
 
+	/*
 	if (stage == FRAME_RENDER_START && G::Localplayer && G::LocalplayerAlive && cfg->Keybinds["Thirdperson"].boolean)
 	{
 		static auto util_playerbyindex = FindPattern("server.dll", "85 C9 7E 32 A1"); 
@@ -484,10 +506,11 @@ void __stdcall H::FrameStageNotifyHook(int stage)
 
 		}
 	}
-	
-	resolver->Run();
+	*/
 
 	oFrameStageNotify(stage);
+
+	resolver->Run();
 
 	lagcomp->Run_FSN(stage);
 }
@@ -523,7 +546,9 @@ bool __stdcall H::CreateMoveHook(float flInputSampleTime, CUserCmd* cmd)
 			cmd->iButtons &= ~IN_ZOOM;
 		}
 
-		if constexpr (DEBUG_HOOKS) L::Debug("CM_Start");
+		// fps fix
+		static auto shadows = I::convar->FindVar("cl_csm_enabled");
+		shadows->SetValue(false);
 
 		// movmeent fix
 		movement->CM_Start(cmd, pSendPacket);
@@ -536,17 +561,14 @@ bool __stdcall H::CreateMoveHook(float flInputSampleTime, CUserCmd* cmd)
 			I::client->DispatchUserMessage(50, 0, 0, nullptr);
 		
 		// movement
-		if (DEBUG_HOOKS) L::Debug("Bunnyhop");
 		movement->Bunnyhop();
 
-		if (DEBUG_HOOKS) L::Debug("AutoStrafe");
 		movement->AutoStrafe();
 
 		// movement
 		movement->SlowWalk();
 
 		// movmeent fix
-		if (DEBUG_HOOKS) L::Debug("CM_MoveFixStart");
 		movement->CM_MoveFixStart();
 
 		// fakelag
@@ -572,7 +594,6 @@ bool __stdcall H::CreateMoveHook(float flInputSampleTime, CUserCmd* cmd)
 		
 
 		// offensive 
-		if (DEBUG_HOOKS) L::Debug("backtrack");
 		backtrack->Run();
 
 		// Manual Shot fix
@@ -589,10 +610,11 @@ bool __stdcall H::CreateMoveHook(float flInputSampleTime, CUserCmd* cmd)
 			G::cmd->angViewAngle = G::StartAngle;
 			G::real = Vector(G::cmd->angViewAngle.x, G::cmd->angViewAngle.y);
 			G::fake = Vector(G::cmd->angViewAngle.x, G::cmd->angViewAngle.y);
+			for (auto& a : lagcomp->PlayerList)
+				a.second.badShots++;
 		}
 
-		if (DEBUG_HOOKS) L::Debug("aimbot");
-		aimbot->Run();
+		rage->Run();
 
 		// Shot fix
 		static bool LastTickShot = false;
@@ -610,11 +632,9 @@ bool __stdcall H::CreateMoveHook(float flInputSampleTime, CUserCmd* cmd)
 		}
 
 		// movmeent fix
-		if (DEBUG_HOOKS) L::Debug("CM_MoveFixEnd");
 		movement->CM_MoveFixEnd();
 
 		// movmeent fix
-		if (DEBUG_HOOKS) L::Debug("CM_End");
 		movement->CM_End();
 
 		if ((G::cmd->iButtons & IN_ATTACK) && G::Localplayer->CanShoot())
@@ -651,7 +671,7 @@ bool __stdcall H::CreateMoveHook(float flInputSampleTime, CUserCmd* cmd)
 
 void __stdcall H::PaintTraverseHook(int vguiID, bool force, bool allowForcing)
 {
-	if  (DEBUG_HOOKS) L::Debug("PaintTraverseHook");
+	/*if  (DEBUG_HOOKS) L::Debug("PaintTraverseHook");*/
 
 	// noscope
 	if (strcmp("HudZoom", I::panel->GetName(vguiID)) == 0 && cfg->vis.NoScope && G::LocalplayerAlive)
@@ -684,9 +704,9 @@ void __stdcall H::PaintTraverseHook(int vguiID, bool force, bool allowForcing)
 		if (!G::Localplayer || !I::engine->IsInGame())
 			return;
 
-		if (DEBUG_HOOKS) L::Debug("manager start");
+		/*if (DEBUG_HOOKS) L::Debug("manager start");
 		dlightManager->Run();
-		if (DEBUG_HOOKS) L::Debug("manager end");
+		if (DEBUG_HOOKS) L::Debug("manager end");*/
 
 
 		esp->RunPaintTraverse();
@@ -742,6 +762,11 @@ void __stdcall H::DoPostScreenEffectsHook(int param)
 	if  (DEBUG_HOOKS) L::Debug("DoPostScreenEffectsHook");
 
 	thirdperson->Run_DoPostScreenEffects();
+	if (I::engine->IsInGame())
+	{
+		static auto brightness = I::convar->FindVar("mat_force_tonemap_scale");
+		brightness->SetValue(cfg->world_vis.brightness);
+	}
 
 	return oDoPostScreenEffects(I::clientmode, param);
 }
@@ -817,4 +842,10 @@ bool __fastcall H::WriteUsercmdDeltaToBufferHook(void* ecx, void* edx, int slot,
 		toCmd.iTickCount++;
 	}
 	return true;
+}
+
+void __fastcall H::DrawModelExecuteHook(void* thisptr, int edx, void* ctx, void* state, const ModelRenderInfo& info, matrix3x4_t* customBoneToWorld)
+{
+	chams->Init(); // BRO, there MUST be a better way to do this
+	chams->Run(thisptr, edx, ctx, state, info, customBoneToWorld);
 }

@@ -30,7 +30,8 @@ namespace I
 	extern IClientState* clientstate;
 	extern CEffects* effects;
 	extern GameEventManager* gameeventmanager;
-
+	extern MaterialSystem* materialsystem;
+	extern ModelRender* modelrender;
 	// func
 	typedef void* (*InterfaceCreator)(const char*, int);
 	template <typename T>

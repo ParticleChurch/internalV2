@@ -120,7 +120,7 @@
     <ClCompile Include="Valve\SDK\Vector.cpp">
       <Filter>Source Files\Valve\SDK</Filter>
     </ClCompile>
-    <ClCompile Include="Hacks\Aimbot.cpp">
+    <ClCompile Include="Hacks\Ragebot.cpp">
       <Filter>Source Files\Hacks</Filter>
     </ClCompile>
     <ClCompile Include="Hacks\Thirdperson.cpp">
@@ -139,6 +139,9 @@
       <Filter>Source Files\Hacks</Filter>
     </ClCompile>
     <ClCompile Include="Hacks\Resolver.cpp">
+      <Filter>Source Files\Hacks</Filter>
+    </ClCompile>
+    <ClCompile Include="Hacks\Chams.cpp">
       <Filter>Source Files\Hacks</Filter>
     </ClCompile>
   </ItemGroup>
@@ -362,7 +365,7 @@
     <ClInclude Include="Valve\SDK\Animations.h">
       <Filter>Header Files\Valve\SDK</Filter>
     </ClInclude>
-    <ClInclude Include="Hacks\Aimbot.hpp">
+    <ClInclude Include="Hacks\Ragebot.hpp">
       <Filter>Header Files\Hacks</Filter>
     </ClInclude>
     <ClInclude Include="Hacks\Thirdperson.hpp">
@@ -400,6 +403,24 @@
     </ClInclude>
     <ClInclude Include="Utils\StrHash.hpp">
       <Filter>Header Files\Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="Hacks\Chams.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Valve\SDK\Material.hpp">
+      <Filter>Header Files\Valve\SDK</Filter>
+    </ClInclude>
+    <ClInclude Include="Valve\Interfaces\MaterialSystem.hpp">
+      <Filter>Header Files\Valve\Interfaces</Filter>
+    </ClInclude>
+    <ClInclude Include="Valve\SDK\KeyValues.hpp">
+      <Filter>Header Files\Valve\SDK</Filter>
+    </ClInclude>
+    <ClInclude Include="Valve\Interfaces\ModelRender.hpp">
+      <Filter>Header Files\Valve\Interfaces</Filter>
+    </ClInclude>
+    <ClInclude Include="Valve\SDK\ModelRenderInfo.hpp">
+      <Filter>Header Files\Valve\SDK</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

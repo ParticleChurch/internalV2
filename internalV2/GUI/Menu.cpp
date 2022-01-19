@@ -19,9 +19,61 @@ namespace ImGui
 	}
 }
 
-// C for Custom
-namespace C
+// menu frame work
+namespace mfw
 {
+	int Tab = 1;
+
+	void StartMain()
+	{
+		ImGui::Begin("MAIN", nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoSavedSettings);
+
+	}
+	void EndMain()
+	{
+		/*ImGui::PopFont();*/
+		ImGui::End();//hrrrr
+	}
+	void StartSection(std::string name, float& pos1, float& propersize)
+	{
+		ImGui::BeginChild(("##" + name).c_str(), ImVec2(0, propersize), true);
+
+		pos1 = ImGui::GetCursorPosY();
+
+		ImGui::PushStyleColor(ImGuiCol_Text, cfg->menu.AccentClr.operator ImVec4());
+		ImGui::Text(name.c_str());
+		ImGui::PopStyleColor();
+		ImGui::Separator();
+	}
+	void EndSection(float& propersize, float& pos1)
+	{
+		float pos2 = ImGui::GetCursorPosY();
+		propersize = pos2 - pos1 + 20.f;
+
+		ImGui::EndChild(); // end child
+	}
+	void RefreshColors()
+	{
+		ImGui::StyleColorsLight();
+
+		ImGuiStyle& style = ImGui::GetStyle();
+		style.Colors[ImGuiCol_WindowBg] = cfg->menu.WindowBackgroundClr.operator ImVec4();
+		style.Colors[ImGuiCol_ChildBg] = cfg->menu.ChildBackgroundClr.operator ImVec4();
+		style.Colors[ImGuiCol_FrameBg] = cfg->menu.WindowBackgroundClr.operator ImVec4();
+		style.Colors[ImGuiCol_FrameBgHovered] = cfg->menu.WindowBackgroundClr.operator ImVec4();
+		style.Colors[ImGuiCol_FrameBgActive] = cfg->menu.ChildBackgroundClr.operator ImVec4();
+		style.Colors[ImGuiCol_PopupBg] = cfg->menu.ChildBackgroundClr.operator ImVec4();
+		style.Colors[ImGuiCol_ResizeGrip] = cfg->menu.ResizeClr.operator ImVec4();
+		style.Colors[ImGuiCol_ResizeGripHovered] = cfg->menu.ResizeClr.operator ImVec4();
+		style.Colors[ImGuiCol_ResizeGripActive] = cfg->menu.ResizeClr.operator ImVec4();
+		style.Colors[ImGuiCol_Text] = cfg->menu.TextClr.operator ImVec4();
+
+		style.Colors[ImGuiCol_Separator] = cfg->menu.AccentClr.operator ImVec4();
+		style.Colors[ImGuiCol_SeparatorHovered] = cfg->menu.AccentClr.operator ImVec4();
+		style.Colors[ImGuiCol_SeparatorActive] = cfg->menu.AccentClr.operator ImVec4();
+	}
+
+	// custom imgui stuff
 	void ColorPicker(const char* name, Color* COLOR)
 	{
 		ImVec4 color = ImVec4(COLOR->color[0] / 255.f, COLOR->color[1] / 255.f, COLOR->color[2] / 255.f, COLOR->color[3] / 255.f);
@@ -50,7 +102,6 @@ namespace C
 			ImGui::EndPopup();
 		}
 	}
-
 	void ColorPicker(std::string name, Color* COLOR)
 	{
 		ImVec4 color = ImVec4(COLOR->color[0] / 255.f, COLOR->color[1] / 255.f, COLOR->color[2] / 255.f, COLOR->color[3] / 255.f);
@@ -79,7 +130,6 @@ namespace C
 			ImGui::EndPopup();
 		}
 	}
-
 	bool Checkbox(const char* label, bool* v)
 	{
 		ImGuiWindow* window = ImGui::GetCurrentWindow();
@@ -111,18 +161,18 @@ namespace C
 		if (*v)
 		{
 			// backgroound
-			window->DrawList->AddRectFilled(ImVec2(total_bb.Min.x + 0, total_bb.Min.y + 2), ImVec2(total_bb.Min.x + 30, total_bb.Min.y + 18), ImGui::GetColorU32(cfg->menu.AccentColor), 10, 15);
+			window->DrawList->AddRectFilled(ImVec2(total_bb.Min.x + 0, total_bb.Min.y + 2), ImVec2(total_bb.Min.x + 30, total_bb.Min.y + 18), ImGui::GetColorU32(cfg->menu.AccentClr), 10, 15);
 
 			// knob
-			window->DrawList->AddRectFilled(ImVec2(total_bb.Min.x + 15, total_bb.Min.y + 4), ImVec2(total_bb.Min.x + 28, total_bb.Min.y + 16), ImGui::GetColorU32(cfg->menu.SelectTextColor), 15, 15);
+			window->DrawList->AddRectFilled(ImVec2(total_bb.Min.x + 15, total_bb.Min.y + 4), ImVec2(total_bb.Min.x + 28, total_bb.Min.y + 16), ImGui::GetColorU32(cfg->menu.TextClr), 15, 15);
 		}
 		else
 		{
 			// backgroound
-			window->DrawList->AddRectFilled(ImVec2(total_bb.Min.x + 0, total_bb.Min.y + 2), ImVec2(total_bb.Min.x + 30, total_bb.Min.y + 18), ImColor(43, 43, 43, 255), 10, 15);
+			window->DrawList->AddRectFilled(ImVec2(total_bb.Min.x + 0, total_bb.Min.y + 2), ImVec2(total_bb.Min.x + 30, total_bb.Min.y + 18), ImGui::GetColorU32(cfg->menu.WindowBackgroundClr), 10, 15);
 
 			// knob
-			window->DrawList->AddRectFilled(ImVec2(total_bb.Min.x + 2, total_bb.Min.y + 4), ImVec2(total_bb.Min.x + 15, total_bb.Min.y + 16), ImGui::GetColorU32(cfg->menu.SelectTextColor), 15, 15);
+			window->DrawList->AddRectFilled(ImVec2(total_bb.Min.x + 2, total_bb.Min.y + 4), ImVec2(total_bb.Min.x + 15, total_bb.Min.y + 16), ImGui::GetColorU32(cfg->menu.TextClr), 15, 15);
 		}
 
 		ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(229 / 255.f, 229 / 255.f, 229 / 255.f, 255 / 255.f));
@@ -133,10 +183,9 @@ namespace C
 
 		return pressed;
 	}
-
 	void HotKey(Keybind& keybind)
 	{
-		C::Checkbox(("###checkbox" + keybind.name).c_str(), &keybind.boolean);
+		mfw::Checkbox(("###checkbox" + keybind.name).c_str(), &keybind.boolean);
 
 		// is checkbox right clicked?
 		bool open_popup = ImGui::IsItemClicked(ImGuiMouseButton_::ImGuiMouseButton_Right);
@@ -170,7 +219,6 @@ namespace C
 			ImGui::EndPopup();
 		}
 	}
-
 	static const char* PatchFormatStringFloatToInt(const char* fmt)
 	{
 		if (fmt[0] == '%' && fmt[1] == '.' && fmt[2] == '0' && fmt[3] == 'f' && fmt[4] == 0) // Fast legacy path for "%.0f" which is expected to be the most common case.
@@ -191,7 +239,6 @@ namespace C
 		}
 		return fmt;
 	}
-
 	bool SliderScalar(const char* label, ImGuiDataType data_type, void* p_data, const void* p_min, const void* p_max, const char* format, ImGuiSliderFlags flags)
 	{
 		using namespace ImGui;
@@ -249,8 +296,8 @@ namespace C
 		RenderNavHighlight(frame_bb, id);
 
 		// draw whiteline all the way accross
-		window->DrawList->AddLine(ImVec2(frame_bb.Min.x, (frame_bb.Max.y + frame_bb.Min.y) / 2), ImVec2(frame_bb.Max.x, (frame_bb.Max.y + frame_bb.Min.y) / 2), ImGui::GetColorU32(cfg->menu.SelectTextColor));
-		
+		window->DrawList->AddLine(ImVec2(frame_bb.Min.x, (frame_bb.Max.y + frame_bb.Min.y) / 2), ImVec2(frame_bb.Max.x, (frame_bb.Max.y + frame_bb.Min.y) / 2), ImGui::GetColorU32(cfg->menu.TextClr));
+
 		//RenderFrame(frame_bb.Min, frame_bb.Max, frame_col, true, g.Style.FrameRounding);
 
 		// Slider behavior
@@ -260,13 +307,13 @@ namespace C
 			MarkItemEdited(id);
 
 		// draw line to grab area
-		window->DrawList->AddLine(ImVec2(frame_bb.Min.x, (frame_bb.Max.y + frame_bb.Min.y) / 2), ImVec2(grab_bb.Max.x, (frame_bb.Max.y + frame_bb.Min.y) / 2), ImGui::GetColorU32(cfg->menu.AccentColor));
+		window->DrawList->AddLine(ImVec2(frame_bb.Min.x, (frame_bb.Max.y + frame_bb.Min.y) / 2), ImVec2(grab_bb.Max.x, (frame_bb.Max.y + frame_bb.Min.y) / 2), ImGui::GetColorU32(cfg->menu.AccentClr));
 
 		// Render grab
 		ImVec2 center = (grab_bb.Max + grab_bb.Min) / 2;
 		float height = fabsf(grab_bb.Min.y - grab_bb.Max.y) - 5;
 		if (grab_bb.Max.x > grab_bb.Min.x)
-			window->DrawList->AddRectFilled(ImVec2(center.x - height / 2, center.y - (height/2)), ImVec2(center.x + height / 2, center.y + (height / 2)), ImGui::GetColorU32(cfg->menu.SelectTextColor), /*style.GrabRounding*/15, 15);
+			window->DrawList->AddRectFilled(ImVec2(center.x - height / 2, center.y - (height / 2)), ImVec2(center.x + height / 2, center.y + (height / 2)), ImGui::GetColorU32(cfg->menu.TextClr), /*style.GrabRounding*/15, 15);
 
 		// Display value using user-provided display format so user can add prefix/suffix/decorations to the value.
 		char value_buf[64];
@@ -281,157 +328,148 @@ namespace C
 		IMGUI_TEST_ENGINE_ITEM_INFO(id, label, window->DC.LastItemStatusFlags);
 		return value_changed;
 	}
-
 	bool SliderFloat(const char* label, float* v, float v_min, float v_max, const char* format = "%.3f", ImGuiSliderFlags flags = 0)
 	{
-		return C::SliderScalar(label, ImGuiDataType_Float, v, &v_min, &v_max, format, flags);
+		return mfw::SliderScalar(label, ImGuiDataType_Float, v, &v_min, &v_max, format, flags);
 	}
-
 	bool SliderInt(const char* label, int* v, int v_min, int v_max, const char* format = "%d", ImGuiSliderFlags flags = 0)
 	{
-		return C::SliderScalar(label, ImGuiDataType_S32, v, &v_min, &v_max, format, flags);
+		return mfw::SliderScalar(label, ImGuiDataType_S32, v, &v_min, &v_max, format, flags);
+	}
+	bool ButtonEx(const char* label, const ImVec2& size_arg, ImGuiButtonFlags flags)
+	{
+		ImGuiWindow* window = ImGui::GetCurrentWindow();
+		if (window->SkipItems)
+			return false;
+
+		ImGuiContext& g = *GImGui;
+		const ImGuiStyle& style = g.Style;
+		const ImGuiID id = window->GetID(label);
+		const ImVec2 label_size = ImGui::CalcTextSize(label, NULL, true);
+
+		ImVec2 pos = window->DC.CursorPos;
+		if ((flags & ImGuiButtonFlags_AlignTextBaseLine) && style.FramePadding.y < window->DC.CurrLineTextBaseOffset) // Try to vertically align buttons that are smaller/have no padding so that text baseline matches (bit hacky, since it shouldn't be a flag)
+			pos.y += window->DC.CurrLineTextBaseOffset - style.FramePadding.y;
+		ImVec2 size = ImGui::CalcItemSize(size_arg, label_size.x + style.FramePadding.x * 2.0f, label_size.y + style.FramePadding.y * 2.0f);
+
+		const ImRect bb(pos, pos + size);
+		ImGui::ItemSize(size, style.FramePadding.y);
+		if (!ImGui::ItemAdd(bb, id))
+			return false;
+
+		if (g.CurrentItemFlags & ImGuiItemFlags_ButtonRepeat)
+			flags |= ImGuiButtonFlags_Repeat;
+		bool hovered, held;
+		bool pressed = ImGui::ButtonBehavior(bb, id, &hovered, &held, flags);
+
+		// Render
+		const ImU32 col = ImGui::GetColorU32((held && hovered) ? ImGuiCol_ButtonActive : hovered ? ImGuiCol_ButtonHovered : ImGuiCol_Button);
+		ImGui::RenderNavHighlight(bb, id);
+		ImGui::RenderFrame(bb.Min, bb.Max, col, true, style.FrameRounding);
+
+		if (g.LogEnabled)
+			ImGui::LogSetNextTextDecoration("[", "]");
+		ImGui::RenderTextClipped(bb.Min + style.FramePadding, bb.Max - style.FramePadding, label, NULL, &label_size, style.ButtonTextAlign, &bb);
+
+		// Automatically close popups
+		//if (pressed && !(flags & ImGuiButtonFlags_DontClosePopups) && (window->Flags & ImGuiWindowFlags_Popup))
+		//    CloseCurrentPopup();
+
+		IMGUI_TEST_ENGINE_ITEM_INFO(id, label, window->DC.LastItemStatusFlags);
+		return pressed;
+	}
+	bool Button(const char* label, const ImVec2& size_arg = ImVec2(0, 0))
+	{
+		ImGui::PushStyleColor(ImGuiCol_Button, cfg->menu.AccentClr.operator ImVec4());
+		ImGui::PushStyleColor(ImGuiCol_ButtonActive, cfg->menu.AccentClr.operator ImVec4());
+		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, cfg->menu.AccentClr.operator ImVec4());
+		bool ret = ButtonEx(label, size_arg, ImGuiButtonFlags_None);
+		ImGui::PopStyleColor(3);
+		return ret;
 	}
 }
 
-void Menu::DoStyle()
+
+void Menu::MenuBar()
 {
-	ImGui::StyleColorsDark();
-
-	// color
-	AccentColor = ImVec4(cfg->menu.AccentColor.r() / 255.f, cfg->menu.AccentColor.g() / 255.f, cfg->menu.AccentColor.b() / 255.f, cfg->menu.AccentColor.a() / 255.f);
-	MainTextColor = ImVec4(cfg->menu.MainTextColor.r() / 255.f, cfg->menu.MainTextColor.g() / 255.f, cfg->menu.MainTextColor.b() / 255.f, cfg->menu.MainTextColor.a() / 255.f);
-	SelectTextColor = ImVec4(cfg->menu.SelectTextColor.r() / 255.f, cfg->menu.SelectTextColor.g() / 255.f, cfg->menu.SelectTextColor.b() / 255.f, cfg->menu.SelectTextColor.a() / 255.f);
-	BackgroundColor = ImVec4(cfg->menu.BackgroundColor.r() / 255.f, cfg->menu.BackgroundColor.g() / 255.f, cfg->menu.BackgroundColor.b() / 255.f, cfg->menu.BackgroundColor.a() / 255.f);
-	WindowColor = ImVec4(cfg->menu.WindowColor.r() / 255.f, cfg->menu.WindowColor.g() / 255.f, cfg->menu.WindowColor.b() / 255.f, cfg->menu.WindowColor.a() / 255.f);
-
-	// inverted color
-	ImVec4 InvertAccentColor = ImVec4(1, 1, 1, 1) - AccentColor; InvertAccentColor.w = AccentColor.w;
-	ImVec4 InvertMainTextColor = ImVec4(1, 1, 1, 1) - MainTextColor; InvertMainTextColor.w = MainTextColor.w;
-	ImVec4 InvertSelectTextColor = ImVec4(1, 1, 1, 1) - SelectTextColor; InvertSelectTextColor.w = SelectTextColor.w;
-	ImVec4 InvertBackgroundColor = ImVec4(1, 1, 1, 1) - BackgroundColor; InvertBackgroundColor.w = BackgroundColor.w;
-
-	auto FadeColor = [](ImVec4 clr, float amount)
+	ImGui::PushStyleColor(ImGuiCol_Button, cfg->menu.ChildBackgroundClr.operator ImVec4());
+	ImGui::PushStyleColor(ImGuiCol_ButtonActive, cfg->menu.WindowBackgroundClr.operator ImVec4());
+	ImGui::PushStyleColor(ImGuiCol_ButtonHovered, cfg->menu.ChildBackgroundClr.operator ImVec4());
+	static const char* tabs[5] = { "Legit", "Rage", "Visuals", "Other", "Config" };
+	int button_width = max((ImGui::GetContentRegionAvail().x - ((IM_ARRAYSIZE(tabs) - 1) * ImGui::GetStyle().ItemSpacing.x)) / IM_ARRAYSIZE(tabs), 1);
+	for (int i = 1; i <= IM_ARRAYSIZE(tabs); i++)
 	{
-		clr.x *= amount;
-		clr.y *= amount;
-		clr.z *= amount;
-		return clr;
-	};
+		if (ImGui::Button(tabs[i - 1], ImVec2(button_width, 0)))
+			mfw::Tab = i;
 
-	// faded colors
-	ImVec4 AccentColor_Faded = FadeColor(AccentColor, 0.9f);
-	ImVec4 MainTextColor_Faded = FadeColor(MainTextColor, 0.9f);
-	ImVec4 SelectTextColor_Faded = FadeColor(SelectTextColor, 0.9f);
-	ImVec4 BackgroundColor_Faded = FadeColor(BackgroundColor, 0.9f);
-
-	// light colors
-	ImVec4 AccentColor_Light = FadeColor(AccentColor, 0.8f);
-	ImVec4 MainTextColor_Light = FadeColor(MainTextColor, 0.8f);
-	ImVec4 SelectTextColor_Light = FadeColor(SelectTextColor, 0.8f);
-	ImVec4 BackgroundColor_Light = FadeColor(BackgroundColor, 0.8f);
-
-	// Get imgui style
-	ImGuiStyle* style = &ImGui::GetStyle();
-
-	// Main window background 
-	style->Colors[ImGuiCol_WindowBg] = WindowColor;
-
-	// Child window backgrounds
-	style->Colors[ImGuiCol_ChildBg] = BackgroundColor_Light; // Background of child windows
-	style->Colors[ImGuiCol_PopupBg] = BackgroundColor_Light; // Background of popups, menus, tooltips windows
-
-	// Text
-	style->Colors[ImGuiCol_Text] = MainTextColor;
-	style->Colors[ImGuiCol_TextSelectedBg] = InvertMainTextColor;
-	style->Colors[ImGuiCol_TextDisabled] = MainTextColor_Faded;
-
-	// selectable crap // Header* colors are used for CollapsingHeader, TreeNode, Selectable, MenuItem
-	style->Colors[ImGuiCol_Header] = AccentColor;
-	style->Colors[ImGuiCol_HeaderHovered] = AccentColor_Faded;
-	style->Colors[ImGuiCol_HeaderActive] = AccentColor_Light;
-
-	// button crap
-	style->Colors[ImGuiCol_Button] = AccentColor;
-	style->Colors[ImGuiCol_ButtonHovered] = AccentColor_Faded;
-	style->Colors[ImGuiCol_ButtonActive] = AccentColor_Light;
-
-	// checkmark crap
-	style->Colors[ImGuiCol_CheckMark] = InvertAccentColor;
-
-	// slider stuff
-	style->Colors[ImGuiCol_SliderGrab] = SelectTextColor;
-	style->Colors[ImGuiCol_SliderGrabActive] = SelectTextColor_Light;
-
-	// Background of checkbox, radio button, plot, slider, text input
-	style->Colors[ImGuiCol_FrameBg] = AccentColor;
-	style->Colors[ImGuiCol_FrameBgHovered] = AccentColor_Faded;
-	style->Colors[ImGuiCol_FrameBgActive] = AccentColor;
-
-	// IDK
-	style->Colors[ImGuiCol_TitleBg] = AccentColor;
-	style->Colors[ImGuiCol_TitleBgActive] = AccentColor;
-
-	// seperator stuff
-	style->Colors[ImGuiCol_Separator] = MainTextColor;
-	style->Colors[ImGuiCol_SeparatorHovered] = MainTextColor_Light;
-	style->Colors[ImGuiCol_SeparatorActive] = SelectTextColor_Light;
-
-	// resize stuff
-	style->Colors[ImGuiCol_ResizeGrip] = AccentColor;
-	style->Colors[ImGuiCol_ResizeGripHovered] = MainTextColor_Light;
-	style->Colors[ImGuiCol_ResizeGripActive] = AccentColor_Light;
-
-	// SQUARE
-	style->WindowRounding = 0.f;
-	style->ChildRounding = 0.f;
-	style->WindowBorderSize = 0.f;
+		if (i < IM_ARRAYSIZE(tabs))
+			ImGui::SameLine();
+	}
+	ImGui::PopStyleColor(3);
 }
 
 void Menu::RenderMenuOptions()
 {
+	mfw::RefreshColors();
+
 	static float propersize = 100.f;
-
-	int width = max((ImGui::GetContentRegionAvail().x - ImGui::GetStyle().ItemSpacing.x) / 2, 1);
-
-	ImGui::BeginChild("##MenuArea", ImVec2(0, propersize), true);
-
-	float pos1 = ImGui::GetCursorPosY();
-
-	ImGui::Text("Menu Colors");
-	ImGui::Separator();
+	static float pos1 = 0.f;
+	mfw::StartSection("Menu Customization", pos1, propersize);
 
 	int total_w = ImGui::GetContentRegionAvail().x - 20;
+
+	ImGui::Text("Main Window Background Color");
+	ImGui::SameLine(total_w);
+	ImGui::SetNextItemWidth(total_w);
+	mfw::ColorPicker("Main Window Background Color", &cfg->menu.WindowBackgroundClr);
+
+	ImGui::Text("Child Window Background Color");
+	ImGui::SameLine(total_w);
+	ImGui::SetNextItemWidth(total_w);
+	mfw::ColorPicker("Child Window Background Color", &cfg->menu.ChildBackgroundClr);
+
+	ImGui::Text("Text Color");
+	ImGui::SameLine(total_w);
+	ImGui::SetNextItemWidth(total_w);
+	mfw::ColorPicker("Text Color", &cfg->menu.TextClr);
 
 	ImGui::Text("Accent Color");
 	ImGui::SameLine(total_w);
 	ImGui::SetNextItemWidth(total_w);
-	C::ColorPicker("AccentColor", &cfg->menu.AccentColor);
+	mfw::ColorPicker("Accent Color", &cfg->menu.AccentClr);
 
-	ImGui::Text("Main Text Color");
-	ImGui::SameLine(total_w);
-	ImGui::SetNextItemWidth(total_w);
-	C::ColorPicker("MainTextColor", &cfg->menu.MainTextColor);
+	mfw::Checkbox("Console Window", &ConsoleWindow);
 
-	ImGui::Text("Selectable Text Color");
-	ImGui::SameLine(total_w);
-	ImGui::SetNextItemWidth(total_w);
-	C::ColorPicker("SelectableTextColor", &cfg->menu.SelectTextColor);
+	bool open_popup = mfw::Button("Eject");
+	if (open_popup)
+	{
+		ImGui::OpenPopup("Eject popup");
+	}
 
-	ImGui::Text("Background Color");
-	ImGui::SameLine(total_w);
-	ImGui::SetNextItemWidth(total_w);
-	C::ColorPicker("BackgroundColor", &cfg->menu.BackgroundColor);
+	if (ImGui::BeginPopup("Eject popup"))
+	{
+		ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1.f, 0, 0, 1.00f));
+		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(1.f, 0.1f, 0.1f, 1.00f));
+		ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(1.f, 0.2f, 0.2f, 1.00f));
 
-	ImGui::Text("Window Color");
-	ImGui::SameLine(total_w);
-	ImGui::SetNextItemWidth(total_w);
-	C::ColorPicker("WindowColor", &cfg->menu.WindowColor);
+		ImGui::Text("Are you sure you want to Eject?");
+		if (ImGui::Button("Eject##Eject2"))
+			G::KillDLL = true;
+		if (ImGui::IsItemHovered())
+			ImGui::SetTooltip("NOTE:\nEjecting can potentially crash your game.\nEjecting can is not complete so if you want to inject another cheat, restart the game.");
 
 
-	float pos2 = ImGui::GetCursorPosY();
-	propersize = pos2 - pos1 + 20.f;
+		ImGui::PopStyleColor();
+		ImGui::PopStyleColor();
+		ImGui::PopStyleColor();
 
-	ImGui::EndChild(); // end child
+		ImGui::EndPopup();
+	}
+
+	if (mfw::Button("Connect to Big Steppa HVH"))
+		I::engine->ClientCmdUnrestricted("connect 74.91.124.24:27015");
+
+	mfw::EndSection(propersize, pos1);
 }
 
 void Menu::RenderMovement()
@@ -445,7 +483,7 @@ void Menu::RenderMovement()
 	ImGui::Text("Movement");
 	ImGui::Separator();
 
-	ImGui::Columns(2, "##MovementCols"); // 4-ways, with border
+	ImGui::Columns(2, "##MovementCols", false);
 
 	ImGui::Text("Bunnyhop");
 	ImGui::NextColumn();
@@ -453,7 +491,7 @@ void Menu::RenderMovement()
 		int total_w = ImGui::GetContentRegionAvail().x;
 		ImGui::SetNextItemWidth(total_w);
 	}
-	C::Checkbox("##Bunnyhop", &cfg->movement.Bunnyhop);
+	mfw::Checkbox("##Bunnyhop", &cfg->movement.Bunnyhop);
 	ImGui::NextColumn();
 
 	if (cfg->movement.Bunnyhop) {
@@ -463,7 +501,7 @@ void Menu::RenderMovement()
 			int total_w = ImGui::GetContentRegionAvail().x;
 			ImGui::SetNextItemWidth(total_w);
 		}
-		C::SliderInt("##BunnyhopChance", &cfg->movement.Chance, 0, 100);
+		mfw::SliderInt("##BunnyhopChance", &cfg->movement.Chance, 0, 100);
 		ImGui::NextColumn();
 		// if the max hops is slid down... compensate min hops
 		if (cfg->movement.MaxHops < cfg->movement.MinHops) {
@@ -481,7 +519,7 @@ void Menu::RenderMovement()
 			int total_w = ImGui::GetContentRegionAvail().x;
 			ImGui::SetNextItemWidth(total_w);
 		}
-		C::SliderInt("###BunnyhopMinHops", &cfg->movement.MinHops, 0, 15);
+		mfw::SliderInt("###BunnyhopMinHops", &cfg->movement.MinHops, 0, 15);
 		ImGui::NextColumn();
 
 		ImGui::Text("Bunnyhop Max Hops");
@@ -490,13 +528,13 @@ void Menu::RenderMovement()
 			int total_w = ImGui::GetContentRegionAvail().x;
 			ImGui::SetNextItemWidth(total_w);
 		}
-		C::SliderInt("###BunnyhopMaxHops", &cfg->movement.MaxHops, 0, 15);
+		mfw::SliderInt("###BunnyhopMaxHops", &cfg->movement.MaxHops, 0, 15);
 		ImGui::NextColumn();
 	}
 
 	ImGui::Text("Slow Walk");
 	ImGui::NextColumn();
-	C::HotKey(cfg->Keybinds["Slowwalk"]);
+	mfw::HotKey(cfg->Keybinds["Slowwalk"]);
 	{
 		int total_w = ImGui::GetContentRegionAvail().x;
 		ImGui::SetNextItemWidth(total_w);
@@ -509,7 +547,7 @@ void Menu::RenderMovement()
 		int total_w = ImGui::GetContentRegionAvail().x;
 		ImGui::SetNextItemWidth(total_w);
 	}
-	C::SliderFloat("##slowwalkspeed", &cfg->movement.SlowWalkSpeed, 0, 100);
+	mfw::SliderFloat("##slowwalkspeed", &cfg->movement.SlowWalkSpeed, 0, 100);
 	ImGui::NextColumn();
 
 	ImGui::Text("Autostrafe");
@@ -518,7 +556,7 @@ void Menu::RenderMovement()
 		int total_w = ImGui::GetContentRegionAvail().x;
 		ImGui::SetNextItemWidth(total_w);
 	}
-	C::Checkbox("##Autostrafe", &cfg->movement.Autostrafe);
+	mfw::Checkbox("##Autostrafe", &cfg->movement.Autostrafe);
 	ImGui::NextColumn();
 	if (cfg->movement.Autostrafe) {
 		ImGui::Text("Angle Sacrifice");
@@ -527,7 +565,7 @@ void Menu::RenderMovement()
 			int total_w = ImGui::GetContentRegionAvail().x;
 			ImGui::SetNextItemWidth(total_w);
 		}
-		C::SliderFloat("##AutostrafeAngSacrifice", &cfg->movement.AngSacrifice, 0, 10);
+		mfw::SliderFloat("##AutostrafeAngSacrifice", &cfg->movement.AngSacrifice, 0, 10);
 		ImGui::NextColumn();
 
 		ImGui::Text("Strafing angle");
@@ -536,13 +574,13 @@ void Menu::RenderMovement()
 			int total_w = ImGui::GetContentRegionAvail().x;
 			ImGui::SetNextItemWidth(total_w);
 		}
-		C::SliderFloat("##AutostrafeStrafeAng", &cfg->movement.StrafeAng, 0, 30);
+		mfw::SliderFloat("##AutostrafeStrafeAng", &cfg->movement.StrafeAng, 0, 30);
 		ImGui::NextColumn();
 	}
 
 	ImGui::Text("Fake Duck");
 	ImGui::NextColumn();
-	C::HotKey(cfg->Keybinds["Fake Duck"]);
+	mfw::HotKey(cfg->Keybinds["Fake Duck"]);
 	{
 		int total_w = ImGui::GetContentRegionAvail().x;
 		ImGui::SetNextItemWidth(total_w);
@@ -568,11 +606,11 @@ void Menu::RenderBacktrack()
 	ImGui::Text("Backtrack");
 	ImGui::Separator();
 
-	ImGui::Columns(2, "##BacktrackCols"); 
+	ImGui::Columns(2, "##BacktrackCols", false); 
 
 	ImGui::Text("Backtrack");
 	ImGui::NextColumn();
-	C::Checkbox("###Backtrack", &cfg->backtrack.Enable);
+	mfw::Checkbox("###Backtrack", &cfg->backtrack.Enable);
 	ImGui::NextColumn();
 
 	if (cfg->backtrack.Enable) {
@@ -582,7 +620,7 @@ void Menu::RenderBacktrack()
 			int total_w = ImGui::GetContentRegionAvail().x;
 			ImGui::SetNextItemWidth(total_w);
 		}
-		C::SliderFloat("##BacktrackTIme", &cfg->backtrack.BacktrackTime, 10, 200);
+		mfw::SliderFloat("##BacktrackTIme", &cfg->backtrack.BacktrackTime, 10, 200);
 		ImGui::NextColumn();
 	}
 
@@ -605,45 +643,45 @@ void Menu::RenderESP()
 	ImGui::Text("ESP");
 	ImGui::Separator();
 
-	ImGui::Columns(2, "##ESPCols"); // 4-ways, with border
+	ImGui::Columns(2, "##ESPCols", false);
 
 	ImGui::Text("Enable");
 	ImGui::NextColumn();
-	C::Checkbox("##ESPEnable", &cfg->esp.Enable);
+	mfw::Checkbox("##ESPEnable", &cfg->esp.Enable);
 	ImGui::NextColumn();
 
 	ImGui::Text("Names");
 	ImGui::NextColumn();
-	C::Checkbox("##ESPNames", &cfg->esp.Name);
+	mfw::Checkbox("##ESPNames", &cfg->esp.Name);
 	if (cfg->esp.Name)
 	{
 		ImGui::SameLine();
-		C::ColorPicker("Name Color", &cfg->esp.NameColor);
+		mfw::ColorPicker("Name Color", &cfg->esp.NameColor);
 	}
 	ImGui::NextColumn();
 
 	ImGui::Text("Skeleton");
 	ImGui::NextColumn();
-	C::Checkbox("##ESPSkeleton", &cfg->esp.Skeleton);
+	mfw::Checkbox("##ESPSkeleton", &cfg->esp.Skeleton);
 	if (cfg->esp.Skeleton)
 	{
 		ImGui::SameLine();
-		C::ColorPicker("Skeleton Color", &cfg->esp.SkeletonColor);
+		mfw::ColorPicker("Skeleton Color", &cfg->esp.SkeletonColor);
 	}
 	ImGui::NextColumn();
 
 	ImGui::Text("Health");
 	ImGui::NextColumn();
-	C::Checkbox("##ESPHealth", &cfg->esp.Health);
+	mfw::Checkbox("##ESPHealth", &cfg->esp.Health);
 	ImGui::NextColumn();
 
 	ImGui::Text("Weapon");
 	ImGui::NextColumn();
-	C::Checkbox("##ESPWeapon", &cfg->esp.Weapon);
+	mfw::Checkbox("##ESPWeapon", &cfg->esp.Weapon);
 	if (cfg->esp.Weapon)
 	{
 		ImGui::SameLine();
-		C::ColorPicker("Weapon Color", &cfg->esp.WeaponColor);
+		mfw::ColorPicker("Weapon Color", &cfg->esp.WeaponColor);
 	}
 	ImGui::NextColumn();
 
@@ -666,28 +704,28 @@ void Menu::RenderVisuals()
 	ImGui::Text("Visuals");
 	ImGui::Separator();
 
-	ImGui::Columns(2, "##VISCols"); 
+	ImGui::Columns(2, "##VISCols", false);
 
 	ImGui::Text("Thirdperson");
 	ImGui::NextColumn();
-	C::HotKey(cfg->Keybinds["Thirdperson"]);
+	mfw::HotKey(cfg->Keybinds["Thirdperson"]);
 	ImGui::SameLine();
-	C::SliderFloat("##VISThirdpersonDistance", &cfg->vis.ThirdPersonDistance, 50, 300);
+	mfw::SliderFloat("##VISThirdpersonDistance", &cfg->vis.ThirdPersonDistance, 50, 300);
 	ImGui::NextColumn();
 
 	ImGui::Text("No Scope");
 	ImGui::NextColumn();
-	C::Checkbox("##NoScope", &cfg->vis.NoScope);
+	mfw::Checkbox("##NoScope", &cfg->vis.NoScope);
 	ImGui::NextColumn();
 
 
 	ImGui::Text("SpectatorList");
 	ImGui::NextColumn();
-	C::Checkbox("##SpecListEnable", &cfg->vis.SpectatorList);
+	mfw::Checkbox("##SpecListEnable", &cfg->vis.SpectatorList);
 	if (cfg->vis.SpectatorList)
 	{
 		ImGui::SameLine();
-		C::SliderFloat("##SpecListOpaq", &cfg->vis.SpecOpacity, 0.f, 1.f);
+		mfw::SliderFloat("##SpecListOpaq", &cfg->vis.SpecOpacity, 0.f, 1.f);
 	}
 
 	ImGui::EndColumns(); // end columns
@@ -709,7 +747,7 @@ void Menu::RenderAimbot()
 	ImGui::Text("Aimbot");
 	ImGui::Separator();
 
-	ImGui::Columns(2, "##AimCols"); // 4-ways, with border
+	ImGui::Columns(2, "##AimCols", false);
 
 	ImGui::Text("Enable");
 	ImGui::NextColumn();
@@ -717,7 +755,7 @@ void Menu::RenderAimbot()
 		int total_w = ImGui::GetContentRegionAvail().x;
 		ImGui::SetNextItemWidth(total_w);
 	}
-	C::HotKey(cfg->Keybinds["Aimbot"]);
+	mfw::HotKey(cfg->Keybinds["Aimbot"]);
 	ImGui::NextColumn();
 
 	ImGui::Text("Hitchance");
@@ -726,7 +764,7 @@ void Menu::RenderAimbot()
 		int total_w = ImGui::GetContentRegionAvail().x;
 		ImGui::SetNextItemWidth(total_w);
 	}
-	C::SliderFloat("##AimHitchance", &cfg->aimbot.Hitchance, 0, 100);
+	mfw::SliderFloat("##AimHitchance", &cfg->aimbot.Hitchance, 0, 100);
 	ImGui::NextColumn();
 
 	ImGui::Text("MinDamage");
@@ -735,7 +773,7 @@ void Menu::RenderAimbot()
 		int total_w = ImGui::GetContentRegionAvail().x;
 		ImGui::SetNextItemWidth(total_w);
 	}
-	C::SliderInt("##AimMinDamage", &cfg->aimbot.MinDamage, 1, 120);
+	mfw::SliderInt("##AimMinDamage", &cfg->aimbot.MinDamage, 1, 120);
 	ImGui::NextColumn();
 
 	static std::vector<std::string> priority_hitboxes =
@@ -805,7 +843,7 @@ void Menu::RenderAimbot()
 		int total_w = ImGui::GetContentRegionAvail().x;
 		ImGui::SetNextItemWidth(total_w);
 	}
-	C::SliderFloat("##AimHeadPointScale", &cfg->aimbot.HeadPointScale, 0, 100);
+	mfw::SliderFloat("##AimHeadPointScale", &cfg->aimbot.HeadPointScale, 0, 100);
 	ImGui::NextColumn();
 
 	ImGui::Text("Body Point Scale");
@@ -814,7 +852,7 @@ void Menu::RenderAimbot()
 		int total_w = ImGui::GetContentRegionAvail().x;
 		ImGui::SetNextItemWidth(total_w);
 	}
-	C::SliderFloat("##AimBodyPointScale", &cfg->aimbot.BodyPointScale, 0, 100);
+	mfw::SliderFloat("##AimBodyPointScale", &cfg->aimbot.BodyPointScale, 0, 100);
 	ImGui::NextColumn();
 
 	ImGui::Separator();
@@ -825,7 +863,7 @@ void Menu::RenderAimbot()
 		int total_w = ImGui::GetContentRegionAvail().x;
 		ImGui::SetNextItemWidth(total_w);
 	}
-	C::Checkbox("##Aim_DT", &cfg->aimbot.EnableDt);
+	mfw::Checkbox("##Aim_DT", &cfg->aimbot.EnableDt);
 	ImGui::NextColumn();
 
 	ImGui::Text("Enable Hideshots");
@@ -834,7 +872,7 @@ void Menu::RenderAimbot()
 		int total_w = ImGui::GetContentRegionAvail().x;
 		ImGui::SetNextItemWidth(total_w);
 	}
-	C::Checkbox("##AIM_HS", &cfg->aimbot.EnableHs);
+	mfw::Checkbox("##AIM_HS", &cfg->aimbot.EnableHs);
 	ImGui::NextColumn();
 
 	ImGui::EndColumns(); // end columns
@@ -856,7 +894,7 @@ void Menu::RenderAA()
 	ImGui::Text("Antiaim");
 	ImGui::Separator();
 
-	ImGui::Columns(2, "##AntiaimCols");
+	ImGui::Columns(2, "##AntiaimCols", false);
 
 	ImGui::Text("Enable");
 	ImGui::NextColumn();
@@ -864,7 +902,7 @@ void Menu::RenderAA()
 		int total_w = ImGui::GetContentRegionAvail().x;
 		ImGui::SetNextItemWidth(total_w);
 	}
-	C::Checkbox("##AntiaimEnable", &cfg->aa.Enable);
+	mfw::Checkbox("##AntiaimEnable", &cfg->aa.Enable);
 	ImGui::NextColumn();
 
 	ImGui::Text("Invert");
@@ -873,7 +911,7 @@ void Menu::RenderAA()
 		int total_w = ImGui::GetContentRegionAvail().x;
 		ImGui::SetNextItemWidth(total_w);
 	}
-	C::HotKey(cfg->Keybinds["Invert AA"]);
+	mfw::HotKey(cfg->Keybinds["Invert AA"]);
 	ImGui::NextColumn();
 
 	static std::vector<std::string> yaw_bases =
@@ -898,7 +936,7 @@ void Menu::RenderAA()
 		int total_w = ImGui::GetContentRegionAvail().x;
 		ImGui::SetNextItemWidth(total_w);
 	}
-	C::SliderFloat("##AntiaimLeftYawbaseOffset", &cfg->aa.LeftBaseOffset, 0, 179);
+	mfw::SliderFloat("##AntiaimLeftYawbaseOffset", &cfg->aa.LeftBaseOffset, 0, 179);
 	ImGui::NextColumn();
 
 	ImGui::Text("Right Yaw Base Offset");
@@ -907,7 +945,7 @@ void Menu::RenderAA()
 		int total_w = ImGui::GetContentRegionAvail().x;
 		ImGui::SetNextItemWidth(total_w);
 	}
-	C::SliderFloat("##AntiaimRightYawbaseOffset", &cfg->aa.RightBaseOffset, 0, 179);
+	mfw::SliderFloat("##AntiaimRightYawbaseOffset", &cfg->aa.RightBaseOffset, 0, 179);
 	ImGui::NextColumn();
 
 	static std::vector<std::string> AATypes =
@@ -935,7 +973,7 @@ void Menu::RenderAA()
 		int total_w = ImGui::GetContentRegionAvail().x;
 		ImGui::SetNextItemWidth(total_w);
 	}
-	C::SliderFloat("##AntiaimLeftLimit", &cfg->aa.LeftLimit, 0, 58);
+	mfw::SliderFloat("##AntiaimLeftLimit", &cfg->aa.LeftLimit, 0, 58);
 	ImGui::NextColumn();
 
 	ImGui::Text("Right Limit");
@@ -944,7 +982,7 @@ void Menu::RenderAA()
 		int total_w = ImGui::GetContentRegionAvail().x;
 		ImGui::SetNextItemWidth(total_w);
 	}
-	C::SliderFloat("##AntiaimRightLimit", &cfg->aa.RightLimit, 0, 58);
+	mfw::SliderFloat("##AntiaimRightLimit", &cfg->aa.RightLimit, 0, 58);
 	ImGui::NextColumn();
 
 	// sway
@@ -956,7 +994,7 @@ void Menu::RenderAA()
 			int total_w = ImGui::GetContentRegionAvail().x;
 			ImGui::SetNextItemWidth(total_w);
 		}
-		C::SliderFloat("##AntiaimSwayStep", &cfg->aa.SwayStep, 0, 25);
+		mfw::SliderFloat("##AntiaimSwayStep", &cfg->aa.SwayStep, 0, 25);
 		ImGui::NextColumn();
 	}
 
@@ -969,7 +1007,7 @@ void Menu::RenderAA()
 			int total_w = ImGui::GetContentRegionAvail().x;
 			ImGui::SetNextItemWidth(total_w);
 		}
-		C::SliderFloat("##AntiaimJitterTime", &cfg->aa.JitterTime, 0, 200);
+		mfw::SliderFloat("##AntiaimJitterTime", &cfg->aa.JitterTime, 0, 200);
 		ImGui::NextColumn();
 	}
 
@@ -982,7 +1020,7 @@ void Menu::RenderAA()
 			int total_w = ImGui::GetContentRegionAvail().x;
 			ImGui::SetNextItemWidth(total_w);
 		}
-		C::SliderFloat("##AntiaimRandomTime", &cfg->aa.RandomUpdateTime, 0, 200);
+		mfw::SliderFloat("##AntiaimRandomTime", &cfg->aa.RandomUpdateTime, 0, 200);
 		ImGui::NextColumn();
 	}
 
@@ -995,7 +1033,7 @@ void Menu::RenderAA()
 			int total_w = ImGui::GetContentRegionAvail().x;
 			ImGui::SetNextItemWidth(total_w);
 		}
-		C::SliderFloat("##AntiaimSpinStep", &cfg->aa.SpinStep, -180, 180);
+		mfw::SliderFloat("##AntiaimSpinStep", &cfg->aa.SpinStep, -180, 180);
 		ImGui::NextColumn();
 	}
 
@@ -1005,7 +1043,7 @@ void Menu::RenderAA()
 		int total_w = ImGui::GetContentRegionAvail().x;
 		ImGui::SetNextItemWidth(total_w);
 	}
-	C::Checkbox("##AntiaimAntiBrute", &cfg->aa.AntiBrute);
+	mfw::Checkbox("##AntiaimAntiBrute", &cfg->aa.AntiBrute);
 	ImGui::NextColumn();
 
 	ImGui::Separator();
@@ -1016,7 +1054,7 @@ void Menu::RenderAA()
 		int total_w = ImGui::GetContentRegionAvail().x;
 		ImGui::SetNextItemWidth(total_w);
 	}
-	C::Checkbox("##ANTIAIM_LEGITAA", &cfg->aa.LegitAA);
+	mfw::Checkbox("##ANTIAIM_LEGITAA", &cfg->aa.LegitAA);
 	ImGui::NextColumn();
 
 	ImGui::Separator();
@@ -1027,7 +1065,7 @@ void Menu::RenderAA()
 		int total_w = ImGui::GetContentRegionAvail().x;
 		ImGui::SetNextItemWidth(total_w);
 	}
-	C::SliderFloat("##AntiAimLeanAngle", &cfg->aa.LeanAngle, 0, 180);
+	mfw::SliderFloat("##AntiAimLeanAngle", &cfg->aa.LeanAngle, 0, 180);
 	ImGui::NextColumn();
 
 	ImGui::Text("Real Offset");
@@ -1036,7 +1074,7 @@ void Menu::RenderAA()
 		int total_w = ImGui::GetContentRegionAvail().x;
 		ImGui::SetNextItemWidth(total_w);
 	}
-	C::SliderFloat("##AntiaimLegitAmount", &cfg->aa.LegitAmount, -58, 58);
+	mfw::SliderFloat("##AntiaimLegitAmount", &cfg->aa.LegitAmount, -58, 58);
 	ImGui::NextColumn();
 
 	ImGui::EndColumns(); // end columns
@@ -1139,7 +1177,7 @@ void Menu::RenderFakelag()
 	ImGui::Text("Fakelag");
 	ImGui::Separator();
 
-	ImGui::Columns(2, "##FakelagCols"); // 4-ways, with border
+	ImGui::Columns(2, "##FakelagCols", false);
 
 	ImGui::Text("Regular Lag (ticks)");
 	ImGui::NextColumn();
@@ -1147,7 +1185,7 @@ void Menu::RenderFakelag()
 		int total_w = ImGui::GetContentRegionAvail().x;
 		ImGui::SetNextItemWidth(total_w);
 	}
-	C::SliderInt("##FakelagRegularLagTime", &cfg->fakelag.LagTicks, 1, 14);
+	mfw::SliderInt("##FakelagRegularLagTime", &cfg->fakelag.LagTicks, 1, 14);
 	ImGui::NextColumn();
 
 	ImGui::Text("Random Lag (ticks)");
@@ -1156,7 +1194,7 @@ void Menu::RenderFakelag()
 		int total_w = ImGui::GetContentRegionAvail().x;
 		ImGui::SetNextItemWidth(total_w);
 	}
-	C::SliderInt("##FakelagRandomLagTime", &cfg->fakelag.RandomTicks, 0, 13);
+	mfw::SliderInt("##FakelagRandomLagTime", &cfg->fakelag.RandomTicks, 0, 13);
 	ImGui::NextColumn();
 
 	ImGui::Text("Lag On Peek");
@@ -1165,7 +1203,7 @@ void Menu::RenderFakelag()
 		int total_w = ImGui::GetContentRegionAvail().x;
 		ImGui::SetNextItemWidth(total_w);
 	}
-	C::Checkbox("##FakelagLagOnPeak", &cfg->fakelag.LagOnPeak);
+	mfw::Checkbox("##FakelagLagOnPeak", &cfg->fakelag.LagOnPeak);
 	ImGui::NextColumn();
 
 	ImGui::EndColumns(); // end columns
@@ -1176,77 +1214,195 @@ void Menu::RenderFakelag()
 	ImGui::EndChild(); // end child
 }
 
+void Menu::RenderChams()
+{
+	static float propersize = 100.f;
+
+	ImGui::BeginChild("##ChamArea", ImVec2(0, propersize), true);
+
+	float pos1 = ImGui::GetCursorPosY();
+
+	ImGui::Text("Chams");
+	ImGui::Separator();
+
+	ImGui::Columns(2, "##ChamCols"); // 4-ways, with border
+
+	static std::vector<std::string> ChamTypes = { "Flat", "Normal", "Glow", "Animated", "Glass", "Crystal", "chrome" };
+
+	ImGui::Text("Visible Player");
+	ImGui::NextColumn();
+	mfw::Checkbox("##ChamVisPlayer", &cfg->chams.Vis);
+	if (cfg->chams.Vis)
+	{
+		ImGui::SameLine();
+		mfw::ColorPicker("Visible Cham Color", &cfg->chams.VisColor);
+		ImGui::SameLine();
+		{
+			int total_w = ImGui::GetContentRegionAvail().x;
+			ImGui::SetNextItemWidth(total_w);
+		}
+		ImGui::Combo("##ChamVisTypes", &cfg->chams.VisibleType, ChamTypes);
+	}
+	ImGui::NextColumn();
+
+	ImGui::Text("Hidden Player");
+	ImGui::NextColumn();
+	mfw::Checkbox("##ChamHidPlayer", &cfg->chams.Hidden);
+	if (cfg->chams.Hidden)
+	{
+		ImGui::SameLine();
+		mfw::ColorPicker("Hidden Cham Color", &cfg->chams.HiddenColor);
+		ImGui::SameLine();
+		{
+			int total_w = ImGui::GetContentRegionAvail().x;
+			ImGui::SetNextItemWidth(total_w);
+		}
+		ImGui::Combo("##ChamHidTypes", &cfg->chams.HiddenType, ChamTypes);
+	}
+	ImGui::NextColumn();
+
+	ImGui::Text("Local Weapon");
+	ImGui::NextColumn();
+	mfw::Checkbox("##ChamsWeapon", &cfg->chams.Weapon);
+	if (cfg->chams.Weapon)
+	{
+		ImGui::SameLine();
+		mfw::ColorPicker("Local Weapon Color", &cfg->chams.WeaponColor);
+		ImGui::SameLine();
+		{
+			int total_w = ImGui::GetContentRegionAvail().x;
+			ImGui::SetNextItemWidth(total_w);
+		}
+		ImGui::Combo("##ChamsWeaponTypes", &cfg->chams.WeaponType, ChamTypes);
+	}
+	ImGui::NextColumn();
+
+	ImGui::Text("Local Arms");
+	ImGui::NextColumn();
+	mfw::Checkbox("##ChamsArms", &cfg->chams.Arms);
+	if (cfg->chams.Arms)
+	{
+		ImGui::SameLine();
+		mfw::ColorPicker("Local Arm Color", &cfg->chams.ArmColor);
+		ImGui::SameLine();
+		{
+			int total_w = ImGui::GetContentRegionAvail().x;
+			ImGui::SetNextItemWidth(total_w);
+		}
+		ImGui::Combo("##ChamsArmTypes", &cfg->chams.ArmType, ChamTypes);
+	}
+	ImGui::NextColumn();
+
+	ImGui::Text("Local Sleeves");
+	ImGui::NextColumn();
+	mfw::Checkbox("##ChamsSleeves", &cfg->chams.Sleeves);
+	if (cfg->chams.Sleeves)
+	{
+		ImGui::SameLine();
+		mfw::ColorPicker("Local Sleeve Color", &cfg->chams.SleevesColor);
+		ImGui::SameLine();
+		{
+			int total_w = ImGui::GetContentRegionAvail().x;
+			ImGui::SetNextItemWidth(total_w);
+		}
+		ImGui::Combo("##ChamsSleeveTypes", &cfg->chams.SleeveType, ChamTypes);
+	}
+	ImGui::NextColumn();
+
+	ImGui::EndColumns(); // end columns
+
+	float pos2 = ImGui::GetCursorPosY();
+	propersize = pos2 - pos1 + 20.f;
+
+	ImGui::EndChild(); // end child
+}
+
+void Menu::RenderWorldVisuals()
+{
+	static float propersize = 100.f;
+	static float pos1 = 0.f;
+	mfw::StartSection("World Brightness", pos1, propersize);
+
+	int total_w = ImGui::GetContentRegionAvail().x - 20;
+
+	ImGui::Columns(2, "##WorldVisCols", false); // 4-ways, with border
+
+	ImGui::Text("World Brightness");
+	ImGui::NextColumn();
+	mfw::SliderFloat("##World Brightness", &cfg->world_vis.brightness, 0.f, 1.f);
+	ImGui::NextColumn();
+
+	ImGui::EndColumns(); // end columns
+
+	mfw::EndSection(propersize, pos1);
+}
+
 void Menu::Render()
 {
 	cfg->HandleKeybinds();
 
 	RenderSpectators();
 
-	DoStyle();
-
 	if (G::MenuOpen)
 	{
-		ImGui::Begin("A$G$ INDUSTRIES");
+		ImGui::SetNextWindowSizeConstraints(ImVec2(500, 420), ImVec2(1920, 1080));
+		//imgui_draw.cpp line 1895 to change default font
+		static bool once = false;
+		if (!once)
+		{
+			mfw::RefreshColors();
+			once = true;
+		}
 
-		ImGui::Columns(2, "##MainMenuCols"); 
+		// should only do this when editing the menu
 
-		// column 1
-		RenderBacktrack();
-		RenderAimbot();
-		RenderAA();
-		RenderFakelag();
-		ImGui::NextColumn();
+		mfw::StartMain();
 
-		// column 2
-		RenderESP();
-		RenderVisuals();
-		RenderMovement();
-		ImGui::NextColumn();
-
-		ImGui::EndColumns(); // end columns
+		MenuBar();
 
 		ImGui::Separator();
 
-		ImGui::Columns(2, "##MainMenuCols2");
+		int total_w = ImGui::GetWindowSize().x;
+		int total_w2 = ImGui::GetContentRegionAvail().x;
+		ImGui::Columns(2, "##MAINCols", false); // 3 columns
 
-		C::Checkbox("Console Window", &ConsoleWindow);
+		// brugh
+		ImGui::SetColumnWidth(0, total_w / 2);
+		ImGui::SetColumnWidth(1, total_w / 2);
 
-		bool open_popup = ImGui::Button("Eject");
-		if (open_popup)
+		// COLUMN 1
+		if (mfw::Tab == 1)
+			RenderBacktrack();
+		if (mfw::Tab == 2)
+			RenderAimbot();
+		if (mfw::Tab == 3)
 		{
-			ImGui::OpenPopup("Eject popup");
-		}
+			RenderChams();
+			RenderESP();
+		}	
+		if (mfw::Tab == 4)
+			RenderMovement();
+		if (mfw::Tab == 5)
+			RenderMenuOptions();
 
-		if (ImGui::BeginPopup("Eject popup"))
-		{
-			ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1.f, 0, 0, 1.00f));
-			ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(1.f, 0.1f, 0.1f, 1.00f));
-			ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(1.f, 0.2f, 0.2f, 1.00f));
-
-			ImGui::Text("Are you sure you want to Eject?");
-			if (ImGui::Button("Eject##Eject2"))
-				G::KillDLL = true;
-			if (ImGui::IsItemHovered())
-				ImGui::SetTooltip("NOTE:\nEjecting can potentially crash your game.\nEjecting can is not complete so if you want to inject another cheat, restart the game.");
-
-
-			ImGui::PopStyleColor();
-			ImGui::PopStyleColor();
-			ImGui::PopStyleColor();
-
-			ImGui::EndPopup();
-		}
-
-		if (ImGui::Button("Connect to Big Steppa HVH"))
-			I::engine->ClientCmdUnrestricted("connect 74.91.124.24:27015");
 
 		ImGui::NextColumn();
 
-		RenderMenuOptions();
-		ImGui::NextColumn();
+		// COLUMN 2
+		if (mfw::Tab == 2)
+		{
+			RenderAA();
+			RenderFakelag();
+		}
+		if (mfw::Tab == 3)
+		{
+			RenderVisuals();
+			RenderWorldVisuals();
+		}
+			
 
-		ImGui::EndColumns();
+		ImGui::EndColumns(); // end columns
 
-		ImGui::End();
+		mfw::EndMain();
 	}
 }

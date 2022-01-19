@@ -245,6 +245,18 @@ public:
 		z = 0;
 	}
 
+	void Normalize()
+	{
+		if (this->x > 89) this->x = 89;
+		else if (this->x < -89) this->x = -89;
+
+		this->y = fmod(this->y + 180.f, 360.f);
+		if (this->y < 0.f)
+			this->y += 180.f;
+		else
+			this->y -= 180.f;
+	}
+
 	float NormalizeInPlace()
 	{
 		const float flLength = this->Length();

@@ -2,7 +2,7 @@
 
 LagComp* lagcomp = new LagComp();
 
-#define DEBUG_LAGCOMP true 
+#define DEBUG_LAGCOMP false 
 
 void LagComp::Record::Extrapolate(Entity* ent)
 {
@@ -118,7 +118,8 @@ void LagComp::Record::Update(Entity* ent)
 	}
 	else
 		this->ValidBones = false;
-
+	if constexpr (DEBUG_LAGCOMP) L::Debug("GetVecOrigin");
+	this->MaxDesync = ent->GetMaxDesyncDelta();
 	if constexpr (DEBUG_LAGCOMP) L::Debug("GetVecOrigin");
 	this->Origin = ent->GetVecOrigin();
 	if constexpr (DEBUG_LAGCOMP) L::Debug("GetSimulationTime");
@@ -141,6 +142,7 @@ void LagComp::Update(Entity* ent, PlayerInfo_t* info)
 	if (PlayerList.find(info->nUserID) == PlayerList.end())
 	{
 		LagComp::Player NewPlayer;
+		NewPlayer.badShots = 0;
 		PlayerList.insert(std::pair(info->nUserID, NewPlayer));
 	}
 
@@ -179,14 +181,17 @@ void LagComp::CleanUp()
 		if constexpr (DEBUG_LAGCOMP) L::Debug("lagcomp->CleanAllRecords()");
 
 		// return false if there is no records for that
+		if constexpr (DEBUG_LAGCOMP) L::Debug("return false if there is no records for that");
 		if (lagcomp->PlayerList.find(userid) == lagcomp->PlayerList.end())
 			return false;
 
 		// don't bother clearing if the records are already empty
+		if constexpr (DEBUG_LAGCOMP) L::Debug("don't bother clearing if the records are already empty");
 		if (lagcomp->PlayerList[userid].records.empty())
 			return true;
 
 		// otherwise clear records and return true
+		if constexpr (DEBUG_LAGCOMP) L::Debug("otherwise clear records and return true");
 		lagcomp->PlayerList[userid].records.clear();
 		lagcomp->PlayerList[userid].records.resize(0);
 		return true;
@@ -223,6 +228,7 @@ void LagComp::CleanUp()
 	// go through all the players + records, and make sure they are valid
 	for (auto& item : PlayerList)
 	{
+		if constexpr (DEBUG_LAGCOMP) L::Debug("lagcomp-> player = item.second;");
 		Player& player = item.second;
 
 		// remove player if entity is nullptr

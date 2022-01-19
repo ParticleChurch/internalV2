@@ -16,3 +16,5 @@
 #include "IVDebugOverlay.hpp"
 #include "CEffects.hpp"
 #include "GameEventManager.hpp"
+#include "MaterialSystem.hpp"
+#include "ModelRender.hpp"

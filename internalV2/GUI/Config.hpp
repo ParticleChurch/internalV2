@@ -15,11 +15,11 @@ namespace CFG
 {
 	struct Menu
 	{
-		Color AccentColor = Color(0, 114, 255, 255);
-		Color MainTextColor = Color(255, 255, 255, 255);
-		Color SelectTextColor = Color(255, 255, 255, 255);
-		Color BackgroundColor = Color(36, 36, 36, 154);
-		Color WindowColor = Color(0, 0, 0, 51);
+		Color WindowBackgroundClr = Color(39, 41, 45, 255);
+		Color ChildBackgroundClr = Color(52, 55, 63, 255);
+		Color ResizeClr = Color(0, 0, 0, 0);
+		Color TextClr = Color(255, 255, 255, 255);
+		Color AccentClr = Color(0, 169, 255, 255);
 	};
 
 	struct Movement
@@ -62,6 +62,11 @@ namespace CFG
 		bool SpectatorList = false;
 		float SpecOpacity = 1.f;
 		bool NoScope = false;
+	};
+
+	struct WorldVisuals
+	{
+		float brightness = 1.f;
 	};
 
 	struct Performance {
@@ -109,6 +114,27 @@ namespace CFG
 		int RandomTicks = 0;
 		bool LagOnPeak = false;
 	};
+
+	struct Chams
+	{
+		// Chams - player
+		bool Vis = false;
+		int VisibleType = 0;
+		Color VisColor;
+		bool Hidden = false;
+		int HiddenType = 0;
+		Color HiddenColor;
+		// Chams - local
+		bool Weapon = false;
+		int WeaponType = 0;
+		Color WeaponColor;
+		bool Arms = false;
+		int ArmType = 0;
+		Color ArmColor;
+		bool Sleeves = false;
+		int SleeveType = 0;
+		Color SleevesColor;
+	};
 }
 
 class Config
@@ -128,6 +154,8 @@ public:
 	CFG::Antiaim aa;
 	CFG::Aimbot aimbot;
 	CFG::Fakelag fakelag;
+	CFG::Chams chams;
+	CFG::WorldVisuals world_vis;
 
 	Config();
 	void HandleKeybinds();
