@@ -166,6 +166,7 @@
     <ClCompile Include="Globals.cpp" />
     <ClCompile Include="GUI\Config.cpp" />
     <ClCompile Include="GUI\Menu.cpp" />
+    <ClCompile Include="Hacks\EnginePrediction.cpp" />
     <ClCompile Include="Hacks\Glow.cpp" />
     <ClCompile Include="Hacks\Ragebot.cpp" />
     <ClCompile Include="Hacks\AntiAim.cpp" />
@@ -178,6 +179,7 @@
     <ClCompile Include="Hacks\Movement.cpp" />
     <ClCompile Include="Hacks\Resolver.cpp" />
     <ClCompile Include="Hacks\Thirdperson.cpp" />
+    <ClCompile Include="Hacks\Triggerbot.cpp" />
     <ClCompile Include="Hacks\ZeusBot.cpp" />
     <ClCompile Include="Hooks.cpp" />
     <ClCompile Include="ImGui\imgui.cpp" />
@@ -198,6 +200,7 @@
     <ClInclude Include="Globals.hpp" />
     <ClInclude Include="GUI\Config.hpp" />
     <ClInclude Include="GUI\Menu.hpp" />
+    <ClInclude Include="Hacks\EnginePrediction.hpp" />
     <ClInclude Include="Hacks\Glow.hpp" />
     <ClInclude Include="Hacks\Ragebot.hpp" />
     <ClInclude Include="Hacks\AntiAim.hpp" />
@@ -210,6 +213,7 @@
     <ClInclude Include="Hacks\Movement.hpp" />
     <ClInclude Include="Hacks\Resolver.hpp" />
     <ClInclude Include="Hacks\Thirdperson.hpp" />
+    <ClInclude Include="Hacks\Triggerbot.hpp" />
     <ClInclude Include="Hacks\ZeusBot.hpp" />
     <ClInclude Include="Hooks.hpp" />
     <ClInclude Include="ImGui\imconfig.h" />
@@ -253,6 +257,7 @@
     <ClInclude Include="Valve\Interfaces\IWeaponSystem.hpp" />
     <ClInclude Include="Valve\Interfaces\MaterialSystem.hpp" />
     <ClInclude Include="Valve\Interfaces\ModelRender.hpp" />
+    <ClInclude Include="Valve\Interfaces\PlayerGameMovement.hpp" />
     <ClInclude Include="Valve\SDK\Animations.h" />
     <ClInclude Include="Valve\SDK\BSPFlags.hpp" />
     <ClInclude Include="Valve\SDK\CBaseTrace.hpp" />

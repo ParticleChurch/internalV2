@@ -56,6 +56,57 @@ void Config::HandleKeybinds()
 	}
 }
 
+void Config::SaveConfig(std::string filename)
+{
+	std::fstream clr;
+	clr.open(filename, std::ofstream::out | std::ofstream::trunc);
+	clr.close();
+
+	// open in append mode and write data to it :D
+	std::fstream file_obj;
+	file_obj.open(filename, std::ios::app);
+	file_obj.write((char*)&menu, sizeof(CFG::Menu));
+	file_obj.write((char*)&movement , sizeof(CFG::Movement))		   ;
+	file_obj.write((char*)&backtrack , sizeof(CFG::Backtrack))		   ;
+	file_obj.write((char*)&esp , sizeof(CFG::ESP))					   ;
+	file_obj.write((char*)&vis , sizeof(CFG::Visuals))				   ;
+	file_obj.write((char*)&aa , sizeof(CFG::Antiaim))				   ;
+	file_obj.write((char*)&aimbot , sizeof(CFG::Aimbot))			   ;
+	file_obj.write((char*)&fakelag , sizeof(CFG::Fakelag))			   ;
+	file_obj.write((char*)&chams , sizeof(CFG::Chams))				   ;
+	file_obj.write((char*)&world_vis , sizeof(CFG::WorldVisuals))	   ;
+	file_obj.write((char*)&glow , sizeof(CFG::Glow			))		   ;
+	file_obj.write((char*)&triggerbot, sizeof(CFG::Triggerbot));
+	file_obj.close();
+}
+
+void Config::OpenConfig(std::string filename)
+{
+	// read data from text file
+	std::fstream file_obj;
+	file_obj.open(filename, std::ios::in);
+	file_obj.seekg(0);
+	file_obj.read((char*)&menu, sizeof(CFG::Menu));
+	file_obj.read((char*)&this->movement, sizeof(CFG::Movement));
+	file_obj.read((char*)&this->backtrack, sizeof(CFG::Backtrack));
+	file_obj.read((char*)&this->esp, sizeof(CFG::ESP));
+	file_obj.read((char*)&this->vis, sizeof(CFG::Visuals));
+	file_obj.read((char*)&this->aa, sizeof(CFG::Antiaim));
+	file_obj.read((char*)&this->aimbot, sizeof(CFG::Aimbot));
+	file_obj.read((char*)&this->fakelag, sizeof(CFG::Fakelag));
+	file_obj.read((char*)&this->chams, sizeof(CFG::Chams));
+	file_obj.read((char*)&this->world_vis, sizeof(CFG::WorldVisuals));
+	file_obj.read((char*)&this->glow, sizeof(CFG::Glow));
+	file_obj.read((char*)&this->triggerbot, sizeof(CFG::Triggerbot));
+	file_obj.close();
+}
+
+void Config::DeleteConfig(std::string filename)
+{
+	if (remove(filename.c_str()) != 0)
+		return; // valid remove
+}
+
 Config::Config()
 {
 	Keybind Aimbot = { false, false, "Aimbot", 0, 0 };
@@ -73,4 +124,20 @@ Config::Config()
 	Keybind FakeDuck = { false, false, "Fake Duck", 0, 0 };
 	Keybinds.insert(std::make_pair(FakeDuck.name, FakeDuck));
 
+	Keybind Triggerbot = { false, false, "Triggerbot", 0, 0 };
+	Keybinds.insert(std::make_pair(Triggerbot.name, Triggerbot));
+
+}
+
+bool CFG::GetVal(std::string total, std::string str, std::string& substr)
+{
+	std::size_t start = total.find(str);
+	if (start == std::string::npos)
+		return false;
+	std::size_t end = total.find("|", str.length());
+	if (end == std::string::npos)
+		return false;
+	substr = total.substr(start + str.length(), end);
+
+	return true;
 }

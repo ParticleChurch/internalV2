@@ -187,6 +187,11 @@ class Entity
 {
 public: // NETVARS
 	// bool
+	bool WaitForNoAttack() {
+		if constexpr (DEBUG_ENTITY) L::Debug("WaitForNoAttack");
+		static DWORD offset = N::GetOffset("DT_CSPlayer", "m_bWaitForNoAttack");
+		return *(bool*)((DWORD)this + offset);
+	}
 	bool GetGunGameImmunity() {
 		if constexpr (DEBUG_ENTITY) L::Debug("GetGunGameImmunity");
 		static DWORD offset = N::GetOffset("DT_CSPlayer", "m_bGunGameImmunity");

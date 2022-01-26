@@ -33,6 +33,9 @@ namespace I
 	extern MaterialSystem* materialsystem;
 	extern ModelRender* modelrender;
 	extern GlowObjectManager* glowobjectmanager;
+	extern PlayerGameMovement* gamemovement;
+	extern PlayerPrediction* prediction;
+	extern PlayerMoveHelper* playermovehelper;
 	// func
 	typedef void* (*InterfaceCreator)(const char*, int);
 	template <typename T>

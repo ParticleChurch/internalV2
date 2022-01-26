@@ -114,7 +114,7 @@ void ESP::DrawName(char name[128], int userid)
 	if (Once)
 	{
 		Once = false;
-		I::surface->SetFontGlyphSet(FONT, "Verdana", 12, 1, 0, 0, FONTFLAG_DROPSHADOW);// FONTFLAG_ANTIALIAS | FONTFLAG_OUTLINE);
+		I::surface->SetFontGlyphSet(FONT, "Tahoma", 12, 1, 0, 0, FONTFLAG_DROPSHADOW);// FONTFLAG_ANTIALIAS | FONTFLAG_OUTLINE);
 	}
 
 
@@ -236,17 +236,17 @@ void ESP::DrawHealth(int health, int userid)
 	green.color[3] = Dormant[userid];
 
 	I::surface->DrawSetColor(red);		//red
-	I::surface->DrawFilledRect(BR.x + 1, BR.y - Height, BR.x + WidthBar + 1, BR.y);
+	I::surface->DrawFilledRect(TL.x - 1, BR.y - Height, TL.x + WidthBar - 1, BR.y);
 
 	I::surface->DrawSetColor(green);		//green
-	I::surface->DrawFilledRect(BR.x + 1, BR.y - HeightBar, BR.x + WidthBar + 1, BR.y);
+	I::surface->DrawFilledRect(TL.x - 1, BR.y - HeightBar, TL.x + WidthBar - 1, BR.y);
 
 	static DWORD FONT = I::surface->FontCreate();
 	static bool Once = true;
 	if (Once)
 	{
 		Once = false;
-		I::surface->SetFontGlyphSet(FONT, "Small Fonts", 10, 400, 0, 0, FONTFLAG_DROPSHADOW);// FONTFLAG_ANTIALIAS | FONTFLAG_OUTLINE);
+		I::surface->SetFontGlyphSet(FONT, "Tahoma", 10, 400, 0, 0, FONTFLAG_DROPSHADOW);// FONTFLAG_ANTIALIAS | FONTFLAG_OUTLINE);
 	}
 
 	std::string TEXT = std::to_string(health);
@@ -256,7 +256,7 @@ void ESP::DrawHealth(int health, int userid)
 	//vgui_spew_fonts TYPE THAT IN CONSOLE TO GET ALL FONTS
 	I::surface->DrawSetTextFont(FONT);
 	I::surface->DrawSetTextColor(Color(255 * (100 - health) / 100.f, 255 * (health) / 100.f, 0, Dormant[userid]));
-	I::surface->DrawSetTextPos(BR.x + WidthBar + 1, BR.y - HeightBar);
+	I::surface->DrawSetTextPos(TL.x - WidthBar - 10, BR.y - HeightBar);
 	I::surface->DrawPrintText(wide_string.c_str(), wcslen(wide_string.c_str()));
 }
 
@@ -269,7 +269,7 @@ void ESP::DrawWeapon(Entity* entity, int userid)
 	if (Once)
 	{
 		Once = false;
-		I::surface->SetFontGlyphSet(FONT, "Verdana", 12, 1, 0, 0, FONTFLAG_DROPSHADOW);// FONTFLAG_ANTIALIAS | FONTFLAG_OUTLINE);
+		I::surface->SetFontGlyphSet(FONT, "Tahoma", 12, 1, 0, 0, FONTFLAG_DROPSHADOW);// FONTFLAG_ANTIALIAS | FONTFLAG_OUTLINE);
 	}
 
 	Entity* weap = entity->GetActiveWeapon();
@@ -306,7 +306,7 @@ void ESP::DrawProjectiles(Entity* entity)
 	if (Once)
 	{
 		Once = false;
-		I::surface->SetFontGlyphSet(FONT, "Verdana", 12, 1, 0, 0, FONTFLAG_DROPSHADOW);// FONTFLAG_ANTIALIAS | FONTFLAG_OUTLINE);
+		I::surface->SetFontGlyphSet(FONT, "Tahoma", 12, 1, 0, 0, FONTFLAG_DROPSHADOW);// FONTFLAG_ANTIALIAS | FONTFLAG_OUTLINE);
 	}
 
 	auto client_class = entity->GetClientClass();

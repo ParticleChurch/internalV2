@@ -485,11 +485,11 @@ bool GetSafepoint(Vector origin, Vector point, float radius, Vector& safepoint, 
 
 bool SAFEPOINT(LagComp::Record& record, float radius, Vector min, Vector max, Vector& aimpoint)
 {
-	// try for min first
-	if (GetSafepoint(record.Origin, min, radius, aimpoint, record.MaxDesync))
-		return true;
-	// otherwise go for max
+	// Go for max first
 	if (GetSafepoint(record.Origin, max, radius, aimpoint, record.MaxDesync))
+		return true;
+	// then try for middle, min just fucks shit up
+	if (GetSafepoint(record.Origin, (max + min) / 2, radius, aimpoint, record.MaxDesync))
 		return true;
 	return false;
 }
@@ -557,8 +557,6 @@ void Aimbot::Run()
 			if (HITBOX == HITBOX_HEAD)
 			{
 				safepoint = SAFEPOINT(record, record.bones[HITBOX].flRadius, min, max, Aimpoint);
-				if (!safepoint)
-					continue;
 			}
 				
 
@@ -661,8 +659,6 @@ void Aimbot::Run()
 			if (HITBOX == HITBOX_HEAD)
 			{
 				safepoint = SAFEPOINT(record, record.bones[HITBOX].flRadius, min, max, Aimpoint);
-				if (!safepoint)
-					continue;
 			}
 
 			// angle to the target bitch

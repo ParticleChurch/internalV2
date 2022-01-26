@@ -13,6 +13,8 @@ struct Keybind
 // this namespace is purely for organization of the structs, not used as something actually used
 namespace CFG
 {
+	bool GetVal(std::string total, std::string str, std::string& substr);
+
 	struct Menu
 	{
 		Color WindowBackgroundClr = Color(39, 41, 45, 255);
@@ -43,6 +45,14 @@ namespace CFG
 	{
 		bool Enable = true;
 		float BacktrackTime = 200.f;
+	};
+
+	struct Triggerbot
+	{
+		float MinDamage = 0.f;
+		float DelayTime = 0.f;
+		float Hitchance = 0.f;
+		bool Hitboxes[13] = { false, false, true, true, true, true, true, false, false, false, false, false, false };
 	};
 
 	struct ESP
@@ -162,19 +172,23 @@ public:
 	CFG::Performance performance;
 
 	// cheat stuff
-	CFG::Movement movement;
-	CFG::Backtrack backtrack;
-	CFG::ESP esp;
-	CFG::Visuals vis;
-	CFG::Antiaim aa;
-	CFG::Aimbot aimbot;
-	CFG::Fakelag fakelag;
-	CFG::Chams chams;
-	CFG::WorldVisuals world_vis;
-	CFG::Glow glow;
+	CFG::Movement		movement;
+	CFG::Backtrack		backtrack;
+	CFG::Triggerbot		triggerbot;
+	CFG::ESP			esp;
+	CFG::Visuals		vis;
+	CFG::Antiaim		aa;
+	CFG::Aimbot			aimbot;
+	CFG::Fakelag		fakelag;
+	CFG::Chams			chams;
+	CFG::WorldVisuals	world_vis;
+	CFG::Glow			glow;
 
 	Config();
 	void HandleKeybinds();
+	void SaveConfig(std::string filename);
+	void OpenConfig(std::string filename);
+	void DeleteConfig(std::string filename);
 };
 
 extern Config* cfg;

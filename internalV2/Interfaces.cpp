@@ -24,6 +24,9 @@ namespace I
 	MaterialSystem* materialsystem = nullptr;
 	ModelRender* modelrender = nullptr;
 	GlowObjectManager* glowobjectmanager = nullptr;
+	PlayerGameMovement* gamemovement = nullptr;
+	PlayerPrediction* prediction = nullptr;
+	PlayerMoveHelper* playermovehelper = nullptr;
 
 	void Init()
 	{
@@ -51,5 +54,9 @@ namespace I
 		materialsystem = GetInterface<MaterialSystem      >("materialsystem.dll", "VMaterialSystem080");
 		modelrender = GetInterface<ModelRender         >("engine.dll", "VEngineModel016");
 		glowobjectmanager = *reinterpret_cast<GlowObjectManager**>(FindPattern("client.dll", "0F 11 05 ? ? ? ? 83 C8 01") + 3);
+		gamemovement = GetInterface<PlayerGameMovement         >("client.dll", "GameMovement001");
+		prediction = GetInterface<PlayerPrediction         >("client.dll", "VClientPrediction001");
+		playermovehelper = **reinterpret_cast<PlayerMoveHelper***>(FindPattern("client.dll", "8B 0D ? ? ? ? 8B 46 08 68") + 2);
+
 	}
 }

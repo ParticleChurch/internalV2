@@ -472,6 +472,239 @@ void Menu::RenderMenuOptions()
 	mfw::EndSection(propersize, pos1);
 }
 
+std::wstring s2ws(const std::string& s)
+{
+	int len;
+	int slength = (int)s.length() + 1;
+	len = MultiByteToWideChar(CP_ACP, 0, s.c_str(), slength, 0, 0);
+	wchar_t* buf = new wchar_t[len];
+	MultiByteToWideChar(CP_ACP, 0, s.c_str(), slength, buf, len);
+	std::wstring r(buf);
+	delete[] buf;
+	return r;
+}
+void Menu::UpdateFiles()
+{
+	menu->files.clear();
+
+	auto path2 = std::filesystem::current_path();
+	std::wstring ws_path(path2);
+	std::string str_path(ws_path.begin(), ws_path.end());
+
+	std::string path = ".";
+	std::string search_path = str_path + "/*.cfg"; //*.ext in order to get only the EXT-files (for ex)
+	WIN32_FIND_DATA fd;
+	HANDLE hFind = ::FindFirstFile((search_path).c_str(), &fd);
+	if (hFind != INVALID_HANDLE_VALUE) {
+		do {
+			// read all (real) files in current folder
+			// , delete '!' read other 2 default folder . and ..
+			if (!(fd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)) {
+				menu->files.insert(std::pair(fd.cFileName, false));
+			}
+		} while (::FindNextFile(hFind, &fd));
+		::FindClose(hFind);
+	}
+}
+
+void Menu::RenderConfig()
+{
+	static bool init = false;
+	if (!init)
+	{
+		UpdateFiles();
+		init = true;
+	}
+
+	static float propersize = 100.f;
+
+	ImGui::BeginChild("##ConfigArea", ImVec2(0, propersize), true);
+
+	float pos1 = ImGui::GetCursorPosY();
+
+	ImGui::Text("Config");
+	ImGui::Separator();
+
+	static char config_name[256];
+
+	ImGui::Columns(2, "##ConfigCols", true); // 4-ways, with border
+
+	for (auto& a : menu->files)
+	{
+		// if the selectable variable has changed
+		if (ImGui::Selectable(a.first.c_str(), &a.second))
+		{
+			// if it is now positive
+			if (a.second)
+			{
+				// copy over the name, and leave last character for '\0'
+				for (int i = 0; i < min(255, a.first.length()); i++)
+				{
+					config_name[i] = a.first[i];
+				}
+				config_name[min(255, a.first.length())] = '\0';
+
+				// set all other selectables to false
+				for (auto& b : menu->files)
+				{
+					// if they aren't the one we just selected, set it to false
+					if (b.first.compare(a.first) != 0)
+					{
+						b.second = false;
+					}
+				}
+			}
+		}
+		ImGui::NextColumn();
+	}
+
+	ImGui::EndColumns(); // end columns
+
+	ImGui::InputText("##configname", config_name, 256);
+
+	if (mfw::Button("Load"))
+	{
+		cfg->OpenConfig(config_name);
+	}
+	ImGui::SameLine();
+	if (mfw::Button("Save"))
+		ImGui::OpenPopup("Save popup");
+	if (ImGui::BeginPopup("Save popup"))
+	{
+		ImGui::Text(("Are you sure you want to save: " + (std::string)(config_name)).c_str());
+		if (mfw::Button("Save##Save2"))
+		{
+			cfg->SaveConfig(config_name);
+			UpdateFiles();
+			ImGui::CloseCurrentPopup();
+		}
+		if (ImGui::IsItemHovered())
+			ImGui::SetTooltip("NOTE:\nThis will permentently overwrite the config.");
+
+		ImGui::EndPopup();
+	}
+	ImGui::SameLine();
+	if (mfw::Button("Delete"))
+		ImGui::OpenPopup("Delete popup");
+	if (ImGui::BeginPopup("Delete popup"))
+	{
+		ImGui::Text(("Are you sure you want to delete: " + (std::string)(config_name)).c_str());
+		if (mfw::Button("Delete##Delete2"))
+		{
+			cfg->DeleteConfig(config_name);
+			UpdateFiles();
+			ImGui::CloseCurrentPopup();
+		}
+		if (ImGui::IsItemHovered())
+			ImGui::SetTooltip("NOTE:\nThis will permentently delete the config.");
+
+		ImGui::EndPopup();
+	}
+	ImGui::SameLine();
+	if (mfw::Button("Refresh"))
+	{
+		UpdateFiles();
+	}
+
+	bool open_popup = mfw::Button("Eject");
+	if (open_popup)
+	{
+		ImGui::OpenPopup("Eject popup");
+	}
+
+	if (ImGui::BeginPopup("Eject popup"))
+	{
+		ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1.f, 0, 0, 1.00f));
+		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(1.f, 0.1f, 0.1f, 1.00f));
+		ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(1.f, 0.2f, 0.2f, 1.00f));
+
+		ImGui::Text("Are you sure you want to Eject?");
+		if (mfw::Button("Eject##Eject2"))
+			G::KillDLL = true;
+		if (ImGui::IsItemHovered())
+			ImGui::SetTooltip("NOTE:\nEjecting can potentially crash your game.\nEjecting can is not complete so if you want to inject another cheat, restart the game.");
+
+
+		ImGui::PopStyleColor();
+		ImGui::PopStyleColor();
+		ImGui::PopStyleColor();
+
+		ImGui::EndPopup();
+	}
+
+	float pos2 = ImGui::GetCursorPosY();
+	propersize = pos2 - pos1 + 20.f;
+
+	ImGui::EndChild(); // end child
+}
+
+void Menu::RenderTriggerbot()
+{
+	static float propersize = 100.f;
+	static float pos1 = 0.f;
+	mfw::StartSection("Triggerbot", pos1, propersize);
+
+	ImGui::Columns(2, "##TriggerbotCols", false);
+
+	ImGui::Text("Triggerbot");
+	ImGui::NextColumn();
+	mfw::HotKey(cfg->Keybinds["Triggerbot"]);
+	ImGui::NextColumn();
+
+	ImGui::Text("Minimum Damage");
+	ImGui::NextColumn();
+	mfw::SliderFloat("##TriggerMinDamage", &cfg->triggerbot.MinDamage, 0, 120.f);
+	ImGui::NextColumn();
+
+	ImGui::Text("Delay Time");
+	ImGui::NextColumn();
+	mfw::SliderFloat("##TriggerDelaytime", &cfg->triggerbot.DelayTime, 0, 200.f);
+	ImGui::NextColumn();
+
+	ImGui::Text("Hitchance");
+	ImGui::NextColumn();
+	mfw::SliderFloat("##TriggerHitchance", &cfg->triggerbot.Hitchance, 0, 100.f);
+	ImGui::NextColumn();
+
+	ImGui::Text("Hitboxes");
+	ImGui::NextColumn();
+	{
+		int total_w = ImGui::GetContentRegionAvail().x;
+		ImGui::SetNextItemWidth(total_w);
+	}
+	static std::string preview = "";
+	static std::vector<std::string> hitboxes =
+	{
+		"HEAD",
+		"NECK",
+		"PELVIS",
+		"STOMACH",
+		"THORAX",
+		"CHEST",
+		"UPPER_CHEST",
+		"THIGH",
+		"CALF",
+		"FOOT",
+		"HAND",
+		"UPPER_ARM",
+		"FOREARM"
+	};
+	if (ImGui::BeginCombo("##TriggerHitboxes", preview.c_str())) {
+		preview = "";
+		for (size_t i = 0; i < hitboxes.size(); i++) {
+			ImGui::Selectable(hitboxes[i].c_str(), &cfg->triggerbot.Hitboxes[i], ImGuiSelectableFlags_::ImGuiSelectableFlags_DontClosePopups);
+			if (cfg->triggerbot.Hitboxes[i])
+				preview += hitboxes[i] + ",";
+		}
+		ImGui::EndCombo();
+	}
+	ImGui::NextColumn();
+
+	ImGui::EndColumns(); // end columns
+	mfw::EndSection(propersize, pos1);
+
+}
+
 void Menu::RenderMovement()
 {
 	static float propersize = 100.f;
@@ -1404,7 +1637,7 @@ void Menu::Render()
 	if (G::MenuOpen)
 	{
 		ImGui::SetNextWindowSizeConstraints(ImVec2(500, 420), ImVec2(1920, 1080));
-		//imgui_draw.cpp line 1895 to change default font
+		//imgui_draw.cpp line 2122 to change default font ("AddFontDefault" func)
 		static bool once = false;
 		if (!once)
 		{
@@ -1430,7 +1663,10 @@ void Menu::Render()
 
 		// COLUMN 1
 		if (mfw::Tab == 1)
+		{
 			RenderBacktrack();
+			RenderTriggerbot();
+		}	
 		if (mfw::Tab == 2)
 			RenderAimbot();
 		if (mfw::Tab == 3)
@@ -1458,10 +1694,16 @@ void Menu::Render()
 			RenderVisuals();
 			RenderWorldVisuals();
 		}
+		if (mfw::Tab == 5)
+		{
+			ImGui::Text("Config section coming soon");
+			RenderConfig();
+		}
 			
 
 		ImGui::EndColumns(); // end columns
 
 		mfw::EndMain();
+
 	}
 }

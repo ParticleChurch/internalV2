@@ -54,6 +54,7 @@
 #include "Utils/Math.hpp"
 
 // Hacks
+#include "Hacks/EnginePrediction.hpp"
 #include "Hacks/Autowall.hpp"
 #include "Hacks/Movement.hpp"
 #include "Hacks/Lagcomp.hpp"
@@ -68,6 +69,8 @@
 #include "Hacks/Resolver.hpp"
 #include "Hacks/Chams.hpp"
 #include "Hacks/Glow.hpp"
+#include "Hacks/Triggerbot.hpp"
+
 
 // Hooks
 #include "Hooks.hpp"            //hooking ingame functions

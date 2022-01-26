@@ -1,10 +1,15 @@
 #pragma once
 class Menu
 {
+private:
+	std::map<std::string, bool> files;
+	void UpdateFiles();
 private: // actual rendering
 	void MenuBar();
 	void RenderMenuOptions();
+	void RenderConfig();
 
+	void RenderTriggerbot();
 	void RenderMovement();
 	void RenderBacktrack();
 	void RenderESP();

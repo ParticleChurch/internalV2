@@ -87,8 +87,8 @@ public:
 			int UserID = event->GetInt("userid");
 			if (I::engine->GetPlayerForUserID(UserID) == G::LocalplayerIndex)
 			{
-				/*if(event->GetInt("dmg_health") < 100)
-					I::engine->ExecuteClientCmd("kill");*/
+				if(event->GetInt("hitgroup") != HITGROUP_HEAD)
+					I::engine->ExecuteClientCmd("kill; say thats not my head");
 				return;
 			}
 
@@ -280,6 +280,8 @@ void H::Free()
 	delete g_EventListener;
 	delete chams;
 	delete glow;
+	delete triggerbot;
+	delete enginePrediction;
 
 	// let user do input lol
 	I::inputsystem->EnableInput(true);
@@ -578,7 +580,13 @@ bool __stdcall H::CreateMoveHook(float flInputSampleTime, CUserCmd* cmd)
 		if (TicksToShift > 0 || TicksToRecharge)
 			antiaim->PredictedVal = true;
 
+		/*enginePrediction->start(cmd);*/
+
 		bSendPacket = antiaim->FakelagEnd();
+
+		// do epic edge jump here :D
+		
+		/*enginePrediction->end();*/
 
 		// run antiaim aa
 		antiaim->Run();
@@ -615,6 +623,7 @@ bool __stdcall H::CreateMoveHook(float flInputSampleTime, CUserCmd* cmd)
 				a.second.badShots++;
 		}
 
+		triggerbot->Run();
 		rage->Run();
 
 		// Shot fix
