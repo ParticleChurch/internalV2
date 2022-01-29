@@ -21,7 +21,7 @@ private: // essential var/funcs
 	void SortPlayers(std::vector<std::pair<int, float>>& values);
 	void UpdateVals();
 	float CalculateHitchance(Vector vangles, const Vector& point, Entity* player, int hbox);
-	float CalculatePsudoHitchance();
+	float CalculatePsudoHitchance(Entity* ent, int Hitbox);
 	float GetPointScale(int Hitbox);
 public:
 	int TheoreticalScans;

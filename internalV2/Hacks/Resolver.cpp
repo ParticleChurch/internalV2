@@ -4,6 +4,8 @@ Resolver* resolver = new Resolver();
 
 void Resolver::AimbotShot(aim_shot_log shot)
 {
+	float latency = (I::engine->GetNetChannelInfo()->GetAvgLatency(0) + I::engine->GetNetChannelInfo()->GetAvgLatency(1));
+	shot.time += latency;
 	aim_shots.push_back(shot);
 }
 
@@ -113,27 +115,25 @@ void Resolver::MatchImpacts()
 			break;
 
 		impact_log* impact = &this->impacts[i];
-		player_hurt_log* hurt = nullptr;
 		shot_log shot = this->shots.front();
+		match_log new_match;
+		new_match.miss = true;
 
 		//match it to hurt
 		for (size_t j = 0; j < this->hurts.size(); j++)
 		{
 			if (impact->time == this->hurts[j].time)
 			{
-				hurt = &this->hurts[j];
+				new_match.hurt = *&this->hurts[j];
+				new_match.miss = false;
 				break;
 			}
 		}
-
-		match_log new_match;
-		new_match.miss = !hurt;
+		
 		new_match.shot = shot;
 		new_match.impact = *impact;
-		new_match.hurt = hurt ? *hurt : player_hurt_log();
 
 		new_matches.push_back(new_match);
-		H::console.push_back(new_match.print());
 		this->shots.pop_front();
 	}
 
@@ -142,11 +142,18 @@ void Resolver::MatchImpacts()
 	this->matches.clear();
 
 	for (size_t i = 0; i < new_matches.size(); i++)
+	{
+		//H::console.push_back("MATCH: " + std::to_string(new_matches[i].impact.time));
 		this->matches.push_back(new_matches[i]);
+	}
+		
 }
 
 void Resolver::ResolveMatches()
 {
+	if (this->matches.empty()) return;
+
+	// should prob iterate through aimshots, and determine if any matches match, but whatev lol
 	for (size_t i = 0; i < this->matches.size(); i++)
 	{
 		match_log& match = this->matches[i];
@@ -154,7 +161,7 @@ void Resolver::ResolveMatches()
 		int AimbotShotIndex = -1;
 		for (int j = 0; j < this->aim_shots.size(); j++)
 		{
-			if (match.shot.time == this->aim_shots[j].time)
+			if (fabsf(match.shot.time - this->aim_shots[j].time) < I::globalvars->flIntervalPerTick + 0.1f)
 				AimbotShotIndex = j;
 		}
 
@@ -163,7 +170,9 @@ void Resolver::ResolveMatches()
 
 		aim_shot_log aim = this->aim_shots[AimbotShotIndex];
 
-		H::console.push_back("____________________");
+		std::string matchName = "";
+		PlayerInfo_t info;
+		I::engine->GetPlayerInfo(I::engine->GetPlayerForUserID(aim.userID), &info);
 
 		// we actually hit something
 		bool did_hit = false;
@@ -173,14 +182,16 @@ void Resolver::ResolveMatches()
 			if (match.hurt.hitgroup == aim.hitgroup && match.hurt.userid == aim.userID)
 			{
 				lagcomp->PlayerList[match.hurt.userid].goodShots++;
-				H::console.push_back("good resolve");
+				H::console.push_back("good resolve on " + (std::string)info.szName);
+				this->aim_shots.erase(this->aim_shots.begin() + AimbotShotIndex);
 				continue;
 			} 
 			else if (match.hurt.userid == aim.userID)
 			{
 				// lucky spread hit
 				lagcomp->PlayerList[match.hurt.userid].luckShots++;
-				H::console.push_back("lucky hit");
+				H::console.push_back("lucky hit on " + (std::string)info.szName);
+				this->aim_shots.erase(this->aim_shots.begin() + AimbotShotIndex);
 				continue;
 			}
 			// otherwise its gonna be a spread/resolve issue
@@ -192,45 +203,40 @@ void Resolver::ResolveMatches()
 		{
 			// resolve error
 			lagcomp->PlayerList[aim.userID].badShots++;
-			H::console.push_back("bad resolve");
+			H::console.push_back("bad resolve on " + (std::string)info.szName);
+			this->aim_shots.erase(this->aim_shots.begin() + AimbotShotIndex);
 			continue;
 		}
 
 		if ((aim.shootPos - aim.shootPoint).VecLength() > (aim.shootPos - match.impact.end_pos).VecLength() + 5.f && aim.hitchance > 50.f)
 		{
 			// ray didn't reach far enough --> autowall error, not resolver error
-			H::console.push_back("trace error");
+			H::console.push_back("trace error on " + (std::string)info.szName);
+			this->aim_shots.erase(this->aim_shots.begin() + AimbotShotIndex);
 			continue;
 		}
 
 		// spread error
-		H::console.push_back("spread error");
+		H::console.push_back("spread error on " + (std::string)info.szName);
+		this->aim_shots.erase(this->aim_shots.begin() + AimbotShotIndex);
 	}
 
-	/*this->aim_shots.clear();
-	this->aim_shots.resize(0);*/
-
-	
+	this->aim_shots.clear();
+	this->aim_shots.resize(0);
 }
 
 void Resolver::LogicResolve(Entity* ent, int missedShots)
-{
-	return;
-	if (!ent) return;
-	if (!(ent->GetHealth() > 0)) return;
-	if (ent->GetLifeState() != LIFE_ALIVE) return;
-	if (ent->IsDormant()) return;
-
+{		
 	auto animstate = ent->GetAnimState();
 	if (!animstate) return;
 
 	// in air fix
-	/*bool onGround = ent->GetFlags() & FL_ONGROUND;
+	bool onGround = ent->GetFlags() & FL_ONGROUND;
 	if (!onGround)
 	{
 		animstate->flGoalFeetYaw = ent->GetLBY();
 		return;
-	}*/
+	}
 		
 	Vector velocity = ent->GetVecVelocity();
 	float horizontalVelocity = velocity.VecLength2D();
@@ -267,8 +273,9 @@ void Resolver::LogicResolve(Entity* ent, int missedShots)
 
 void Resolver::Run()
 { 
-	return;
+	L::Debug("RESOLVER");
 	// sort all the events before making a decision
+
 	SortImpacts();
 	MatchImpacts();
 	ResolveMatches();
@@ -284,7 +291,17 @@ void Resolver::Run()
 		if (player.Team == G::LocalplayerTeam) return;
 		if (player.LifeState != LIFE_ALIVE) return;
 
-		LogicResolve(player.pEntity, player.badShots);
+		Entity* ent = I::entitylist->GetClientEntity(player.Index);
+		if (!ent) continue;
+		if (!(ent->GetHealth() > 0)) continue;
+		if (ent->GetLifeState() != LIFE_ALIVE) continue;
+		if (ent->GetTeam() == G::LocalplayerTeam) continue;
+		if (ent->IsDormant()) continue;
+
+
+		LogicResolve(ent, player.badShots);
 	}
 
 }
+
+

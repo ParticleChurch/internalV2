@@ -153,6 +153,12 @@
     <ClCompile Include="Hacks\EnginePrediction.cpp">
       <Filter>Source Files\Hacks</Filter>
     </ClCompile>
+    <ClCompile Include="Hacks\Skinchanger.cpp">
+      <Filter>Source Files\Hacks</Filter>
+    </ClCompile>
+    <ClCompile Include="Hacks\AnimFix.cpp">
+      <Filter>Source Files\Hacks</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Utils\Logger.hpp">
@@ -444,6 +450,12 @@
       <Filter>Header Files\Valve\Interfaces</Filter>
     </ClInclude>
     <ClInclude Include="Hacks\Chams.hpp">
+      <Filter>Header Files\Hacks</Filter>
+    </ClInclude>
+    <ClInclude Include="Hacks\Skinchanger.hpp">
+      <Filter>Header Files\Hacks</Filter>
+    </ClInclude>
+    <ClInclude Include="Hacks\AnimFix.hpp">
       <Filter>Header Files\Hacks</Filter>
     </ClInclude>
   </ItemGroup>

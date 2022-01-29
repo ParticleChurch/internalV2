@@ -42,6 +42,7 @@ public:
 		switch (StrHash::HashRuntime(event->GetName())) {
 		case StrHash::Hash("bullet_impact"):
 		{
+
 			int UserID = event->GetInt("userid");
 
 			if (I::engine->GetPlayerForUserID(UserID) != G::LocalplayerIndex)
@@ -83,12 +84,13 @@ public:
 			byte	dmg_armor	damage done to armor
 			byte	hitgroup	hitgroup that was damaged
 			*/
-			// if the localplayer gets hurt, return
+
+			// if the localplayer gets hurt, do some stuff
 			int UserID = event->GetInt("userid");
 			if (I::engine->GetPlayerForUserID(UserID) == G::LocalplayerIndex)
 			{
-				if(event->GetInt("hitgroup") != HITGROUP_HEAD)
-					I::engine->ExecuteClientCmd("kill; say thats not my head");
+				/*if(event->GetInt("hitgroup") != HITGROUP_HEAD)
+					I::engine->ExecuteClientCmd("kill; say thats not my head");*/
 				return;
 			}
 
@@ -128,14 +130,12 @@ public:
 			bool	attackerblind	attacker was blind from flashbang
 			*/
 
-
+			
 		}
 		break;
 		case StrHash::Hash("round_freeze_end"):
-
 			break;
 		case StrHash::Hash("round_prestart"):
-
 			break;
 		}
 	}
@@ -176,6 +176,9 @@ namespace H
 	int TicksToShift = 0;
 	int TicksToRecharge = 0;
 	EventListener* g_EventListener;
+
+
+	int lag = 0;
 }
 
 void H::Init()
@@ -282,6 +285,7 @@ void H::Free()
 	delete glow;
 	delete triggerbot;
 	delete enginePrediction;
+	delete skins;
 
 	// let user do input lol
 	I::inputsystem->EnableInput(true);
@@ -289,6 +293,8 @@ void H::Free()
 	// let user use mouse again?
 	if (I::engine->IsInGame())
 		I::surface->LockCursor();
+
+	ConsoleColorMsg(Color(255, 0, 0, 255), "Cheat Unhooked\n");
 }
 
 long __stdcall H::ResetHook(IDirect3DDevice9* device, D3DPRESENT_PARAMETERS* pPresentationParameters)
@@ -345,7 +351,7 @@ long __stdcall H::EndSceneHook(IDirect3DDevice9* device)
 
 		if (menu->ConsoleWindow)
 		{
-			ImGui::SetNextWindowSizeConstraints(ImVec2(400, 400), ImVec2(1920, 1080));
+			ImGui::SetNextWindowSizeConstraints(ImVec2(10, 10), ImVec2(1920, 1080));
 			ImGui::Begin("Console");
 			//ImGui::Text(("Aimbot Scans (per tick): " + std::to_string(aimbot->TheoreticalScans)).c_str());
 			for (auto& a : H::console)
@@ -466,6 +472,8 @@ void __stdcall H::FrameStageNotifyHook(int stage)
 		return oFrameStageNotify(stage);
 	}
 
+	
+
 	static int deadflagOffset = N::GetOffset("DT_BasePlayer", "deadflag");
 	if (stage == FRAME_RENDER_START) {
 		if (cfg->Keybinds["Thirdperson"].boolean)
@@ -511,11 +519,115 @@ void __stdcall H::FrameStageNotifyHook(int stage)
 	}
 	*/
 
+	skins->FSN(stage);
+
 	oFrameStageNotify(stage);
 
 	resolver->Run();
 
+	// first create a consitent lag amount for players
+	{
+		static int LastTickCount = I::globalvars->iTickCount;
+		if (LastTickCount != I::globalvars->iTickCount)
+		{
+			LastTickCount = I::globalvars->iTickCount;
+			lag++;
+		}
+		if (lag > 20)
+			lag = 0;
+	}
+	static Vector lastPos[64];
+	static float lastTime[64];
+	static Vector backupAbsPos[64];
+	static Vector backupPos[64];
+	static float backupTime[64];
+	/*if (stage == FRAME_NET_UPDATE_POSTDATAUPDATE_START && G::Localplayer && G::LocalplayerAlive)
+	{
+		Entity* ent;
+		static int PrevLagTime[64];
+		static Vector realVel;
+		for (int i = 1; i < 64; ++i)
+		{
+			// Localplayer Check
+			if (i == G::LocalplayerIndex) continue;
+
+			// entity existence check
+			ent = I::entitylist->GetClientEntity(i);
+			if (!ent) continue;
+
+			// entity player check
+			if (!ent->IsPlayer()) continue;
+
+			// just do enemies for now
+			if (ent->GetTeam() == G::LocalplayerTeam) continue;
+
+			// do another player check
+			PlayerInfo_t info;
+			if (!I::engine->GetPlayerInfo(i, &info)) continue;
+
+			// layer alive check
+			if (!(ent->GetHealth() > 0)) continue;
+			if (ent->GetLifeState() != LIFE_ALIVE) continue;
+
+			backupPos[i] = ent->GetVecOrigin();
+			backupAbsPos[i] = ent->GetAbsOrigin();
+			backupTime[i] = ent->GetOldSimulationTime();
+
+			// 0 lag rn
+			if (lag == 1)
+			{
+				lastTime[i] = ent->GetSimulationTime();
+				lastPos[i] = ent->GetVecOrigin();
+			}
+			// lets STRESS TEST the fuckin SYSTEM BABY
+			else
+			{
+				ent->GetVecOrigin() = lastPos[i];
+				ent->SetAbsOrigin(lastPos[i]);
+				ent->GetOldSimulationTime() = lastTime[i];
+			}
+		}
+	}
+	*/
+
+	animfix->Update(stage);
+
 	lagcomp->Run_FSN(stage);
+
+	
+
+	/*
+	if (stage == FRAME_NET_UPDATE_POSTDATAUPDATE_START && G::Localplayer && G::LocalplayerAlive)
+	{
+		Entity* ent;
+		for (int i = 1; i < 64; ++i)
+		{
+			// Localplayer Check
+			if (i == G::LocalplayerIndex) continue;
+
+			// entity existence check
+			ent = I::entitylist->GetClientEntity(i);
+			if (!ent) continue;
+
+			// entity player check
+			if (!ent->IsPlayer()) continue;
+
+			// just do enemies for now
+			if (ent->GetTeam() == G::LocalplayerTeam) continue;
+
+			// do another player check
+			PlayerInfo_t info;
+			if (!I::engine->GetPlayerInfo(i, &info)) continue;
+
+			// layer alive check
+			if (!(ent->GetHealth() > 0)) continue;
+			if (ent->GetLifeState() != LIFE_ALIVE) continue;
+
+			ent->GetVecOrigin() = backupPos[i];
+			ent->SetAbsOrigin(backupAbsPos[i]);
+			ent->GetOldSimulationTime() = backupTime[i];
+		}
+	}*/
 }
 
 bool __stdcall H::CreateMoveHook(float flInputSampleTime, CUserCmd* cmd)
@@ -550,8 +662,8 @@ bool __stdcall H::CreateMoveHook(float flInputSampleTime, CUserCmd* cmd)
 		}
 
 		// fps fix
-		static auto shadows = I::convar->FindVar("cl_csm_enabled");
-		shadows->SetValue(false);
+		/*static auto shadows = I::convar->FindVar("cl_csm_enabled");
+		shadows->SetValue(false);*/
 
 		// movmeent fix
 		movement->CM_Start(cmd, pSendPacket);
@@ -619,8 +731,6 @@ bool __stdcall H::CreateMoveHook(float flInputSampleTime, CUserCmd* cmd)
 			G::cmd->angViewAngle = G::StartAngle;
 			G::real = Vector(G::cmd->angViewAngle.x, G::cmd->angViewAngle.y);
 			G::fake = Vector(G::cmd->angViewAngle.x, G::cmd->angViewAngle.y);
-			for (auto& a : lagcomp->PlayerList)
-				a.second.badShots++;
 		}
 
 		triggerbot->Run();
@@ -650,7 +760,7 @@ bool __stdcall H::CreateMoveHook(float flInputSampleTime, CUserCmd* cmd)
 		if ((G::cmd->iButtons & IN_ATTACK) && G::Localplayer->CanShoot())
 		{
 			if (cfg->aimbot.EnableHs)
-				TicksToShift = 3;
+				TicksToShift = 2;
 			if (cfg->aimbot.EnableDt)
 				TicksToShift = 16;
 			bSendPacket = true;

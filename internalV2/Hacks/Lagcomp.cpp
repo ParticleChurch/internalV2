@@ -2,20 +2,26 @@
 
 LagComp* lagcomp = new LagComp();
 
-#define DEBUG_LAGCOMP false 
+#define DEBUG_LAGCOMP true 
 
-void LagComp::Record::Extrapolate(Entity* ent)
+void LagComp::Record::Extrapolate(Entity* ent, int UserID)
 {
-	float velocity = ent->GetVecVelocity().Length2D();
+	return;
+	// dont bother if no lag
+	if (this->LagAmount < 1) return;
+
+	float velocity = ent->GetVecVelocity().VecLength2D();
+	H::console.push_back("velocity: " + std::to_string(velocity));
 	if (velocity < 1.f)
 		return;
 
 	// tick delta (you can predict forward 3-4 ticks and hit them still lol)
-	int tick_delta = abs(TimeToTicks(ent->GetSimulationTime() - ent->GetOldSimulationTime()));
+	int tick_delta = this->LagAmount;
+	H::console.push_back("tick_delta: " + std::to_string(tick_delta));
 
 	// if shit tick delta
-	if (tick_delta > 15 && tick_delta < 2)
-		return;
+	/*if (tick_delta > 15 && tick_delta < 2)
+		return;*/
 
 	// set extrapolated flag
 	this->extrapolated = true;
@@ -24,7 +30,14 @@ void LagComp::Record::Extrapolate(Entity* ent)
 	this->SimulationTime += tick_delta * I::globalvars->flIntervalPerTick;
 
 	// Move the position for all of the bones...
-	this->HeadPos = Calc::ExtrapolateTick(this->HeadPos, this->Velocity, tick_delta);
+	H::console.push_back("_______________");
+	H::console.push_back(this->HeadPos.str());
+	Vector bef = Calc::ExtrapolateTick(this->HeadPos, ent->GetVecVelocity(), tick_delta);
+	H::console.push_back(std::to_string((bef - this->HeadPos).VecLength()));
+	this->HeadPos = bef;
+	H::console.push_back(this->HeadPos.str());
+
+	/*
 	for (auto a : this->bones)
 	{
 		a.vecBBMin = Calc::ExtrapolateTick(a.vecBBMin, this->Velocity, tick_delta);
@@ -50,7 +63,7 @@ void LagComp::Record::Extrapolate(Entity* ent)
 	{
 		if constexpr (DEBUG_LAGCOMP) L::Debug(std::to_string(i).c_str());
 		mstudiobone_t* Bone = StudioModel->GetBone(i);
-		if (!Bone /*|| !(Bone->iFlags & 256) || Bone->iParent == -1*/)
+		if (!Bone ) //|| !(Bone->iFlags & 256) || Bone->iParent == -1
 			continue;
 
 		if (i >= MAXSTUDIOBONES) continue;
@@ -66,9 +79,16 @@ void LagComp::Record::Extrapolate(Entity* ent)
 		this->Matrix[i].arrData[1][3] = NextPos.y;
 		this->Matrix[i].arrData[2][3] = NextPos.z;
 	}
+*/
 }
 
-void LagComp::Record::Update(Entity* ent)
+// kinda counter intuative, this interpolates (if valid tick, everything behind it xD)
+void LagComp::Record::Interpolate(Entity* ent, int UserID)
+{
+
+}
+
+void LagComp::Record::Update(Entity* ent, int UserID)
 {
 	if constexpr (DEBUG_LAGCOMP) L::Debug("SETUP BONES");
 	bool FixBones = ent->GetVecVelocity().Length2D() > 1.f && !ent->IsDormant();
@@ -118,7 +138,7 @@ void LagComp::Record::Update(Entity* ent)
 	}
 	else
 		this->ValidBones = false;
-	if constexpr (DEBUG_LAGCOMP) L::Debug("GetVecOrigin");
+	if constexpr (DEBUG_LAGCOMP) L::Debug("GetMaxDesyncDelta");
 	this->MaxDesync = ent->GetMaxDesyncDelta();
 	if constexpr (DEBUG_LAGCOMP) L::Debug("GetVecOrigin");
 	this->Origin = ent->GetVecOrigin();
@@ -128,8 +148,14 @@ void LagComp::Record::Update(Entity* ent)
 	this->Velocity = ent->GetVecVelocity();
 	if constexpr (DEBUG_LAGCOMP) L::Debug("GetVecVelocity");
 	this->Flags = ent->GetFlags();
-	if constexpr (DEBUG_LAGCOMP) L::Debug("Extrapolate");
-	this->Extrapolate(ent);
+	if constexpr (DEBUG_LAGCOMP) L::Debug("LagAmount");
+	this->LagAmount = abs(TimeToTicks(ent->GetSimulationTime() - ent->GetOldSimulationTime()));
+
+	// NO CRAZY SHIT BRUGH
+	/*if constexpr (DEBUG_LAGCOMP) L::Debug("Extrapolate");
+	this->Extrapolate(ent, UserID);*/
+	/*if constexpr (DEBUG_LAGCOMP) L::Debug("Extrapolate");
+	Interpolate(ent, UserID);*/
 }
 
 void LagComp::Update(Entity* ent, PlayerInfo_t* info)
@@ -151,6 +177,7 @@ void LagComp::Update(Entity* ent, PlayerInfo_t* info)
 
 	if constexpr (DEBUG_LAGCOMP) L::Debug("Getting basic info");
 
+
 	// update player vars
 	player.pEntity = ent;
 	player.Dormant = ent->IsDormant();
@@ -159,12 +186,20 @@ void LagComp::Update(Entity* ent, PlayerInfo_t* info)
 	player.Team = ent->GetTeam();
 	player.Index = ent->GetIndex();
 
+	
+
 	if constexpr (DEBUG_LAGCOMP) L::Debug("copy name");
 	std::memcpy(&player.Info, &info, sizeof(PlayerInfo_t));
 
+	// animation goofery
+	bool validatingtick = player.Dormant || player.LifeState != LIFE_ALIVE;
+	memcpy(player.OldAnimLayers, validatingtick ? ent->GetAnimOverlays() : player.AnimLayers, 15 * sizeof CAnimationLayer);
+	memcpy(player.AnimLayers, ent->GetAnimOverlays(), 15 * sizeof CAnimationLayer);
+
+
 	// add record
 	LagComp::Record NewRec;
-	NewRec.Update(ent);
+	NewRec.Update(ent, info->nUserID);
 	if constexpr (DEBUG_LAGCOMP) L::Debug("player.records.push_front");
 	player.records.push_front(NewRec);
 
@@ -198,7 +233,7 @@ void LagComp::CleanUp()
 	};
 
 	auto CleanAndDeletePlayer = [](int userid) {
-		if constexpr (DEBUG_LAGCOMP) L::Debug("lagcomp->CleanAndDeletePlayer()");
+		if constexpr (DEBUG_LAGCOMP) L::Debug(("lagcomp->CleanAndDeletePlayer() " + std::to_string(userid)).c_str());
 
 		// make sure this fucker isn't emtpy
 		if constexpr (DEBUG_LAGCOMP) L::Debug("CleanAndDeletePlayer->empty check");
@@ -276,7 +311,7 @@ void LagComp::CleanUp()
 
 		// remove bad RECORDS (not Player)
 		while (player.records.size() > 3
-			&& fabsf(I::globalvars->flCurrentTime - player.records.back().SimulationTime) > 0.2f) {
+			&& fabsf(I::globalvars->flCurrentTime - player.records.back().SimulationTime) > 0.7f) { // 700ms big brain (max 2x breaklagcomp ~500ms)
 			player.records.pop_back();
 		}
 	}
@@ -329,7 +364,7 @@ void LagComp::Run_FSN(int stage)
 		// do another player check
 		PlayerInfo_t info;
 		if (!I::engine->GetPlayerInfo(i, &info))
-			return;
+			continue;
 
 		// Update based on info
 		Update(ent, &info);

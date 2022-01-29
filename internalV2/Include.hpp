@@ -25,6 +25,7 @@
 #include <fstream>				 // for logger
 #include <filesystem>			 // for logger
 #include <ctime>				 // for logger
+#include <unordered_map>
 
 //dumbass warnings
 #pragma warning(disable:4244)
@@ -70,6 +71,7 @@
 #include "Hacks/Chams.hpp"
 #include "Hacks/Glow.hpp"
 #include "Hacks/Triggerbot.hpp"
+#include "Hacks/Skinchanger.hpp"
 
 
 // Hooks

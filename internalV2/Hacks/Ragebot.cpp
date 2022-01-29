@@ -237,6 +237,7 @@ void Aimbot::UpdateVals()
 
 float Aimbot::CalculateHitchance(Vector vangles, const Vector& point, Entity* player, int hbox)
 {
+	
 	auto weapon = G::LocalplayerWeapon;
 	if (!weapon)
 		return 0.f;
@@ -318,9 +319,48 @@ float Aimbot::GetPointScale(int Hitbox)
 	return 0.f;
 }
 
-float Aimbot::CalculatePsudoHitchance()
+float Aimbot::CalculatePsudoHitchance(Entity* ent, int Hitbox)
 {
-	if (!G::LocalplayerWeapondata)
+	studiohdr_t* hdr = I::modelinfo->GetStudioModel(ent->GetModel());
+	if (!hdr)
+		return 0.f;
+
+	mstudiohitboxset_t* set = hdr->GetHitboxSet(0);
+	if (!set)
+		return 0.f;
+
+	mstudiobbox_t* hitbox = set->GetHitbox(Hitbox);
+	if (!hitbox)
+		return 0.f;
+
+	auto weapon = G::LocalplayerWeapon;
+	if (!weapon)
+		return 0.f;
+
+	weapon->UpdateAccuracyPenalty();
+
+	auto cone_angle = weapon->GetInaccuracy() + weapon->GetSpread();
+	auto target_distance = G::Localplayer->GetEyePosition().DistTo(ent->GetEyePosition());
+	auto cone_radius = target_distance * std::tan(cone_angle);
+
+	if (cone_radius == 0.f)
+		return true;
+
+	auto cone_area = M_PI * cone_radius * cone_radius;
+
+	float hitbox_area;
+
+	if (hitbox->flRadius == -1.f)
+		hitbox_area = ((hitbox->vecBBMax - hitbox->vecBBMin).Length() / 2.f) * ((hitbox->vecBBMax - hitbox->vecBBMin).Length() / 2.f);
+	else
+		hitbox_area = M_PI * hitbox->flRadius * hitbox->flRadius * 0.8f;
+
+	if (cone_area < hitbox_area)
+		return true;
+
+	return sqrtf(hitbox_area / cone_area);
+
+	/*if (!G::LocalplayerWeapondata)
 		return 0;
 
 	float inaccuracy = 0;
@@ -442,6 +482,7 @@ float Aimbot::CalculatePsudoHitchance()
 	inaccuracy /= G::LocalplayerWeapon->GetInaccuracy();
 
 	return inaccuracy;
+	*/
 }
 
 /*
@@ -570,7 +611,7 @@ void Aimbot::Run()
 			/*if (i == 0)
 				hitchance = CalculateHitchance(Angle, Aimpoint, player.pEntity, HITBOX);
 			else*/
-			hitchance = CalculatePsudoHitchance();
+			hitchance = CalculatePsudoHitchance(player.pEntity, HITBOX);
 			if (hitchance < this->MinHitchance) continue;
 
 			if constexpr (DEBUG_AIMBOT) L::Debug("GetDamage");
@@ -605,7 +646,7 @@ void Aimbot::Run()
 
 			if constexpr (DEBUG_AIMBOT) L::Debug("CapsuleOverlay");
 			// show the shot :D
-			//CapsuleOverlay(player.pEntity, Color(255, 0, 0, 255), 4, record.Matrix);
+			CapsuleOverlay(player.pEntity, Color(255, 0, 0, 255), 4, record.Matrix);
 
 			/*std::string msg = "Shot at [" + (std::string)player.Info.szName + "] with hitchance [" + std::to_string(hitchance) + "]\n";
 			ConsoleColorMsg(Color(0, 255, 0, 255), msg.c_str());*/
@@ -613,7 +654,7 @@ void Aimbot::Run()
 			// we found a good scan, shoot at it bitch
 			Resolver::aim_shot_log shot;
 			shot.userID = player_userid.first;
-			shot.time = record.SimulationTime;//I::globalvars->flRealTime;
+			shot.time = I::globalvars->flRealTime;
 			shot.hitgroup = HitboxToHitgroup(HITBOX);
 			shot.damage = Damage;
 			shot.shootPos = G::Localplayer->GetEyePosition();
@@ -671,7 +712,7 @@ void Aimbot::Run()
 			/*if (i == 0)
 				hitchance = CalculateHitchance(Angle, Aimpoint, player.pEntity, HITBOX);
 			else*/
-			hitchance = CalculatePsudoHitchance();
+			hitchance = CalculatePsudoHitchance(player.pEntity, HITBOX);
 			if (hitchance < this->MinHitchance) continue;
 
 			float Damage = 0;
@@ -704,14 +745,14 @@ void Aimbot::Run()
 
 			if constexpr (DEBUG_AIMBOT) L::Debug("CapsuleOverlay");
 			// show the shot :D
-			//CapsuleOverlay(player.pEntity, Color(255, 0, 0, 255), 4, record.Matrix);
+			CapsuleOverlay(player.pEntity, Color(255, 0, 0, 255), 4, record.Matrix);
 
 			/*std::string msg = "Shot at [" + (std::string)player.Info.szName + "] with hitchance [" + std::to_string(hitchance) + "]\n";
 			ConsoleColorMsg(Color(0, 255, 0, 255), msg.c_str());*/
 
 			Resolver::aim_shot_log shot;
 			shot.userID = player_userid.first;
-			shot.time = record.SimulationTime;// I::globalvars->flRealTime;
+			shot.time =  I::globalvars->flRealTime;
 			shot.hitgroup = HitboxToHitgroup(HITBOX);
 			shot.damage = Damage;
 			shot.shootPos = G::Localplayer->GetEyePosition();

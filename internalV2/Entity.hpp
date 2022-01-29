@@ -233,7 +233,7 @@ public: // NETVARS
 		static DWORD offset = N::GetOffset("DT_CSPlayer", "m_nRenderMode") + 1;
 		return *(int*)((DWORD)this + offset);
 	}
-	int GetFlags() {
+	int& GetFlags() {
 		if constexpr (DEBUG_ENTITY) L::Debug("GetFlags");
 		static DWORD offset = N::GetOffset("DT_CSPlayer", "m_fFlags");
 		return *(int*)((DWORD)this + offset);
@@ -273,6 +273,44 @@ public: // NETVARS
 		static DWORD offset = N::GetOffset("CBaseEntity", "m_CollisionGroup");
 		return *(int*)((DWORD)this + offset);
 	}
+	int* GetFallbackPaintKit()
+	{
+		static DWORD offset = N::GetOffset("DT_BaseAttributableItem", "m_nFallbackPaintKit");
+		return (int*)((DWORD)this + offset);
+	}
+	int* GetEntityQuality() {
+		static DWORD offset = N::GetOffset("DT_BaseAttributableItem", "m_iEntityQuality");
+		return (int*)((DWORD)this + offset);
+	}
+	int* GetFallbackSeed()
+	{
+		static DWORD offset = N::GetOffset("DT_BaseAttributableItem", "m_nFallbackSeed");
+		return (int*)((DWORD)this + offset);
+	}
+	int* GetFallbackStatTrak()
+	{
+		static DWORD offset = N::GetOffset("DT_BaseAttributableItem", "m_nFallbackStatTrak");
+		return (int*)((DWORD)this + offset);
+	}
+	int* GetItemIDHigh() {
+		static DWORD offset = N::GetOffset("DT_BaseAttributableItem", "m_iItemIDHigh");
+		return (int*)((DWORD)this + offset);
+	}
+	int* GetFallbackOriginalOwnerXuidLow()
+	{
+		static DWORD offset = N::GetOffset("DT_BaseAttributableItem", "m_OriginalOwnerXuidLow");
+		return (int*)((DWORD)this + offset);
+	}
+	int* GetFallbackOriginalOwnerXuidHigh()
+	{
+		static DWORD offset = N::GetOffset("DT_BaseAttributableItem", "m_OriginalOwnerXuidHigh");
+		return (int*)((DWORD)this + offset);
+	}
+	int* GetAccountID()
+	{
+		static DWORD offset = N::GetOffset("DT_BaseAttributableItem", "m_iAccountID");
+		return (int*)((DWORD)this + offset);
+	}
 	//WeaponId
 	WeaponId GetWeaponId() { //get active weapon entity then call
 		if constexpr (DEBUG_ENTITY) L::Debug("GetWeaponId");
@@ -290,6 +328,10 @@ public: // NETVARS
 		if constexpr (DEBUG_ENTITY) L::Debug("GetLifeState");
 		static DWORD offset = N::GetOffset("DT_BasePlayer", "m_lifeState");
 		return *(char*)((DWORD)this + offset);
+	}
+	char* GetCustomName() {
+		static DWORD offset = N::GetOffset("DT_BaseAttributableItem", "m_szCustomName");
+		return (char*)((DWORD)this + offset);
 	}
 	// float
 	float& GetSimulationTime() {
@@ -345,10 +387,15 @@ public: // NETVARS
 		static DWORD offset = N::GetOffset("DT_CSPlayer", "m_flLowerBodyYawTarget");
 		return *(float*)((DWORD)this + offset);
 	}
-	float GetDuckAmount() {
+	float& GetDuckAmount() {
 		if constexpr (DEBUG_ENTITY) L::Debug("GetDuckAmount");
 		static DWORD offset = N::GetOffset("DT_CSPlayer", "m_flDuckAmount");
 		return *(float*)((DWORD)this + offset);
+	}
+	float* GetFallbackWear()
+	{
+		static DWORD offset = N::GetOffset("DT_BaseAttributableItem", "m_flFallbackWear");
+		return (float*)((DWORD)this + offset);
 	}
 	// float array
 	std::array< float, 24 >& GetPoseParameters() {
@@ -416,6 +463,10 @@ public: // PATTERNS
 		return *reinterpret_cast<int*>(reinterpret_cast<std::uintptr_t>(this) + uTakeDamageOffset);
 	}
 public: // VIRTUALS
+	void UpdateAccuracyPenalty()
+	{
+		return CallVFunc<void>(this, 469);
+	}
 	Vector GetAbsOrigin() {
 		if constexpr (DEBUG_ENTITY) L::Debug("GetAbsOrigin");
 		typedef bool(__thiscall* oIsDormant)(void*);
@@ -497,6 +548,26 @@ public: // VIRTUALS
 	float GetInaccuracy() {
 		if (DEBUG_ENTITY) L::Debug("GetInaccuracy");
 		return CallVFunc<float>(this, 483);
+	}
+	void UpdateClientSideAnimation()
+	{
+		typedef void(__thiscall* oUpdateClientSideAnimation)(void*);
+		return VMT::GetVirtualMethod<oUpdateClientSideAnimation>(this, 223)(this);
+	}
+	int& WritableBones() {
+		if constexpr (DEBUG_ENTITY) L::Debug("WritableBones");
+		static DWORD offset = N::GetOffset("DT_BaseAnimating", "m_nForceBone");
+		return *(int*)((DWORD)this + offset + 0x20);
+	}
+	void InvalidateBoneCache()
+	{
+		typedef unsigned long ulong;
+		static uintptr_t InvalidateBoneCache = FindPattern("client.dll", "80 ? ? ? ? ? ? 74 16 A1 ? ? ? ? 48 C7 ? ? ? ? ? ? ? ? ? 89 ? ? ? ? ? C3");
+		ulong recent_bone_counter = **(ulong**)(InvalidateBoneCache + 10);
+
+		*(ulong*)(uintptr_t(this) + 0x2690) = recent_bone_counter - 1;
+		*(ulong*)(uintptr_t(this) + 0x2924) = 0xFF7FFFFF;
+		WritableBones() = 0;
 	}
 public: // OTHERS
 	Entity* GetObserverTarget() {
@@ -736,7 +807,6 @@ public: // OTHERS
 			return 0;
 		return *(int*)(weap + offset);
 	}
-
 	CCSGOPlayerAnimState* GetAnimState()
 	{
 		//if constexpr  (DEBUG_ENTITY) L::Debug("GetAnimState2");
@@ -744,7 +814,10 @@ public: // OTHERS
 		//0x3914
 		return *reinterpret_cast<CCSGOPlayerAnimState**>(this + 0x9960);
 	}
-
+	CAnimationLayer* GetAnimOverlays()
+	{
+		return *(CAnimationLayer**)((DWORD)this + 0x2990);
+	}
 	float GetMaxDesyncDelta() {
 		L::Debug("GetMaxDesyncDelta");
 
@@ -786,7 +859,6 @@ public: // OTHERS
 		float flMaxYawModifier = flYawModifier * pAnimState->flMaxBodyYaw;
 		return fabsf(flMaxYawModifier);
 	}
-
 	bool IsScoped() {
 		if (DEBUG_ENTITY) L::Debug("IsScoped");
 

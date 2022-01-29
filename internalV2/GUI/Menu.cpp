@@ -68,9 +68,20 @@ namespace mfw
 		style.Colors[ImGuiCol_ResizeGripActive] = cfg->menu.ResizeClr.operator ImVec4();
 		style.Colors[ImGuiCol_Text] = cfg->menu.TextClr.operator ImVec4();
 
+		//ImGuiCol_Header,                // Header* colors are used for CollapsingHeader, TreeNode, Selectable, MenuItem
+		//	ImGuiCol_HeaderHovered,
+		//	ImGuiCol_HeaderActive,
+
+		/*style.Colors[ImGuiCol_Header] = cfg->menu.ChildBackgroundClr.operator ImVec4();
+		style.Colors[ImGuiCol_HeaderHovered] = cfg->menu.AccentClr.operator ImVec4();
+		style.Colors[ImGuiCol_HeaderActive] = cfg->menu.AccentClr.operator ImVec4();*/
+
 		style.Colors[ImGuiCol_Separator] = cfg->menu.AccentClr.operator ImVec4();
 		style.Colors[ImGuiCol_SeparatorHovered] = cfg->menu.AccentClr.operator ImVec4();
 		style.Colors[ImGuiCol_SeparatorActive] = cfg->menu.AccentClr.operator ImVec4();
+
+		// smooth sum stuff
+		style.ChildRounding = 10.f;
 	}
 
 	// custom imgui stuff

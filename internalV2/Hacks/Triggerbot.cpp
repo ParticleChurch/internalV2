@@ -196,53 +196,62 @@ void Triggerbot::GetHitboxes()
 
 void Triggerbot::Run()
 {
-    H::console.clear();
-    H::console.resize(0);
-    H::console.push_back("TRIGGER");
+	static auto lastTime = 0.0f;
+	const auto now = I::globalvars->flRealTime;
 
-    H::console.push_back("valid lastContact stuff");
+	if (!cfg->Keybinds["Triggerbot"].boolean)
+	{
+		lastTime = now;
+		return;
+	}
+        
 
-    if (!cfg->Keybinds["Triggerbot"].boolean)
-        return;
-
-	if (!G::LocalplayerWeapondata) return;
+	if (!G::LocalplayerWeapondata) {
+		lastTime = now;
+		return;
+	}
 
 	GetHitboxes();
 
 	if (CalculatePsudoHitchance() < cfg->triggerbot.Hitchance / 100.f)
+	{
+		lastTime = now;
 		return;
+	}
 
-	H::console.push_back("valid hitchance");
+	if (now - lastTime < cfg->triggerbot.DelayTime / 1000.0f)
+		return;
 
     const auto startPos = G::Localplayer->GetEyePosition();
     const auto endPos = startPos + fromAngle(Vector(G::StartAngle.x, G::StartAngle.y) + G::Localplayer->GetAimPunchAngle()) * G::LocalplayerWeapondata->flRange;
 
-	// deal with hitbox
-	/*Trace_t trace;
-	Ray_t ray = { startPos, endPos };
-	I::enginetrace->TraceRay(ray, MASK_SHOT, (ITraceFilter*)G::Localplayer, &trace);
-	if (!trace.pHitEntity) return;
-	if (trace.pHitEntity->GetTeam() == G::LocalplayerTeam) return;
-	bool bad_hitbox = true;
-	for (auto a : this->Hitboxes)
-	{
-		if (HitboxToHitgroup(a) == trace.iHitGroup)
-			bad_hitbox = false;
-	}
-	if (bad_hitbox) return;
-	H::console.push_back("valid hitbox");*/
-
 	// deal with damage
-    float damage = autowall->GetDamage(G::Localplayer, endPos);
-    if (damage < cfg->triggerbot.MinDamage)
-        return;
+	FireBulletData_t data;
+    float damage = autowall->GetDamage(G::Localplayer, endPos, &data);
 
-    H::console.push_back("enemy player... ATTACK");
+	lastTime = now;
+	 
+	
+	// exit if the damage is lower than mindamage
+	bool exit = damage < cfg->triggerbot.MinDamage;
+	// unless it will actually kill the entity
+	if (data.enterTrace.pHitEntity && data.enterTrace.pHitEntity->GetHealth() < damage)
+		exit = false;
+	// exit
+	if (exit)
+		return;
 
-    //____________________________________________________________________________________________________
-    /*if (trace.iHitGroup != cfg.hitgroup)
-        return;*/
-    
+	// deal with bad hitgroup
+	bool BadHitgroup = true;
+	for (auto HBOX : this->Hitboxes)
+	{
+		if (HitboxToHitgroup(HBOX) == data.enterTrace.iHitGroup)
+			BadHitgroup = false;
+	}
+	if (BadHitgroup) return;
+
+	// shoot that shot big boi
+	lastTime = 0.f;
     G::cmd->iButtons |= IN_ATTACK;
 
 }

@@ -120,7 +120,7 @@ void ESP::DrawName(char name[128], int userid)
 
 	std::string TEXT = name;
 	if (lagcomp->PlayerList.find(userid) != lagcomp->PlayerList.end())
-		TEXT += " " + std::to_string((float)lagcomp->PlayerList[userid].goodShots / ((float)lagcomp->PlayerList[userid].goodShots + lagcomp->PlayerList[userid].badShots) * 100.f);
+		TEXT += " " + std::to_string(lagcomp->PlayerList[userid].badShots);
 	static std::wstring wide_string;
 	wide_string = std::wstring(TEXT.begin(), TEXT.end());
 

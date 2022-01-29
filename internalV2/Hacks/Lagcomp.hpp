@@ -24,10 +24,14 @@ public:
 		Vector Velocity;
 		int Flags;
 		float MaxDesync;
+		int LagAmount = 0;
 		bool extrapolated = false;
+		bool interpolated = false;
+		
 
-		void Update(Entity* ent);
-		void Extrapolate(Entity* ent);
+		void Update(Entity* ent, int UserID);
+		void Extrapolate(Entity* ent, int UserID);
+		void Interpolate(Entity* ent, int UserID);
 	};
 
 	struct Player
@@ -39,6 +43,9 @@ public:
 		int Team;
 		int Index;
 		PlayerInfo_t Info;
+		CAnimationLayer AnimLayers[15];
+		CAnimationLayer OldAnimLayers[15];
+		// regular shit
 		std::deque<LagComp::Record> records;
 
 		// resolver crap

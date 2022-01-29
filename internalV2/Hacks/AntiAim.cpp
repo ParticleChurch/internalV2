@@ -211,17 +211,9 @@ void AntiAim::Rage()
 	// get what side we are on
 	bool side = cfg->Keybinds["Invert AA"].boolean;
 
-	/*H::console.clear();
-	H::console.resize(0);*/
-
 	// Deal with Yawbase
 	float YawBase = GetYawBase();
 	YawBase = NormalizeYaw(YawBase + (side ? cfg->aa.LeftBaseOffset : cfg->aa.RightBaseOffset));
-
-
-	/*H::console.push_back(std::to_string(G::StartAngle.y));
-	H::console.push_back(std::to_string(G::cmd->angViewAngle.y));
-	H::console.push_back(std::to_string(YawBase));*/
 
 	if constexpr (DEBUG_AA) L::Debug("MAX DESYNC");
 
@@ -342,8 +334,8 @@ void AntiAim::Rage()
 		break;
 	}
 
-	// lean that Thang
-	if(*G::pSendpacket)
+	// lean that Thang (only when on ground)
+	if(*G::pSendpacket && (G::Localplayer->GetFlags() & FL_ONGROUND))
 		G::cmd->angViewAngle.z = cfg->aa.LeanAngle;
 
 	G::cmd->angViewAngle.y = NormalizeYaw(G::cmd->angViewAngle.y);

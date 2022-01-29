@@ -166,6 +166,7 @@
     <ClCompile Include="Globals.cpp" />
     <ClCompile Include="GUI\Config.cpp" />
     <ClCompile Include="GUI\Menu.cpp" />
+    <ClCompile Include="Hacks\AnimFix.cpp" />
     <ClCompile Include="Hacks\EnginePrediction.cpp" />
     <ClCompile Include="Hacks\Glow.cpp" />
     <ClCompile Include="Hacks\Ragebot.cpp" />
@@ -178,6 +179,7 @@
     <ClCompile Include="Hacks\Lagcomp.cpp" />
     <ClCompile Include="Hacks\Movement.cpp" />
     <ClCompile Include="Hacks\Resolver.cpp" />
+    <ClCompile Include="Hacks\Skinchanger.cpp" />
     <ClCompile Include="Hacks\Thirdperson.cpp" />
     <ClCompile Include="Hacks\Triggerbot.cpp" />
     <ClCompile Include="Hacks\ZeusBot.cpp" />
@@ -200,6 +202,7 @@
     <ClInclude Include="Globals.hpp" />
     <ClInclude Include="GUI\Config.hpp" />
     <ClInclude Include="GUI\Menu.hpp" />
+    <ClInclude Include="Hacks\AnimFix.hpp" />
     <ClInclude Include="Hacks\EnginePrediction.hpp" />
     <ClInclude Include="Hacks\Glow.hpp" />
     <ClInclude Include="Hacks\Ragebot.hpp" />
@@ -212,6 +215,7 @@
     <ClInclude Include="Hacks\Lagcomp.hpp" />
     <ClInclude Include="Hacks\Movement.hpp" />
     <ClInclude Include="Hacks\Resolver.hpp" />
+    <ClInclude Include="Hacks\Skinchanger.hpp" />
     <ClInclude Include="Hacks\Thirdperson.hpp" />
     <ClInclude Include="Hacks\Triggerbot.hpp" />
     <ClInclude Include="Hacks\ZeusBot.hpp" />
