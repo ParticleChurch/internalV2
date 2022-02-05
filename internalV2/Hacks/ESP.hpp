@@ -12,9 +12,11 @@ private:
 	void DrawHealth(int health, int userid);
 	void DrawWeapon(Entity*, int userid);
 	void DrawProjectiles(Entity* ent);
-
+	void DrawBacktrackSkeletons();
 	
 public:
+	std::deque<Vector> safepoints;
+
 	std::map<int, float> Dormant;
 	void RunPaintTraverse();
 	void RunEndScene();

@@ -90,8 +90,10 @@ void LagComp::Record::Interpolate(Entity* ent, int UserID)
 
 void LagComp::Record::Update(Entity* ent, int UserID)
 {
+	float latency = (I::engine->GetNetChannelInfo()->GetAvgLatency(0) + I::engine->GetNetChannelInfo()->GetAvgLatency(1));
+
 	if constexpr (DEBUG_LAGCOMP) L::Debug("SETUP BONES");
-	bool FixBones = ent->GetVecVelocity().Length2D() > 1.f && !ent->IsDormant();
+	bool FixBones = ent->GetVecVelocity().Length2D() > 1.f && !ent->IsDormant() && ent->GetSimulationTime() == ent->GetOldSimulationTime();
 	if (ent->SetupBones(this->Matrix, MAXSTUDIOBONES, 0x100, 0, false))
 	{
 		this->HeadPos = Vector(this->Matrix[8][0][3], this->Matrix[8][1][3], this->Matrix[8][2][3]);
@@ -143,7 +145,7 @@ void LagComp::Record::Update(Entity* ent, int UserID)
 	if constexpr (DEBUG_LAGCOMP) L::Debug("GetVecOrigin");
 	this->Origin = ent->GetVecOrigin();
 	if constexpr (DEBUG_LAGCOMP) L::Debug("GetSimulationTime");
-	this->SimulationTime = ent->GetSimulationTime();
+	this->SimulationTime = ent->GetSimulationTime() + latency;
 	if constexpr (DEBUG_LAGCOMP) L::Debug("GetVecVelocity");
 	this->Velocity = ent->GetVecVelocity();
 	if constexpr (DEBUG_LAGCOMP) L::Debug("GetVecVelocity");
@@ -311,7 +313,7 @@ void LagComp::CleanUp()
 
 		// remove bad RECORDS (not Player)
 		while (player.records.size() > 3
-			&& fabsf(I::globalvars->flCurrentTime - player.records.back().SimulationTime) > 0.7f) { // 700ms big brain (max 2x breaklagcomp ~500ms)
+			&& fabsf(I::globalvars->flCurrentTime - player.records.back().SimulationTime) > 0.2f) { // 700ms big brain is what it should be (max 2x breaklagcomp ~500ms)
 			player.records.pop_back();
 		}
 	}

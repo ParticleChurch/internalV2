@@ -87,15 +87,26 @@ public:
 
 			// if the localplayer gets hurt, do some stuff
 			int UserID = event->GetInt("userid");
+			int iAttacker = event->GetInt("attacker");
 			if (I::engine->GetPlayerForUserID(UserID) == G::LocalplayerIndex)
 			{
-				/*if(event->GetInt("hitgroup") != HITGROUP_HEAD)
-					I::engine->ExecuteClientCmd("kill; say thats not my head");*/
+				if (event->GetInt("hitgroup") != HITGROUP_HEAD)
+				{
+					PlayerInfo_t info;
+					if (I::engine->GetPlayerInfo(I::engine->GetPlayerForUserID(iAttacker), &info))
+					{
+						std::string str = "kill; say " + (std::string)info.szName + " thats not my head, u are a fucking FAILURE at hitting p my guy.";
+						I::engine->ExecuteClientCmd(str.c_str());
+					}	
+					else
+						I::engine->ExecuteClientCmd("kill; Not my head, keep trying...");
+				}
+				
 				return;
 			}
 
 			// if the localplayer isn't shootin, return
-			int iAttacker = event->GetInt("attacker");
+			
 			if (I::engine->GetPlayerForUserID(iAttacker) != G::LocalplayerIndex)
 				return;
 
@@ -521,9 +532,15 @@ void __stdcall H::FrameStageNotifyHook(int stage)
 
 	skins->FSN(stage);
 
+	resolver->Run();
+
+	animfix->Update(stage);
+
+	lagcomp->Run_FSN(stage);
+
 	oFrameStageNotify(stage);
 
-	resolver->Run();
+
 
 	// first create a consitent lag amount for players
 	{
@@ -590,9 +607,7 @@ void __stdcall H::FrameStageNotifyHook(int stage)
 	}
 	*/
 
-	animfix->Update(stage);
-
-	lagcomp->Run_FSN(stage);
+	
 
 	
 
@@ -731,6 +746,30 @@ bool __stdcall H::CreateMoveHook(float flInputSampleTime, CUserCmd* cmd)
 			G::cmd->angViewAngle = G::StartAngle;
 			G::real = Vector(G::cmd->angViewAngle.x, G::cmd->angViewAngle.y);
 			G::fake = Vector(G::cmd->angViewAngle.x, G::cmd->angViewAngle.y);
+
+			Entity* ent;
+			for (int i = 1; i < I::engine->GetMaxClients(); ++i)
+			{
+				// Localplayer Check
+				if (i == G::LocalplayerIndex) continue;
+
+				// entity existence check
+				ent = I::entitylist->GetClientEntity(i);
+				if (!ent) continue;
+
+				// entity player check
+				if (!ent->IsPlayer()) continue;
+
+				// just do enemies for now
+				if (ent->GetTeam() == G::LocalplayerTeam) continue;
+
+				// do another player check
+				PlayerInfo_t info;
+				if (!I::engine->GetPlayerInfo(i, &info))
+					continue;
+
+
+			}
 		}
 
 		triggerbot->Run();

@@ -279,6 +279,8 @@ void Resolver::Run()
 	SortImpacts();
 	MatchImpacts();
 	ResolveMatches();
+
+	return;
 	
 	// make decision
 	for (auto a : lagcomp->PlayerList)

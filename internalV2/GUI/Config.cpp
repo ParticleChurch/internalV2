@@ -77,6 +77,15 @@ void Config::SaveConfig(std::string filename)
 	file_obj.write((char*)&world_vis , sizeof(CFG::WorldVisuals))	   ;
 	file_obj.write((char*)&glow , sizeof(CFG::Glow			))		   ;
 	file_obj.write((char*)&triggerbot, sizeof(CFG::Triggerbot));
+
+	// write keybinds
+	file_obj.write((char*)&Keybinds["Aimbot"], sizeof(Keybind));
+	file_obj.write((char*)&Keybinds["Thirdperson"], sizeof(Keybind));
+	file_obj.write((char*)&Keybinds["Slowwalk"], sizeof(Keybind));
+	file_obj.write((char*)&Keybinds["Invert AA"], sizeof(Keybind));
+	file_obj.write((char*)&Keybinds["Fake Duck"], sizeof(Keybind));
+	file_obj.write((char*)&Keybinds["Triggerbot"], sizeof(Keybind));
+
 	file_obj.close();
 }
 
@@ -98,6 +107,15 @@ void Config::OpenConfig(std::string filename)
 	file_obj.read((char*)&this->world_vis, sizeof(CFG::WorldVisuals));
 	file_obj.read((char*)&this->glow, sizeof(CFG::Glow));
 	file_obj.read((char*)&this->triggerbot, sizeof(CFG::Triggerbot));
+
+	// read keybinds
+	file_obj.read((char*)&this->Keybinds["Aimbot"], sizeof(Keybind));
+	file_obj.read((char*)&this->Keybinds["Thirdperson"], sizeof(Keybind));
+	file_obj.read((char*)&this->Keybinds["Slowwalk"], sizeof(Keybind));
+	file_obj.read((char*)&this->Keybinds["Invert AA"], sizeof(Keybind));
+	file_obj.read((char*)&this->Keybinds["Fake Duck"], sizeof(Keybind));
+	file_obj.read((char*)&this->Keybinds["Triggerbot"], sizeof(Keybind));
+	
 	file_obj.close();
 }
 
@@ -126,7 +144,6 @@ Config::Config()
 
 	Keybind Triggerbot = { false, false, "Triggerbot", 0, 0 };
 	Keybinds.insert(std::make_pair(Triggerbot.name, Triggerbot));
-
 }
 
 bool CFG::GetVal(std::string total, std::string str, std::string& substr)

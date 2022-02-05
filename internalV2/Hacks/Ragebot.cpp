@@ -528,15 +528,23 @@ bool SAFEPOINT(LagComp::Record& record, float radius, Vector min, Vector max, Ve
 {
 	// Go for max first
 	if (GetSafepoint(record.Origin, max, radius, aimpoint, record.MaxDesync))
+	{
+		esp->safepoints.push_back(aimpoint);
 		return true;
+	}
+		
 	// then try for middle, min just fucks shit up
 	if (GetSafepoint(record.Origin, (max + min) / 2, radius, aimpoint, record.MaxDesync))
+	{
+		esp->safepoints.push_back(aimpoint);
 		return true;
+	}
 	return false;
 }
 
 void Aimbot::Run()
 {
+	
 	if constexpr (DEBUG_AIMBOT) L::Debug("Run Aimbot");
 
 	if (!cfg->Keybinds["Aimbot"].boolean) return;
@@ -595,10 +603,10 @@ void Aimbot::Run()
 
 			// safepoint when possible for head
 			bool safepoint = false;
-			if (HITBOX == HITBOX_HEAD)
+			/*if (HITBOX == HITBOX_HEAD)
 			{
 				safepoint = SAFEPOINT(record, record.bones[HITBOX].flRadius, min, max, Aimpoint);
-			}
+			}*/
 				
 
 			// angle to the target bitch
@@ -639,7 +647,7 @@ void Aimbot::Run()
 
 			// deal with lag comp
 			if constexpr (DEBUG_AIMBOT) L::Debug("iTickCount");
-			G::cmd->iTickCount = TimeToTicks(record.SimulationTime /*+ GetLerp()*/) - 1; // magic math 0_0
+			G::cmd->iTickCount = TimeToTicks(record.SimulationTime + GetLerp()); // magic math 0_0
 
 			if (!cfg->Keybinds["Fake Duck"].boolean)
 				*G::pSendpacket = true;
@@ -697,10 +705,10 @@ void Aimbot::Run()
 			Vector Aimpoint = G::cmd->iTickCount % 2 ? top_left : top_right;
 
 			bool safepoint = false;
-			if (HITBOX == HITBOX_HEAD)
+			/*if (HITBOX == HITBOX_HEAD)
 			{
 				safepoint = SAFEPOINT(record, record.bones[HITBOX].flRadius, min, max, Aimpoint);
-			}
+			}*/
 
 			// angle to the target bitch
 			Vector Angle = Calc::CalculateAngle(Aimpoint);
