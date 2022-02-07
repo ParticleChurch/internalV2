@@ -549,7 +549,7 @@ void Menu::RenderConfig()
 			if (a.second)
 			{
 				// copy over the name, and leave last character for '\0'
-				for (int i = 0; i < min(255, a.first.length()); i++)
+				for (unsigned int i = 0; i < min(255, a.first.length()); i++)
 				{
 					config_name[i] = a.first[i];
 				}

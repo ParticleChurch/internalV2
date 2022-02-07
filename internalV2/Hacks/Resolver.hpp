@@ -16,11 +16,14 @@ public:
 		Vector min_bone, max_bone;	 // min/max of the bone we are shooting at
 		float radius_bone;			 // radius of the bone we are shooting at
 		bool safepoint = false;		 // if it was supposedly a safepoint
+
+		bool fixed = false;
 	};
 private:
 	struct shot_log
 	{
 		float time;
+		float flCurrentTime;
 	};
 	struct player_hurt_log
 	{

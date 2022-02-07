@@ -14,7 +14,7 @@ void Skinchanger::Init()
 		item.nFallbackStatTrak = 69;
 		item.iEntityQuality = 4;
 		item.szCustomName = (char*)"p100";
-		item.flFallbackWear = 0.00001;
+		item.flFallbackWear = 0.00001f;
 		g_SkinChangerCfg.insert(std::pair(40, item));
 	}
 }

@@ -4,9 +4,15 @@ Resolver* resolver = new Resolver();
 
 void Resolver::AimbotShot(aim_shot_log shot)
 {
-	float latency = (I::engine->GetNetChannelInfo()->GetAvgLatency(0) + I::engine->GetNetChannelInfo()->GetAvgLatency(1));
-	shot.time += latency;
+	/*float latency = (I::engine->GetNetChannelInfo()->GetAvgLatency(0) + I::engine->GetNetChannelInfo()->GetAvgLatency(1));
+	shot.time -= latency;*/
+	
+	
+	//H::console.push_back("AIM: " + std::to_string(shot.time));
+	
+
 	aim_shots.push_back(shot);
+
 }
 
 void Resolver::Shot()
@@ -23,9 +29,21 @@ void Resolver::Shot()
 
 	shot_log new_shot;
 	new_shot.time = I::globalvars->flRealTime;
+	new_shot.flCurrentTime = I::globalvars->flCurrentTime;
 	shots.push_back(new_shot);
 
 	last_shot = I::globalvars->iTickCount;
+
+	// DO FIX
+	if (aim_shots.empty())
+		return;
+	float latency = (I::engine->GetNetChannelInfo()->GetAvgLatency(0) + I::engine->GetNetChannelInfo()->GetAvgLatency(1)) * 2.f;
+	float maxtime = 0.1f + latency;
+	if (fabsf(new_shot.flCurrentTime - aim_shots.back().time) < maxtime)
+	{
+		aim_shots.back().time = new_shot.time;
+		aim_shots.back().fixed = true;
+	}
 }
 
 void Resolver::Impact(Vector pos)
@@ -153,14 +171,25 @@ void Resolver::ResolveMatches()
 {
 	if (this->matches.empty()) return;
 
+	/*H::console.clear();
+	H::console.resize(0);*/
+
+	while (H::console.size() > 10)
+		H::console.erase(H::console.begin());
+
 	// should prob iterate through aimshots, and determine if any matches match, but whatev lol
 	for (size_t i = 0; i < this->matches.size(); i++)
 	{
 		match_log& match = this->matches[i];
 
+		/*H::console.push_back("match time: " + std::to_string(match.impact.time));*/
+
 		int AimbotShotIndex = -1;
-		for (int j = 0; j < this->aim_shots.size(); j++)
+		for (unsigned int j = 0; j < this->aim_shots.size(); j++)
 		{
+			/*H::console.push_back("--aimbot time: " + std::to_string(aim_shots[i].time) + (aim_shots[i].fixed ? " (fixed)" : " (broken)"));
+			H::console.push_back("--	DELTA: " + std::to_string(fabsf(match.shot.time - this->aim_shots[j].time)) + " VS " + std::to_string(I::globalvars->flIntervalPerTick + 0.1f));*/
+
 			if (fabsf(match.shot.time - this->aim_shots[j].time) < I::globalvars->flIntervalPerTick + 0.1f)
 				AimbotShotIndex = j;
 		}
@@ -221,8 +250,8 @@ void Resolver::ResolveMatches()
 		this->aim_shots.erase(this->aim_shots.begin() + AimbotShotIndex);
 	}
 
-	this->aim_shots.clear();
-	this->aim_shots.resize(0);
+	/*this->aim_shots.clear();
+	this->aim_shots.resize(0);*/
 }
 
 void Resolver::LogicResolve(Entity* ent, int missedShots)
@@ -248,25 +277,50 @@ void Resolver::LogicResolve(Entity* ent, int missedShots)
 	float value = eye_yaw;
 
 	// slowwalk check --> actually do proper bruteforce
-	//bool slowWalking = horizontalVelocity >= 1.f && horizontalVelocity <= maxSpeed;
-	switch (missedShots % 5)
+	bool slowWalking = horizontalVelocity >= 1.f && horizontalVelocity <= maxSpeed;
+	if (slowWalking)
 	{
-	case 0:
-		value = ent->GetLBY();
-		break;
-	case 1:
-		value = eye_yaw + maxDesync;
-		break;
-	case 2:
-		value = eye_yaw - maxDesync;
-		break;
-	case 3:
-		value = eye_yaw + maxDesync / 3;
-		break;
-	case 4:
-		value = eye_yaw - maxDesync / 3;
-		break;
+		switch (missedShots % 5)
+		{
+		case 0:
+			value = ent->GetLBY();
+			break;
+		case 1:
+			value = eye_yaw + maxDesync;
+			break;
+		case 2:
+			value = eye_yaw - maxDesync;
+			break;
+		case 3:
+			value = eye_yaw + maxDesync / 3;
+			break;
+		case 4:
+			value = eye_yaw - maxDesync / 3;
+			break;
+		}
 	}
+	else
+	{
+		switch (missedShots % 5)
+		{
+		case 0:
+			value = ent->GetLBY();
+			break;
+		case 1:
+			value = eye_yaw - maxDesync / 3;
+			break;
+		case 2:
+			value = eye_yaw + maxDesync / 3;
+			break;
+		case 3:
+			value = eye_yaw - maxDesync;
+			break;
+		case 4:
+			value = eye_yaw + maxDesync;
+			break;
+		}
+	}
+	
 
 	animstate->flGoalFeetYaw = NormalizeYaw(value);
 }
@@ -280,7 +334,13 @@ void Resolver::Run()
 	MatchImpacts();
 	ResolveMatches();
 
-	return;
+	static int retard = 0;
+	static int lastretard = G::Localplayer->GetAmmo();
+	if (lastretard != G::Localplayer->GetAmmo())
+	{
+		lastretard = G::Localplayer->GetAmmo();
+		retard++;
+	}
 	
 	// make decision
 	for (auto a : lagcomp->PlayerList)
@@ -301,7 +361,7 @@ void Resolver::Run()
 		if (ent->IsDormant()) continue;
 
 
-		LogicResolve(ent, player.badShots);
+		LogicResolve(ent, retard/*player.badShots*/);
 	}
 
 }

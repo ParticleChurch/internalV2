@@ -662,7 +662,7 @@ void Aimbot::Run()
 			// we found a good scan, shoot at it bitch
 			Resolver::aim_shot_log shot;
 			shot.userID = player_userid.first;
-			shot.time = I::globalvars->flRealTime;
+			shot.time = record.SimulationTime + GetLerp();
 			shot.hitgroup = HitboxToHitgroup(HITBOX);
 			shot.damage = Damage;
 			shot.shootPos = G::Localplayer->GetEyePosition();
@@ -746,7 +746,7 @@ void Aimbot::Run()
 			G::cmd->iButtons |= IN_ATTACK;
 
 			// deal with lag comp
-			G::cmd->iTickCount = TimeToTicks(record.SimulationTime /*+ GetLerp()*/) - 1; // magic math 0_0
+			G::cmd->iTickCount = TimeToTicks(record.SimulationTime + GetLerp()); // magic math 0_0
 
 			if (!cfg->Keybinds["Fake Duck"].boolean)
 				*G::pSendpacket = true;
@@ -760,7 +760,7 @@ void Aimbot::Run()
 
 			Resolver::aim_shot_log shot;
 			shot.userID = player_userid.first;
-			shot.time =  I::globalvars->flRealTime;
+			shot.time = record.SimulationTime + GetLerp();
 			shot.hitgroup = HitboxToHitgroup(HITBOX);
 			shot.damage = Damage;
 			shot.shootPos = G::Localplayer->GetEyePosition();

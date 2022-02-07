@@ -83,7 +83,7 @@ void DlightManager::Run()
 
 	// now we have the needed lights, let's decide what to move/change
 	int range = visible_dlights.size();
-	for (int i = 0; i < visible_dlights.size(); i++)
+	for (unsigned int i = 0; i < visible_dlights.size(); i++)
 	{
 		// we've reached the end
 		if (i >= MAX_DLIGHTS) break;
@@ -154,8 +154,8 @@ void DlightManager::Run()
 	StoredLight.color.exponent = 10.f; // 0, 133, 255, 161 <= ideal col
 	StoredLight.radius = 50.f;
 	StoredLight.decay = 0.f;// 50.f;
-	StoredLight.m_Direction = trace.vecStart + ((trace.vecEnd - trace.vecStart) * 0.96);
-	StoredLight.origin = trace.vecStart + ((trace.vecEnd - trace.vecStart) * 0.96);
+	StoredLight.m_Direction = trace.vecStart + ((trace.vecEnd - trace.vecStart) * 0.96f);
+	StoredLight.origin = trace.vecStart + ((trace.vecEnd - trace.vecStart) * 0.96f);
 	StoredLight.die = FLT_MAX;// I::globalvars->flCurrentTime + 10.f;// 0.f < 0.1f ? I::globalvars->flCurrentTime + 0.2f : 0.f;
 	storedLights.push_back(StoredLight);
 }
