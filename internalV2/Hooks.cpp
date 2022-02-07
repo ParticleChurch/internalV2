@@ -90,17 +90,17 @@ public:
 			int iAttacker = event->GetInt("attacker");
 			if (I::engine->GetPlayerForUserID(UserID) == G::LocalplayerIndex)
 			{
-				/*if (event->GetInt("hitgroup") != HITGROUP_HEAD)
+				if (event->GetInt("hitgroup") != HITGROUP_HEAD)
 				{
-					PlayerInfo_t info;
+					/*PlayerInfo_t info;
 					if (I::engine->GetPlayerInfo(I::engine->GetPlayerForUserID(iAttacker), &info))
 					{
-						std::string str = "say " + (std::string)info.szName + " thats not my head, u are a fucking FAILURE at hitting p my guy.";
+						std::string str = "kill; say [ANTIBAIM] " + (std::string)info.szName + " thats not my head, u are a fucking FAILURE at hitting p my guy.";
 						I::engine->ExecuteClientCmd(str.c_str());
 					}	
 					else
-						I::engine->ExecuteClientCmd("say Not my head, keep trying...");
-				}*/
+						I::engine->ExecuteClientCmd("kill; say [ANTIBAIM] Not my head, keep trying...");*/
+				}
 				
 				return;
 			}

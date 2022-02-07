@@ -361,7 +361,7 @@ void Resolver::Run()
 		if (ent->IsDormant()) continue;
 
 
-		LogicResolve(ent, retard/*player.badShots*/);
+		LogicResolve(ent, player.badShots);
 	}
 
 }

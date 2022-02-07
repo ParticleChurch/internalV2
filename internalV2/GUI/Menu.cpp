@@ -451,32 +451,6 @@ void Menu::RenderMenuOptions()
 
 	mfw::Checkbox("Console Window", &ConsoleWindow);
 
-	bool open_popup = mfw::Button("Eject");
-	if (open_popup)
-	{
-		ImGui::OpenPopup("Eject popup");
-	}
-
-	if (ImGui::BeginPopup("Eject popup"))
-	{
-		ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1.f, 0, 0, 1.00f));
-		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(1.f, 0.1f, 0.1f, 1.00f));
-		ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(1.f, 0.2f, 0.2f, 1.00f));
-
-		ImGui::Text("Are you sure you want to Eject?");
-		if (ImGui::Button("Eject##Eject2"))
-			G::KillDLL = true;
-		if (ImGui::IsItemHovered())
-			ImGui::SetTooltip("NOTE:\nEjecting can potentially crash your game.\nEjecting can is not complete so if you want to inject another cheat, restart the game.");
-
-
-		ImGui::PopStyleColor();
-		ImGui::PopStyleColor();
-		ImGui::PopStyleColor();
-
-		ImGui::EndPopup();
-	}
-
 	if (mfw::Button("Connect to Big Steppa HVH"))
 		I::engine->ClientCmdUnrestricted("connect 74.91.124.24:27015");
 
@@ -1707,7 +1681,6 @@ void Menu::Render()
 		}
 		if (mfw::Tab == 5)
 		{
-			ImGui::Text("Config section coming soon");
 			RenderConfig();
 		}
 			
