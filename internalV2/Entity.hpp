@@ -404,7 +404,7 @@ public: // NETVARS
 		return *reinterpret_cast<std::array<float, 24>*>(reinterpret_cast<uintptr_t>(this) + offset);
 	}
 	// vector
-	Vector GetVecVelocity() {
+	Vector& GetVecVelocity() {
 		if constexpr (DEBUG_ENTITY) L::Debug("GetVecVelocity");
 		static DWORD offset = N::GetOffset("DT_BasePlayer", "m_vecVelocity[0]");
 		return *(Vector*)((DWORD)this + offset);
@@ -452,6 +452,7 @@ public: // NETVARS
 	}
 public: // PATTERNS
 	void SetAbsOrigin(const Vector& vecOrigin) {
+		if (vecOrigin == Vector(0, 0, 0)) return; // dont bother if bad origin
 		if constexpr (DEBUG_ENTITY) L::Debug("SetAbsOrigin");
 		using SetAbsOriginFn = void(__thiscall*)(void*, const Vector&);
 		static auto oSetAbsOrigin = reinterpret_cast<SetAbsOriginFn>(FindPattern("client.dll", "55 8B EC 83 E4 F8 51 53 56 57 8B F1 E8"));
@@ -552,7 +553,7 @@ public: // VIRTUALS
 	void UpdateClientSideAnimation()
 	{
 		typedef void(__thiscall* oUpdateClientSideAnimation)(void*);
-		return VMT::GetVirtualMethod<oUpdateClientSideAnimation>(this, 223)(this);
+		return VMT::GetVirtualMethod<oUpdateClientSideAnimation>(this, 224)(this);
 	}
 	int& WritableBones() {
 		if constexpr (DEBUG_ENTITY) L::Debug("WritableBones");

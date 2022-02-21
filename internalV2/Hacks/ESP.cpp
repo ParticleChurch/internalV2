@@ -416,11 +416,51 @@ void ESP::DrawBacktrackSkeletons()
 	}
 }
 
+void ESP::DrawPlayerListSkeletons()
+{
+	I::surface->DrawSetColor(Color(255, 165, 0, 255));
+
+	for (auto& player : lagcomp->PlayerList)
+	{
+		if (!player.second.pEntity) continue;
+		if (player.second.records.empty()) continue;
+
+		I::surface->DrawSetColor(Color(255, 0, 0, 255));
+
+		studiohdr_t* StudioModel = I::modelinfo->GetStudioModel(player.second.pEntity->GetModel());
+		if (!StudioModel)
+			continue;
+
+		LagComp::Record& record = player.second.records.front();
+
+		for (int i = 0; i < StudioModel->nBones; i++)
+		{
+			mstudiobone_t* Bone = StudioModel->GetBone(i);
+			if (!Bone || !(Bone->iFlags & 256) || Bone->iParent == -1)
+				continue;
+
+			Vector Screen1;
+			Vector loc1 = Vector(record.Matrix[i][0][3], record.Matrix[i][1][3], record.Matrix[i][2][3]);
+			if (!WorldToScreen(loc1, Screen1))
+				continue;
+
+			Vector Screen2;
+			Vector loc2 = Vector(record.Matrix[Bone->iParent][0][3], record.Matrix[Bone->iParent][1][3], record.Matrix[Bone->iParent][2][3]);
+			if (!WorldToScreen(loc2, Screen2))
+				continue;
+
+			I::surface->DrawLine(Screen1.x, Screen1.y, Screen2.x, Screen2.y);
+		}
+	}
+}
+
 void ESP::RunPaintTraverse()
 {
 	//DrawExtrapolatedSkeletons();
 
-	DrawBacktrackSkeletons();
+	//DrawBacktrackSkeletons();
+
+	DrawPlayerListSkeletons();
 
 	while (safepoints.size() > 10)
 		safepoints.pop_front();

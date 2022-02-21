@@ -203,6 +203,13 @@ void Resolver::ResolveMatches()
 		PlayerInfo_t info;
 		I::engine->GetPlayerInfo(I::engine->GetPlayerForUserID(aim.userID), &info);
 
+		std::string otherinfo = " ";
+		otherinfo += "DAM[" + std::to_string(aim.damage) + "/" + std::to_string(match.hurt.damage) + "]";
+		otherinfo += " HC[" + std::to_string(aim.hitchance) + "]";
+		otherinfo += " SP[" + std::to_string(aim.safepoint) + "]";
+
+		//:D good, :P bad, :/ spread, D: trace error
+
 		// we actually hit something
 		bool did_hit = false;
 		if (!match.miss)
@@ -211,7 +218,7 @@ void Resolver::ResolveMatches()
 			if (match.hurt.hitgroup == aim.hitgroup && match.hurt.userid == aim.userID)
 			{
 				lagcomp->PlayerList[match.hurt.userid].goodShots++;
-				H::console.push_back("good resolve on " + (std::string)info.szName);
+				H::console.push_back(":D on " + (std::string)info.szName + otherinfo);
 				this->aim_shots.erase(this->aim_shots.begin() + AimbotShotIndex);
 				continue;
 			} 
@@ -219,7 +226,7 @@ void Resolver::ResolveMatches()
 			{
 				// lucky spread hit
 				lagcomp->PlayerList[match.hurt.userid].luckShots++;
-				H::console.push_back("lucky hit on " + (std::string)info.szName);
+				H::console.push_back("hit shot do to spread on " + (std::string)info.szName + otherinfo);
 				this->aim_shots.erase(this->aim_shots.begin() + AimbotShotIndex);
 				continue;
 			}
@@ -232,7 +239,7 @@ void Resolver::ResolveMatches()
 		{
 			// resolve error
 			lagcomp->PlayerList[aim.userID].badShots++;
-			H::console.push_back("bad resolve on " + (std::string)info.szName);
+			H::console.push_back(":P on " + (std::string)info.szName + otherinfo);
 			this->aim_shots.erase(this->aim_shots.begin() + AimbotShotIndex);
 			continue;
 		}
@@ -240,13 +247,13 @@ void Resolver::ResolveMatches()
 		if ((aim.shootPos - aim.shootPoint).VecLength() > (aim.shootPos - match.impact.end_pos).VecLength() + 5.f && aim.hitchance > 50.f)
 		{
 			// ray didn't reach far enough --> autowall error, not resolver error
-			H::console.push_back("trace error on " + (std::string)info.szName);
+			H::console.push_back("D: on " + (std::string)info.szName + otherinfo);
 			this->aim_shots.erase(this->aim_shots.begin() + AimbotShotIndex);
 			continue;
 		}
 
 		// spread error
-		H::console.push_back("spread error on " + (std::string)info.szName);
+		H::console.push_back(":/ on " + (std::string)info.szName + otherinfo);
 		this->aim_shots.erase(this->aim_shots.begin() + AimbotShotIndex);
 	}
 
@@ -272,55 +279,40 @@ void Resolver::LogicResolve(Entity* ent, int missedShots)
 	float maxSpeed = ent->MaxAccurateSpeed() / 3.f;
 	float maxDesync = ent->GetMaxDesyncDelta(animstate);
 	
+	float backAngle = Calc::CalculateAngle(G::Localplayer->GetVecOrigin(), ent->GetVecOrigin()).y;
 
 	float eye_yaw = animstate->flEyeYaw;
 	float value = eye_yaw;
 
 	// slowwalk check --> actually do proper bruteforce
 	bool slowWalking = horizontalVelocity >= 1.f && horizontalVelocity <= maxSpeed;
-	if (slowWalking)
-	{
-		switch (missedShots % 5)
-		{
-		case 0:
-			value = ent->GetLBY();
-			break;
-		case 1:
-			value = eye_yaw + maxDesync;
-			break;
-		case 2:
-			value = eye_yaw - maxDesync;
-			break;
-		case 3:
-			value = eye_yaw + maxDesync / 3;
-			break;
-		case 4:
-			value = eye_yaw - maxDesync / 3;
-			break;
-		}
-	}
-	else
-	{
-		switch (missedShots % 5)
-		{
-		case 0:
-			value = ent->GetLBY();
-			break;
-		case 1:
-			value = eye_yaw - maxDesync / 3;
-			break;
-		case 2:
-			value = eye_yaw + maxDesync / 3;
-			break;
-		case 3:
-			value = eye_yaw - maxDesync;
-			break;
-		case 4:
-			value = eye_yaw + maxDesync;
-			break;
-		}
-	}
 	
+	switch (missedShots % 6)
+	{
+	case 0:
+		value = ent->GetLBY();
+		break;
+	case 1:
+		value = eye_yaw + maxDesync;
+		break;
+	case 2:
+		value = eye_yaw - maxDesync;
+		break;
+	case 3:
+		value = eye_yaw + maxDesync / 3;
+		break;
+	case 4:
+		value = eye_yaw - maxDesync / 3;
+		break;
+	case 5:
+		value = backAngle;
+		break;
+	}
+
+
+	/*value = eye_yaw + 10.f * missedShots;*/
+	/*int side = missedShots % 2 == 0;
+	value = eye_yaw + ((rand() % int(maxDesync)) / 2 * side);*/
 
 	animstate->flGoalFeetYaw = NormalizeYaw(value);
 }
@@ -333,6 +325,8 @@ void Resolver::Run()
 	SortImpacts();
 	MatchImpacts();
 	ResolveMatches();
+
+	return; // lets be extra careful here now
 
 	static int retard = 0;
 	static int lastretard = G::Localplayer->GetAmmo();

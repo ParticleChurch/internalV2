@@ -20,6 +20,9 @@ void ConsoleColorMsg(const Color& color, const char* fmt, Args ...args)
 	con_color_msg(color, fmt, args...);
 }
 
+static std::map<int, int> BodyShots;
+static std::map<int, int> HeadShots;
+
 class EventListener : public GameEventListener
 {
 public:
@@ -90,8 +93,20 @@ public:
 			int iAttacker = event->GetInt("attacker");
 			if (I::engine->GetPlayerForUserID(UserID) == G::LocalplayerIndex)
 			{
+				
 				if (event->GetInt("hitgroup") != HITGROUP_HEAD)
 				{
+					// if they don't exist...
+					if (BodyShots.find(iAttacker) == BodyShots.end())
+					{
+						HeadShots.insert(std::pair(iAttacker, 0));
+						BodyShots.insert(std::pair(iAttacker, 1));
+					}
+					// if they do, ++ on the bodyshot
+					else
+					{
+						BodyShots[iAttacker]++;
+					}
 					/*PlayerInfo_t info;
 					if (I::engine->GetPlayerInfo(I::engine->GetPlayerForUserID(iAttacker), &info))
 					{
@@ -100,6 +115,21 @@ public:
 					}	
 					else
 						I::engine->ExecuteClientCmd("kill; say [ANTIBAIM] Not my head, keep trying...");*/
+				}
+				// if headshot
+				else
+				{
+					// if they don't exist...
+					if (BodyShots.find(iAttacker) == BodyShots.end())
+					{
+						HeadShots.insert(std::pair(iAttacker, 1));
+						BodyShots.insert(std::pair(iAttacker, 0));
+					}
+					// if they do, ++ on the bodyshot
+					else
+					{
+						HeadShots[iAttacker]++;
+					}
 				}
 				
 				return;
@@ -140,13 +170,41 @@ public:
 			bool	thrusmoke	hitscan weapon went through smoke grenade
 			bool	attackerblind	attacker was blind from flashbang
 			*/
+			
 
+			// if localplayer didn't die...
+			int userid = event->GetInt("userid");
+			if (I::engine->GetPlayerForUserID(userid) != G::LocalplayerIndex)
+				return;
+			
+			int iAttacker = event->GetInt("attacker");
+			PlayerInfo_t info;
+			if (BodyShots.find(iAttacker) != BodyShots.end())
+			{
+				std::string str = "say ";
+				if (I::engine->GetPlayerInfo(I::engine->GetPlayerForUserID(iAttacker), &info))
+				{
+					str += info.szName;
+				}
+				else
+					str += std::to_string(iAttacker);
+				str += " killed me with stats (on me only)...";
+				str += " Headshots: " + std::to_string(HeadShots[iAttacker]) + " Bodyshots: " + std::to_string(BodyShots[iAttacker]) + " Headshot %: ";
+				str += std::to_string((float)HeadShots[iAttacker] / (BodyShots[iAttacker] + HeadShots[iAttacker]) * 100);
+				I::engine->ExecuteClientCmd(str.c_str());
+			}
 			
 		}
 		break;
 		case StrHash::Hash("round_freeze_end"):
 			break;
 		case StrHash::Hash("round_prestart"):
+			break;
+		case StrHash::Hash("round_start"):
+			for (auto& a : BodyShots)
+				a.second = 0;
+			for (auto& a : HeadShots)
+				a.second = 0;
 			break;
 		}
 	}
@@ -365,10 +423,31 @@ long __stdcall H::EndSceneHook(IDirect3DDevice9* device)
 			ImGui::SetNextWindowSizeConstraints(ImVec2(10, 10), ImVec2(1920, 1080));
 			ImGui::Begin("Console");
 			//ImGui::Text(("Aimbot Scans (per tick): " + std::to_string(aimbot->TheoreticalScans)).c_str());
+			if(G::LocalplayerAlive)
+				ImGui::Text(("TICK: " + std::to_string(G::cmd->iTickCount)).c_str());
 			for (auto& a : H::console)
 				ImGui::Text(a.c_str());
 			ImGui::End();
 		}
+
+		/*ImGui::SetNextWindowSizeConstraints(ImVec2(10, 10), ImVec2(1920, 1080));
+		ImGui::Begin("NAME, HS, BS, HS/BS");
+		PlayerInfo_t info;
+		ImGui::Text("NAME, HS, BS, HS/BS");
+		for (auto& a : BodyShots)
+		{
+			std::string str = "";
+			if (I::engine->GetPlayerInfo(I::engine->GetPlayerForUserID(a.first), &info))
+			{
+				str += info.szName;
+			}
+			else
+				str += std::to_string(a.first);
+			str += " HS: " + std::to_string(HeadShots[a.first]) + " BS: " + std::to_string(a.second) + " %%: ";
+			str += std::to_string((float)HeadShots[a.first] / (a.second + HeadShots[a.first]) * 100);
+			ImGui::Text(str.c_str());
+		}
+		ImGui::End();*/
 
 		menu->Render();
 		esp->RunEndScene();
@@ -498,8 +577,20 @@ void __stdcall H::FrameStageNotifyHook(int stage)
 		}
 	}
 
-	/*
-	if (stage == FRAME_RENDER_START && G::Localplayer && G::LocalplayerAlive && cfg->Keybinds["Thirdperson"].boolean)
+	// fix animLOD
+	if (stage == FRAME_RENDER_START) {
+		if (!G::Localplayer)
+			return;
+
+		for (int i = 1; i <= I::engine->GetMaxClients(); i++) {
+			Entity* entity = I::entitylist->GetClientEntity(i);
+			if (!entity || entity == G::Localplayer || entity->IsDormant() || !entity->IsAlive()) continue;
+			*reinterpret_cast<int*>(entity + 0xA28) = 0;
+			*reinterpret_cast<int*>(entity + 0xA30) = I::globalvars->iFrameCount;
+		}
+	}
+	
+	/*if (stage == FRAME_RENDER_START && G::Localplayer && G::LocalplayerAlive && cfg->Keybinds["Thirdperson"].boolean)
 	{
 		static auto util_playerbyindex = FindPattern("server.dll", "85 C9 7E 32 A1"); 
 		static auto draw_server_hitboxes = FindPattern("server.dll", "55 8B EC 81 EC ? ? ? ? 53 56 8B 35 ? ? ? ? 8B D9 57 8B CE");
@@ -527,122 +618,20 @@ void __stdcall H::FrameStageNotifyHook(int stage)
 		{
 
 		}
-	}
-	*/
+	}*/
+	
 
 	skins->FSN(stage);
 
-	resolver->Run();
+	//animfix->Update(stage);
 
-	animfix->Update(stage);
+	resolver->Run();
 
 	lagcomp->Run_FSN(stage);
 
 	oFrameStageNotify(stage);
 
-
-
-	// first create a consitent lag amount for players
-	{
-		static int LastTickCount = I::globalvars->iTickCount;
-		if (LastTickCount != I::globalvars->iTickCount)
-		{
-			LastTickCount = I::globalvars->iTickCount;
-			lag++;
-		}
-		if (lag > 20)
-			lag = 0;
-	}
-	static Vector lastPos[64];
-	static float lastTime[64];
-	static Vector backupAbsPos[64];
-	static Vector backupPos[64];
-	static float backupTime[64];
-	/*if (stage == FRAME_NET_UPDATE_POSTDATAUPDATE_START && G::Localplayer && G::LocalplayerAlive)
-	{
-		Entity* ent;
-		static int PrevLagTime[64];
-		static Vector realVel;
-		for (int i = 1; i < 64; ++i)
-		{
-			// Localplayer Check
-			if (i == G::LocalplayerIndex) continue;
-
-			// entity existence check
-			ent = I::entitylist->GetClientEntity(i);
-			if (!ent) continue;
-
-			// entity player check
-			if (!ent->IsPlayer()) continue;
-
-			// just do enemies for now
-			if (ent->GetTeam() == G::LocalplayerTeam) continue;
-
-			// do another player check
-			PlayerInfo_t info;
-			if (!I::engine->GetPlayerInfo(i, &info)) continue;
-
-			// layer alive check
-			if (!(ent->GetHealth() > 0)) continue;
-			if (ent->GetLifeState() != LIFE_ALIVE) continue;
-
-			backupPos[i] = ent->GetVecOrigin();
-			backupAbsPos[i] = ent->GetAbsOrigin();
-			backupTime[i] = ent->GetOldSimulationTime();
-
-			// 0 lag rn
-			if (lag == 1)
-			{
-				lastTime[i] = ent->GetSimulationTime();
-				lastPos[i] = ent->GetVecOrigin();
-			}
-			// lets STRESS TEST the fuckin SYSTEM BABY
-			else
-			{
-				ent->GetVecOrigin() = lastPos[i];
-				ent->SetAbsOrigin(lastPos[i]);
-				ent->GetOldSimulationTime() = lastTime[i];
-			}
-		}
-	}
-	*/
-
 	
-
-	
-
-	/*
-	if (stage == FRAME_NET_UPDATE_POSTDATAUPDATE_START && G::Localplayer && G::LocalplayerAlive)
-	{
-		Entity* ent;
-		for (int i = 1; i < 64; ++i)
-		{
-			// Localplayer Check
-			if (i == G::LocalplayerIndex) continue;
-
-			// entity existence check
-			ent = I::entitylist->GetClientEntity(i);
-			if (!ent) continue;
-
-			// entity player check
-			if (!ent->IsPlayer()) continue;
-
-			// just do enemies for now
-			if (ent->GetTeam() == G::LocalplayerTeam) continue;
-
-			// do another player check
-			PlayerInfo_t info;
-			if (!I::engine->GetPlayerInfo(i, &info)) continue;
-
-			// layer alive check
-			if (!(ent->GetHealth() > 0)) continue;
-			if (ent->GetLifeState() != LIFE_ALIVE) continue;
-
-			ent->GetVecOrigin() = backupPos[i];
-			ent->SetAbsOrigin(backupAbsPos[i]);
-			ent->GetOldSimulationTime() = backupTime[i];
-		}
-	}*/
 }
 
 bool __stdcall H::CreateMoveHook(float flInputSampleTime, CUserCmd* cmd)
@@ -663,10 +652,13 @@ bool __stdcall H::CreateMoveHook(float flInputSampleTime, CUserCmd* cmd)
 
 	if (I::engine->IsInGame() && cmd && G::Localplayer)
 	{
-		PVOID pebp;
+		/*PVOID pebp;
 		__asm mov pebp, ebp;
-		bool* pSendPacket = (bool*)(*(DWORD*)pebp - 0x1C);
-		bool& bSendPacket = *pSendPacket;
+		bool* pSendPacket = (bool*)(*(DWORD*)pebp - 0x34);
+		bool& bSendPacket = *pSendPacket;*/
+
+		bool bSendPacket;
+		bool* pSendPacket = &bSendPacket;
 
 		// Menu fix
 		if (G::MenuOpen && (cmd->iButtons & IN_ATTACK | IN_ATTACK2 | IN_ZOOM))
@@ -681,44 +673,68 @@ bool __stdcall H::CreateMoveHook(float flInputSampleTime, CUserCmd* cmd)
 		shadows->SetValue(false);*/
 
 		// movmeent fix
+		if (DEBUG_HOOKS) L::Debug("CM_Start");
 		movement->CM_Start(cmd, pSendPacket);
 
 		// aa movement
+		if (DEBUG_HOOKS) L::Debug("RunMovement");
 		antiaim->RunMovement();
 
 		// rank reveal
+		if (DEBUG_HOOKS) L::Debug("DispatchUserMessage");
 		if ((G::cmd->iButtons & IN_SCORE))
 			I::client->DispatchUserMessage(50, 0, 0, nullptr);
 		
 		// movement
+		if (DEBUG_HOOKS) L::Debug("Bunnyhop");
 		movement->Bunnyhop();
 
+		if (DEBUG_HOOKS) L::Debug("AutoStrafe");
 		movement->AutoStrafe();
 
 		// movement
+		if (DEBUG_HOOKS) L::Debug("SlowWalk");
 		movement->SlowWalk();
 
 		// movmeent fix
+		if (DEBUG_HOOKS) L::Debug("CM_MoveFixStart");
 		movement->CM_MoveFixStart();
 
 		// fakelag
+		if (DEBUG_HOOKS) L::Debug("FakelagStart");
 		antiaim->FakelagStart();
+
+		if (DEBUG_HOOKS) L::Debug("explot start here ticks to brugh");
 		// put stuff like exploit start here (for predicted and actual value of sendpacket)
 		if (TicksToShift > 0 || TicksToRecharge)
 			antiaim->PredictedVal = true;
 
 		/*enginePrediction->start(cmd);*/
 
-		bSendPacket = antiaim->FakelagEnd();
+		if (DEBUG_HOOKS) L::Debug("FakelagEnd");
+
+		/*if (antiaim->PredictedVal)
+			G::cmd->iTickCount = INT_MAX;*/
+
+		//bSendPacket = antiaim->FakelagEnd();
+		static auto mov_bl = (std::uintptr_t*)((std::uintptr_t)(FindPattern("engine.dll", "B3 01 8B 01 8B 40 10 FF D0 84 C0 74 0F 80 BF ? ? ? ? ? 0F 84") + 0x1));
+		unsigned long protect = 0;
+		VirtualProtect((void*)mov_bl, 4, PAGE_EXECUTE_READWRITE, &protect);
+		*reinterpret_cast<bool*>(mov_bl) = antiaim->FakelagEnd();
+		VirtualProtect((void*)mov_bl, 4, protect, &protect);
+
+		
 
 		// do epic edge jump here :D
 		
 		/*enginePrediction->end();*/
 
 		// run antiaim aa
+		if (DEBUG_HOOKS) L::Debug("antiaim");
 		antiaim->Run();
 
 		// run fakeduck
+		if (DEBUG_HOOKS) L::Debug("fakeduck");
 		if (cfg->Keybinds["Fake Duck"].boolean)
 		{
 			G::cmd->iButtons |= IN_BULLRUSH;
@@ -730,9 +746,11 @@ bool __stdcall H::CreateMoveHook(float flInputSampleTime, CUserCmd* cmd)
 		
 
 		// offensive 
+		if (DEBUG_HOOKS) L::Debug("backtrack");
 		backtrack->Run();
 
 		// Manual Shot fix
+		if (DEBUG_HOOKS) L::Debug("manuel shot fix");
 		if (G::cmd->iButtons & IN_ATTACK && G::Localplayer->CanShoot())
 		{
 			G::cmd->angViewAngle = G::StartAngle;
@@ -741,6 +759,7 @@ bool __stdcall H::CreateMoveHook(float flInputSampleTime, CUserCmd* cmd)
 		}
 
 		// E fix
+		if (DEBUG_HOOKS) L::Debug("e fix");
 		if (G::cmd->iButtons & IN_USE)
 		{
 			G::cmd->angViewAngle = G::StartAngle;
@@ -772,10 +791,17 @@ bool __stdcall H::CreateMoveHook(float flInputSampleTime, CUserCmd* cmd)
 			}
 		}
 
+		if (DEBUG_HOOKS) L::Debug("triggerbot");
 		triggerbot->Run();
+
+		if (DEBUG_HOOKS) L::Debug("rage");
 		rage->Run();
 
+		if (DEBUG_HOOKS) L::Debug("rage record stuff");
+
+
 		// Shot fix
+		if (DEBUG_HOOKS) L::Debug("Shot fix");
 		static bool LastTickShot = false;
 		if (LastTickShot)
 		{
@@ -791,20 +817,25 @@ bool __stdcall H::CreateMoveHook(float flInputSampleTime, CUserCmd* cmd)
 		}
 
 		// movmeent fix
+		if (DEBUG_HOOKS) L::Debug("CM_MoveFixEnd");
 		movement->CM_MoveFixEnd();
 
 		// movmeent fix
+		if (DEBUG_HOOKS) L::Debug("CM_End");
 		movement->CM_End();
 
+		if (DEBUG_HOOKS) L::Debug("dt dumb stuff");
 		if ((G::cmd->iButtons & IN_ATTACK) && G::Localplayer->CanShoot())
 		{
 			if (cfg->aimbot.EnableHs)
 				TicksToShift = 2;
 			if (cfg->aimbot.EnableDt)
 				TicksToShift = 16;
-			bSendPacket = true;
+			if(cfg->aimbot.EnableHs || cfg->aimbot.EnableDt)
+				bSendPacket = true;
 		}
 		
+		if (DEBUG_HOOKS) L::Debug("dt recharge stuff");
 		// recharge dt (but if we NEED to shoot, and can... shoot)
 		static int LastChargeTickcount = G::cmd->iTickCount;
 		if (TicksToRecharge > 0 && !(G::cmd->iButtons & IN_ATTACK) && G::Localplayer->CanShoot())
@@ -817,12 +848,13 @@ bool __stdcall H::CreateMoveHook(float flInputSampleTime, CUserCmd* cmd)
 			G::cmd->iTickCount = INT_MAX;
 		}
 		
-		// dummy aimbot fix?
+		if (DEBUG_HOOKS) L::Debug("dummy aimbot fix");
+		// dummy aimbot fix?    
 		if (TicksToShift > 0)
 			G::cmd->iButtons |= IN_ATTACK;
 
 		
-
+		if (DEBUG_HOOKS) L::Debug("ret");
 	}
 
 	return false; //silent aim on false (only for client)

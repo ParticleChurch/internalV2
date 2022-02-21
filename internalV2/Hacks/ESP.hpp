@@ -13,6 +13,7 @@ private:
 	void DrawWeapon(Entity*, int userid);
 	void DrawProjectiles(Entity* ent);
 	void DrawBacktrackSkeletons();
+	void DrawPlayerListSkeletons();
 	
 public:
 	std::deque<Vector> safepoints;

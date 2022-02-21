@@ -2,7 +2,7 @@
 
 Aimbot* rage = new Aimbot();
 
-#define DEBUG_AIMBOT false
+#define DEBUG_AIMBOT true
 
 template<typename ...Args>
 void ConsoleColorMsg(const Color& color, const char* fmt, Args ...args)
@@ -40,6 +40,7 @@ bool Aimbot::TimerStop()
 
 static void CapsuleOverlay(Entity* pPlayer, Color col, float duration, matrix3x4_t pBoneToWorldOut[128])
 {
+
 	if (!pPlayer)
 		return;
 
@@ -76,6 +77,63 @@ static void CapsuleOverlay(Entity* pPlayer, Color col, float duration, matrix3x4
 	}
 }
 
+/*
+std::string get_active_window() {
+	char window_title[256];
+	GetWindowTextA(GetForegroundWindow(), window_title, 256);
+	return window_title;
+}
+*/
+Vector RotatePoint(Vector pos, Vector orig, float ang)
+{
+	// oreient ourselves wih origin @ the new origin
+	pos = pos - orig;
+
+	// cos/sin
+	float COS = cos(DEG2RAD(ang));
+	float SIN = sin(DEG2RAD(ang));
+
+	// rotate point around origin
+	Vector FinalPos;
+	FinalPos.x = pos.x * COS - pos.y * SIN;
+	FinalPos.y = pos.y * COS + pos.x * SIN;
+	FinalPos.z = pos.z;
+
+	// orient ourselves back from given origin
+	FinalPos += orig;
+	return FinalPos;
+}
+
+bool GetSafepoint(Vector origin, Vector point, float radius, Vector& safepoint, float MaxDesync)
+{
+	origin.z = point.z;
+	Vector r1 = RotatePoint(point, origin, 180);
+	Vector r2 = RotatePoint(point, origin, 180 + MaxDesync);
+	Vector r3 = RotatePoint(point, origin, 180 - MaxDesync);
+
+	std::vector<Vector> pts = { r1, r2, r3 };
+
+	return FoundSafepoint(G::Localplayer->GetEyePosition(), pts, radius, safepoint);
+}
+
+bool SAFEPOINT(LagComp::Record& record, float radius, Vector min, Vector max, Vector& aimpoint)
+{
+	// Go for max first
+	if (GetSafepoint(record.Origin, max, radius, aimpoint, record.MaxDesync))
+	{
+		esp->safepoints.push_back(aimpoint);
+		return true;
+	}
+
+	// then try for middle, min just fucks shit up
+	if (GetSafepoint(record.Origin, (max + min) / 2, radius, aimpoint, record.MaxDesync))
+	{
+		esp->safepoints.push_back(aimpoint);
+		return true;
+	}
+	return false;
+}
+
 void Aimbot::SortPlayers(std::vector<std::pair<int, float>>& values)
 {
 	values.clear();
@@ -90,6 +148,7 @@ void Aimbot::SortPlayers(std::vector<std::pair<int, float>>& values)
 		if (!a.second.pEntity) continue;
 		if (a.second.Team == G::LocalplayerTeam) continue;
 		if (!(a.second.records.size() > 0)) continue;
+		//if (a.second.records.front().LagAmount != 1) continue; // DONT SHOOT AT LAGGED/MESSED UP PLAYERS
 
 		values.push_back(std::pair(a.first, (100 - a.second.Health) * 8 + 80000 / (a.second.records[0].Origin - localorigin).VecLength2D()));
 	}
@@ -319,6 +378,222 @@ float Aimbot::GetPointScale(int Hitbox)
 	return 0.f;
 }
 
+static float CalculatePsudoHitchanceP100(Vector min, Vector max, float radius)
+{
+	auto weapon = G::LocalplayerWeapon;
+	if (!weapon)
+		return 0.f;
+
+	weapon->UpdateAccuracyPenalty();
+
+	auto cone_angle = weapon->GetInaccuracy() + weapon->GetSpread();
+	auto target_distance = G::Localplayer->GetEyePosition().DistTo((max + min) / 2.f);
+	auto cone_radius = target_distance * std::tan(cone_angle);
+
+	if (cone_radius == 0.f)
+		return true;
+
+	auto cone_area = M_PI * cone_radius * cone_radius;
+
+	float hitbox_area;
+
+	if (radius == -1.f)
+		hitbox_area = ((max - min).Length() / 2.f) * ((max - min).Length() / 2.f);
+	else
+		hitbox_area = M_PI * radius * radius * 0.8f;
+
+	if (cone_area < hitbox_area)
+		return true;
+
+	return sqrtf(hitbox_area / cone_area);
+}
+
+void Aimbot::TestRage()
+{
+	if constexpr (DEBUG_AIMBOT) L::Debug("TestRage");
+
+	if (!cfg->Keybinds["Aimbot"].boolean) return;
+
+	if (!G::Localplayer->CanShoot()) return;
+
+	if (antiaim->LaggingOnPeak) return;
+
+	if constexpr (DEBUG_AIMBOT) L::Debug("UpdateVals");
+	UpdateVals();
+
+	// Start timer
+	TimerStart();
+
+	// reset the number of scans
+	NumScan = 0;
+
+	H::console.clear();
+	H::console.resize(0);
+	
+	if constexpr (DEBUG_AIMBOT) L::Debug("SortPlayers");
+	SortPlayers(this->players);
+
+	for (auto& a : this->players)
+		H::console.push_back(std::to_string(a.first));
+
+	// go through lagcomp list
+	for (auto& player_userid : this->players)
+	{
+		// STOP AIMBOT the moment we have scanned too much
+		if (TimerStop()) goto END_AIM2;
+
+		// get the player
+		auto& player = lagcomp->PlayerList[player_userid.first];
+
+		// ok checks
+		if (player.records.empty()) continue;				// do record check
+		if (player.LifeState != LIFE_ALIVE) continue;		// do live check
+		if (!(player.Health > 0)) continue;					// do another live check
+		if (player.Dormant) continue;						// do dormant check
+
+		// get given record
+
+		// go through the records and find valid one
+		auto& record = player.records[0];
+		if (!record.ValidBones)
+		{
+			for (auto& a : player.records)
+			{
+				if (a.ValidBones)
+					record = a;
+			}
+		}
+		
+
+		// check if valid bones
+		/*if (!record.ValidBones) continue;*/
+
+		// priority scan
+		if constexpr (DEBUG_AIMBOT) L::Debug("priority hitbox scan");
+		for (auto HITBOX : this->Priority)
+		{
+			// BREAK the moment we have scanned too much
+			if (TimerStop()) goto END_AIM2;
+
+			//Vector Aimpoint = record.HeadPos;// Calc::ExtrapolateTick(record.HeadPos, record.Velocity, 4);
+			Vector min = record.bones[HITBOX].vecBBMin.Transform(record.Matrix[record.bones[HITBOX].iBone]);
+			Vector max = record.bones[HITBOX].vecBBMax.Transform(record.Matrix[record.bones[HITBOX].iBone]);
+			Vector mid = (min + max / 2);
+			Vector top = min.z > max.z ? min : max;
+			float PointScale = GetPointScale(HITBOX);
+			Vector top_left = player.pEntity->GetTopLeft(top, record.bones[HITBOX].flRadius * PointScale, G::Localplayer);
+			Vector top_right = player.pEntity->GetTopRight(top, record.bones[HITBOX].flRadius * PointScale, G::Localplayer);
+			Vector Aimpoint = G::cmd->iTickCount % 2 ? top_left : top_right;
+
+
+			/*bool safepoint = false;
+			if (HITBOX == HITBOX_HEAD)
+			{
+				safepoint = SAFEPOINT(record, record.bones[HITBOX].flRadius, min, max, mid);
+			}*/
+
+			// angle to the target bitch
+			Vector Angle = Calc::CalculateAngle(Aimpoint);
+			Angle -= (G::Localplayer->GetAimPunchAngle() * 2);
+
+			// shit hitchance, nah
+			if constexpr (DEBUG_AIMBOT) L::Debug("hitchance");
+			float hitchance = CalculatePsudoHitchanceP100(min, max, record.bones[HITBOX].flRadius);
+			if (hitchance < this->MinHitchance) continue;
+
+
+			if constexpr (DEBUG_AIMBOT) L::Debug("Traceray");
+			CTraceFilter filter((IHandleEntity*)G::Localplayer);
+			Ray_t ray(G::Localplayer->GetEyePosition(), Aimpoint);
+			Trace_t trace = {};
+			I::enginetrace->TraceRay(ray, MASK_SHOT, &filter, &trace);
+
+			bool hit = false;
+			bool goodtrace = trace.flFraction == 1.f;
+			bool goodPhit = trace.pHitEntity && trace.pHitEntity->IsPlayer() && trace.pHitEntity->GetTeam() != G::LocalplayerTeam;
+
+			float Damage = (goodPhit || goodtrace) ? 1337.f : 0.f;
+
+			L::Debug(("Autowal Damage: " + std::to_string(Damage)).c_str());
+
+
+
+			// we just did autowall scan
+			NumScan++;
+
+			// damage check
+			if (Damage < this->MinDamage) continue;
+
+				// silent aim
+			G::cmd->angViewAngle = QAngle(Angle.x, Angle.y);
+
+			// FIRE POW POW POW!
+			G::cmd->iButtons |= IN_ATTACK;
+
+			H::console.push_back("oTickCount: " + std::to_string(G::cmd->iTickCount));
+			H::console.push_back("SimulationTime: " + std::to_string(record.SimulationTime));
+			H::console.push_back("OldSimulationTime: " + std::to_string(record.OldSimulationTime));
+			H::console.push_back("LagAmount: " + std::to_string(record.LagAmount));
+			H::console.push_back("GetLerpTime: " + std::to_string(TimeToTicks(GetLerp())));
+
+			// deal with lag comp
+			if constexpr (DEBUG_AIMBOT) L::Debug("iTickCount");
+			//G::cmd->iTickCount = TimeToTicks(record.SimulationTime /*+ GetLerp()*/) - 2; // magic math 0_0
+			//G::cmd->iTickCount = TimeToTicks(record.SimulationTime + GetLerp()) - 2; // magic math 0_0
+
+			G::cmd->iTickCount = TimeToTicks(record.OldSimulationTime + GetLerp()) - 2;
+
+			H::console.push_back("nTickCount: " + std::to_string(G::cmd->iTickCount));
+
+			/*if (!cfg->Keybinds["Fake Duck"].boolean)
+				*G::pSendpacket = true;*/
+
+			if constexpr (DEBUG_AIMBOT) L::Debug("CapsuleOverlay");
+			// show the shot :D
+
+			CapsuleOverlay(player.pEntity, Color(255, 0, 0, 255), 4, record.Matrix);
+			Vector midlz = Aimpoint; midlz.z -= 5.f;
+			Vector midhz = Aimpoint; midhz.z += 5.f;
+			Vector midlx = Aimpoint; midlx.x -= 5.f;
+			Vector midhx = Aimpoint; midhx.x += 5.f;
+			Vector midly = Aimpoint; midly.y -= 5.f;
+			Vector midhy = Aimpoint; midhy.y += 5.f;
+			I::debugoverlay->AddLineOverlay(midlz, midhz, 255, 255, 255, true, 4.f);
+			I::debugoverlay->AddLineOverlay(midlx, midhx, 255, 255, 255, true, 4.f);
+			I::debugoverlay->AddLineOverlay(midly, midhy, 255, 255, 255, true, 4.f);
+
+			Resolver::aim_shot_log shot;
+			shot.hitchance = hitchance;
+			shot.userID = player_userid.first;
+			shot.time = record.OldSimulationTime + GetLerp();
+			shot.hitgroup = HitboxToHitgroup(HITBOX);
+			shot.damage = Damage;
+			shot.shootPos = G::Localplayer->GetEyePosition();
+			shot.shootPoint = Aimpoint;
+			shot.origin = record.Origin;
+			shot.min_bone = min;
+			shot.max_bone = max;
+			shot.radius_bone = record.bones[HITBOX].flRadius;
+			shot.safepoint = false;
+			resolver->AimbotShot(shot);
+
+			goto END_AIM2;
+		}
+	}
+END_AIM2:
+
+	// for debugging
+	if (NumScan > 0)
+	{
+		// calculate theoretical # of scans you can do per tick
+		float intervalPerTick = I::globalvars->flIntervalPerTick;
+		float avgScanTime = this->DeltaTime / NumScan;
+		TheoreticalScans = intervalPerTick / avgScanTime;
+	}
+
+	return;
+}
+
 float Aimbot::CalculatePsudoHitchance(Entity* ent, int Hitbox)
 {
 	studiohdr_t* hdr = I::modelinfo->GetStudioModel(ent->GetModel());
@@ -485,66 +760,11 @@ float Aimbot::CalculatePsudoHitchance(Entity* ent, int Hitbox)
 	*/
 }
 
-/*
-std::string get_active_window() {
-	char window_title[256];
-	GetWindowTextA(GetForegroundWindow(), window_title, 256);
-	return window_title;
-}
-*/
-Vector RotatePoint(Vector pos, Vector orig, float ang)
-{
-	// oreient ourselves wih origin @ the new origin
-	pos = pos - orig;
-
-	// cos/sin
-	float COS = cos(DEG2RAD(ang));
-	float SIN = sin(DEG2RAD(ang));
-
-	// rotate point around origin
-	Vector FinalPos;
-	FinalPos.x = pos.x * COS - pos.y * SIN;
-	FinalPos.y = pos.y * COS + pos.x * SIN;
-	FinalPos.z = pos.z;
-
-	// orient ourselves back from given origin
-	FinalPos += orig;
-	return FinalPos;
-}
-
-bool GetSafepoint(Vector origin, Vector point, float radius, Vector& safepoint, float MaxDesync)
-{
-	origin.z = point.z;
-	Vector r1 = RotatePoint(point, origin, 180);
-	Vector r2 = RotatePoint(point, origin, 180 + MaxDesync);
-	Vector r3 = RotatePoint(point, origin, 180 - MaxDesync);
-
-	std::vector<Vector> pts = { r1, r2, r3 };
-
-	return FoundSafepoint(G::Localplayer->GetEyePosition(), pts, radius, safepoint);
-}
-
-bool SAFEPOINT(LagComp::Record& record, float radius, Vector min, Vector max, Vector& aimpoint)
-{
-	// Go for max first
-	if (GetSafepoint(record.Origin, max, radius, aimpoint, record.MaxDesync))
-	{
-		esp->safepoints.push_back(aimpoint);
-		return true;
-	}
-		
-	// then try for middle, min just fucks shit up
-	if (GetSafepoint(record.Origin, (max + min) / 2, radius, aimpoint, record.MaxDesync))
-	{
-		esp->safepoints.push_back(aimpoint);
-		return true;
-	}
-	return false;
-}
-
 void Aimbot::Run()
 {
-	
+	TestRage();
+	return;
+
 	if constexpr (DEBUG_AIMBOT) L::Debug("Run Aimbot");
 
 	if (!cfg->Keybinds["Aimbot"].boolean) return;
@@ -579,7 +799,7 @@ void Aimbot::Run()
 		if (player.Dormant) continue;						// do dormant check
 
 		// get given record
-		auto& record = player.records[0];
+		auto& record = player.records.front();
 
 		// check if valid bones
 		if (!record.ValidBones) continue;
@@ -647,14 +867,16 @@ void Aimbot::Run()
 
 			// deal with lag comp
 			if constexpr (DEBUG_AIMBOT) L::Debug("iTickCount");
-			G::cmd->iTickCount = TimeToTicks(record.SimulationTime /*+ GetLerp()*/) - 1; // magic math 0_0
+			G::cmd->iTickCount = TimeToTicks(record.SimulationTime /*+ GetLerp()*/) - 2; // magic math 0_0
 
-			if (!cfg->Keybinds["Fake Duck"].boolean)
-				*G::pSendpacket = true;
+			/*if (!cfg->Keybinds["Fake Duck"].boolean)
+				*G::pSendpacket = true;*/
 
 			if constexpr (DEBUG_AIMBOT) L::Debug("CapsuleOverlay");
 			// show the shot :D
+
 			CapsuleOverlay(player.pEntity, Color(255, 0, 0, 255), 4, record.Matrix);
+
 
 			/*std::string msg = "Shot at [" + (std::string)player.Info.szName + "] with hitchance [" + std::to_string(hitchance) + "]\n";
 			ConsoleColorMsg(Color(0, 255, 0, 255), msg.c_str());*/
@@ -748,8 +970,8 @@ void Aimbot::Run()
 			// deal with lag comp
 			G::cmd->iTickCount = TimeToTicks(record.SimulationTime /*+ GetLerp()*/) - 1; // magic math 0_0
 
-			if (!cfg->Keybinds["Fake Duck"].boolean)
-				*G::pSendpacket = true;
+			/*if (!cfg->Keybinds["Fake Duck"].boolean)
+				*G::pSendpacket = true;*/
 
 			if constexpr (DEBUG_AIMBOT) L::Debug("CapsuleOverlay");
 			// show the shot :D

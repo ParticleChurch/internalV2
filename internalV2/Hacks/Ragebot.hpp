@@ -23,8 +23,11 @@ private: // essential var/funcs
 	float CalculateHitchance(Vector vangles, const Vector& point, Entity* player, int hbox);
 	float CalculatePsudoHitchance(Entity* ent, int Hitbox);
 	float GetPointScale(int Hitbox);
+
+	void TestRage();
 public:
 	int TheoreticalScans;
+
 	void Run();
 	void RenderStats();
 };

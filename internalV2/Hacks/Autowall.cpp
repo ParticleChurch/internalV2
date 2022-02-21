@@ -353,6 +353,7 @@ bool CAutoWall::HandleBulletPenetration(Entity* pLocal, const CCSWeaponData* pWe
 
 bool CAutoWall::SimulateFireBullet(Entity* pLocal, Entity* pWeapon, FireBulletData_t& data)
 {
+	
 	if constexpr (DEBUG_AUTOWALL) L::Debug("SimulateFireBullet");
 
 	// @ida firebullet: client.dll @ 55 8B EC 83 E4 F0 81 EC ? ? ? ? F3 0F 7E
@@ -391,7 +392,11 @@ bool CAutoWall::SimulateFireBullet(Entity* pLocal, Entity* pWeapon, FireBulletDa
 
 		// we didn't hit anything, stop tracing shoot
 		if (data.enterTrace.flFraction == 1.0f)
-			break;
+		{
+			// normally bad, but if we get to the point then its a win so...
+			ScaleDamage(data.enterTrace.iHitGroup, data.enterTrace.pHitEntity, pWeaponData->flArmorRatio, pWeaponData->flHeadShotMultiplier, data.flCurrentDamage);
+			return true;
+		}
 
 		// calculate the damage based on the distance the bullet traveled
 		flTraceLenght += data.enterTrace.flFraction * flMaxRange;

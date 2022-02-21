@@ -100,8 +100,8 @@ void AntiAim::LagOnPeak()
 	if (LaggingOnPeak && ChokeOnce)
 	{
 		
-		TrigDistance = (64.f * 64.f * 0.9f);
-		TrigTicks = 14;
+		TrigDistance = (64.f * 64.f * 0.85f);
+		TrigTicks = 12;
 		LagAmount = TrigTicks;
 	}
 }
@@ -426,6 +426,7 @@ void AntiAim::Run()
 
 void AntiAim::FakelagStart()
 {
+	if constexpr (DEBUG_AA) L::Debug("FakelagStart");
 	// fakelag exception
 	if (cfg->Keybinds["Fake Duck"].boolean)
 	{
@@ -434,12 +435,17 @@ void AntiAim::FakelagStart()
 		return;
 	}
 
+	if constexpr (DEBUG_AA) L::Debug("tick update");
+
+
 	// only update every tick
 	static int oldTickCount = I::globalvars->iTickCount;
 	if (oldTickCount == I::globalvars->iTickCount) return;
 	oldTickCount = I::globalvars->iTickCount;
 
 	// Update Lag Amount every 200 ms
+	if constexpr (DEBUG_AA) L::Debug("Update Lag Amount every 200 ms");
+
 	static float oldTime = I::globalvars->flCurrentTime;
 	if (fabsf(oldTime - I::globalvars->flCurrentTime) > 0.2)
 	{
@@ -455,24 +461,32 @@ void AntiAim::FakelagStart()
 		LagAmount = min(14, LagAmount);
 	}
 
+	if constexpr (DEBUG_AA) L::Debug("Update vel");
+
 	// Update Velocity
 	Vector velocity = G::Localplayer->GetVecVelocity();
 	velocity *= (I::globalvars->flIntervalPerTick * 2);
 	//velocity now holds our distance to move (doubled for safety)
 
 	// Updating our next position
+	if constexpr (DEBUG_AA) L::Debug("NextPos");
 	NextPos = G::Localplayer->GetEyePosition() + velocity;
 
 
 	// If breaking distance or time --> Send packets
+	if constexpr (DEBUG_AA) L::Debug("DistanceBreaker");
 	bool distancebreak = DistanceBreaker();
+	if constexpr (DEBUG_AA) L::Debug("TimeBreaker");
 	bool timebreak = TimeBreaker();
 
 	// Updating Limits if trigger 
-	LagOnPeak();
+	if constexpr (DEBUG_AA) L::Debug("LagOnPeak");
+	//LagOnPeak();
 
+	if constexpr (DEBUG_AA) L::Debug("PredictedVal");
 	PredictedVal = timebreak || distancebreak;
 
+	if constexpr (DEBUG_AA) L::Debug("if (PredictedVal)");
 	if (PredictedVal)
 		PrevPos = G::Localplayer->GetEyePosition();
 }

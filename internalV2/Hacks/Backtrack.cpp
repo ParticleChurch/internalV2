@@ -117,11 +117,13 @@ void Backtrack::Run()
 	if (delta > cfg->backtrack.BacktrackTime / 1000.f)
 		return;
 
-	if (delta > 0.1f)
-		ConsoleColorMsg(Color(0, 255, 0, 255), ("Backtrack: " + std::to_string(delta) + "\n").c_str());
+	/*if (delta > 0.1f)
+		ConsoleColorMsg(Color(0, 255, 0, 255), ("Backtrack: " + std::to_string(delta) + "\n").c_str());*/
 
 	G::cmd->iTickCount = TimeToTicks(TargTime);
-	CapsuleOverlay(I::entitylist->GetClientEntity(I::engine->GetPlayerForUserID(TargEnt)), Color(255, 165, 0, 255), 4, TargTick.Matrix);
+	//CapsuleOverlay(I::entitylist->GetClientEntity(I::engine->GetPlayerForUserID(TargEnt)), Color(255, 165, 0, 255), 4, TargTick.Matrix);
+
+	//I::debugoverlay->AddLineOverlay(G::Localplayer->GetEyePosition(), TargTick.HeadPos, 255, 255, 255, false, 4.f);
 
 }
 

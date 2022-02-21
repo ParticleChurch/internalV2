@@ -21,6 +21,7 @@ public:
 		Vector Origin;
 		Vector HeadPos;
 		float SimulationTime;
+		float OldSimulationTime;
 		Vector Velocity;
 		int Flags;
 		float MaxDesync;

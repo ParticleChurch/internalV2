@@ -90,11 +90,26 @@ void LagComp::Record::Interpolate(Entity* ent, int UserID)
 
 void LagComp::Record::Update(Entity* ent, int UserID)
 {
-	float latency = (I::engine->GetNetChannelInfo()->GetAvgLatency(0) + I::engine->GetNetChannelInfo()->GetAvgLatency(1));
+	if constexpr (DEBUG_LAGCOMP) L::Debug("LagAmount");
+	
+	if constexpr (DEBUG_LAGCOMP) L::Debug("GetMaxDesyncDelta");
+	this->MaxDesync = ent->GetMaxDesyncDelta();
+	if constexpr (DEBUG_LAGCOMP) L::Debug("GetVecOrigin");
+	this->Origin = ent->GetVecOrigin();
+	if constexpr (DEBUG_LAGCOMP) L::Debug("GetSimulationTime");
+	this->SimulationTime = ent->GetSimulationTime();
+	if constexpr (DEBUG_LAGCOMP) L::Debug("GetOldSimulationTime");
+	this->OldSimulationTime = ent->GetOldSimulationTime();
+	if constexpr (DEBUG_LAGCOMP) L::Debug("GetVecVelocity");
+	this->Velocity = ent->GetVecVelocity();
+	if constexpr (DEBUG_LAGCOMP) L::Debug("GetVecVelocity");
+	this->Flags = ent->GetFlags();
+
+	this->LagAmount = abs(TimeToTicks(this->SimulationTime - this->OldSimulationTime));
 
 	if constexpr (DEBUG_LAGCOMP) L::Debug("SETUP BONES");
-	bool FixBones = ent->GetVecVelocity().Length2D() > 1.f && !ent->IsDormant() && ent->GetSimulationTime() == ent->GetOldSimulationTime();
-	if (ent->SetupBones(this->Matrix, MAXSTUDIOBONES, 0x100, 0, false))
+	bool FixBones =  LagAmount < 1;
+	if (ent->SetupBones(this->Matrix, MAXSTUDIOBONES, BONE_USED_BY_ANYTHING, 0, FixBones))
 	{
 		this->HeadPos = Vector(this->Matrix[8][0][3], this->Matrix[8][1][3], this->Matrix[8][2][3]);
 
@@ -140,18 +155,8 @@ void LagComp::Record::Update(Entity* ent, int UserID)
 	}
 	else
 		this->ValidBones = false;
-	if constexpr (DEBUG_LAGCOMP) L::Debug("GetMaxDesyncDelta");
-	this->MaxDesync = ent->GetMaxDesyncDelta();
-	if constexpr (DEBUG_LAGCOMP) L::Debug("GetVecOrigin");
-	this->Origin = ent->GetVecOrigin();
-	if constexpr (DEBUG_LAGCOMP) L::Debug("GetSimulationTime");
-	this->SimulationTime = ent->GetSimulationTime() + latency;
-	if constexpr (DEBUG_LAGCOMP) L::Debug("GetVecVelocity");
-	this->Velocity = ent->GetVecVelocity();
-	if constexpr (DEBUG_LAGCOMP) L::Debug("GetVecVelocity");
-	this->Flags = ent->GetFlags();
-	if constexpr (DEBUG_LAGCOMP) L::Debug("LagAmount");
-	this->LagAmount = abs(TimeToTicks(ent->GetSimulationTime() - ent->GetOldSimulationTime()));
+	
+	
 
 	// NO CRAZY SHIT BRUGH
 	/*if constexpr (DEBUG_LAGCOMP) L::Debug("Extrapolate");
@@ -246,12 +251,16 @@ void LagComp::CleanUp()
 		if (lagcomp->PlayerList.find(userid) == lagcomp->PlayerList.end())
 			return false;
 
-		// otherwise clear records and erase the item, then return true
-		if constexpr (DEBUG_LAGCOMP) L::Debug("lagcomp->clear()");
-		lagcomp->PlayerList[userid].records.clear();
+		// remove the records if the records are there
+		if (!lagcomp->PlayerList[userid].records.empty())
+		{
+			// otherwise clear records and erase the item, then return true
+			if constexpr (DEBUG_LAGCOMP) L::Debug("lagcomp->clear()");
+			lagcomp->PlayerList[userid].records.clear();
 
-		if constexpr (DEBUG_LAGCOMP) L::Debug("lagcomp->resize()");
-		lagcomp->PlayerList[userid].records.resize(0);
+			if constexpr (DEBUG_LAGCOMP) L::Debug("lagcomp->resize()");
+			lagcomp->PlayerList[userid].records.resize(0);
+		}
 
 		if constexpr (DEBUG_LAGCOMP) L::Debug("lagcomp->erase()");
 		lagcomp->PlayerList.erase(lagcomp->PlayerList.find(userid)); // remove current item
@@ -271,12 +280,14 @@ void LagComp::CleanUp()
 		// remove player if entity is nullptr
 		if (!player.pEntity)
 		{
+			if constexpr (DEBUG_LAGCOMP) L::Debug("lagcomp->!player.pEntity");
 			CleanAndDeletePlayer(item.first);
 			continue;
 		}
 
 		// remove player if entity is no longer human
 		if (!I::engine->GetPlayerInfo(player.Index, &info)) {
+			if constexpr (DEBUG_LAGCOMP) L::Debug("lagcomp->GetPlayerInfo");
 			CleanAndDeletePlayer(item.first);
 			continue;
 		}
@@ -293,12 +304,14 @@ void LagComp::CleanUp()
 		// remove player if entity is on same team as localplayers
 		if (player.Team == G::LocalplayerTeam)
 		{
+			if constexpr (DEBUG_LAGCOMP) L::Debug("lagcomp->equalteam");
 			CleanAndDeletePlayer(item.first);
 			continue;
 		}
 
 		// remove player if entity index is localplayers
 		if (player.Index == G::LocalplayerIndex) {
+			if constexpr (DEBUG_LAGCOMP) L::Debug("lagcomp->LocalplayerIndex");
 			CleanAndDeletePlayer(item.first);
 
 			continue;
@@ -307,6 +320,7 @@ void LagComp::CleanUp()
 		// remove player if current (front) entity simulation time is super bad (aka > 1)
 		if (!player.records.empty() && fabsf(I::globalvars->flCurrentTime - player.records.front().SimulationTime) > 1) 
 		{
+			if constexpr (DEBUG_LAGCOMP) L::Debug("lagcomp->superbadsimtime");
 			CleanAndDeletePlayer(item.first);
 			continue;
 		}
