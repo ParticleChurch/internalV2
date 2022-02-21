@@ -875,7 +875,7 @@ void Aimbot::Run()
 			if constexpr (DEBUG_AIMBOT) L::Debug("CapsuleOverlay");
 			// show the shot :D
 
-			CapsuleOverlay(player.pEntity, Color(255, 0, 0, 255), 4, record.Matrix);
+			//CapsuleOverlay(player.pEntity, Color(255, 0, 0, 255), 4, record.Matrix);
 
 
 			/*std::string msg = "Shot at [" + (std::string)player.Info.szName + "] with hitchance [" + std::to_string(hitchance) + "]\n";
@@ -884,7 +884,7 @@ void Aimbot::Run()
 			// we found a good scan, shoot at it bitch
 			Resolver::aim_shot_log shot;
 			shot.userID = player_userid.first;
-			shot.time = record.SimulationTime - I::globalvars->flIntervalPerTick/*record.SimulationTime + GetLerp()*/;
+			shot.time = record.SimulationTime - (2 * I::globalvars->flIntervalPerTick)/*record.SimulationTime + GetLerp()*/;
 			shot.hitgroup = HitboxToHitgroup(HITBOX);
 			shot.damage = Damage;
 			shot.shootPos = G::Localplayer->GetEyePosition();
@@ -968,21 +968,21 @@ void Aimbot::Run()
 			G::cmd->iButtons |= IN_ATTACK;
 
 			// deal with lag comp
-			G::cmd->iTickCount = TimeToTicks(record.SimulationTime /*+ GetLerp()*/) - 1; // magic math 0_0
+			G::cmd->iTickCount = TimeToTicks(record.SimulationTime /*+ GetLerp()*/) - 2; // magic math 0_0
 
 			/*if (!cfg->Keybinds["Fake Duck"].boolean)
 				*G::pSendpacket = true;*/
 
 			if constexpr (DEBUG_AIMBOT) L::Debug("CapsuleOverlay");
 			// show the shot :D
-			CapsuleOverlay(player.pEntity, Color(255, 0, 0, 255), 4, record.Matrix);
+			//CapsuleOverlay(player.pEntity, Color(255, 0, 0, 255), 4, record.Matrix);
 
 			/*std::string msg = "Shot at [" + (std::string)player.Info.szName + "] with hitchance [" + std::to_string(hitchance) + "]\n";
 			ConsoleColorMsg(Color(0, 255, 0, 255), msg.c_str());*/
 
 			Resolver::aim_shot_log shot;
 			shot.userID = player_userid.first;
-			shot.time = record.SimulationTime - I::globalvars->flIntervalPerTick/*record.SimulationTime + GetLerp()*/;
+			shot.time = record.SimulationTime - (2*I::globalvars->flIntervalPerTick)/*record.SimulationTime + GetLerp()*/;
 			shot.hitgroup = HitboxToHitgroup(HITBOX);
 			shot.damage = Damage;
 			shot.shootPos = G::Localplayer->GetEyePosition();

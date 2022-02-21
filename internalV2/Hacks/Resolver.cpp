@@ -326,7 +326,7 @@ void Resolver::Run()
 	MatchImpacts();
 	ResolveMatches();
 
-	return; // lets be extra careful here now
+	//return; // lets be extra careful here now
 
 	static int retard = 0;
 	static int lastretard = G::Localplayer->GetAmmo();

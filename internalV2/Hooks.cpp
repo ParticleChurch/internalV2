@@ -177,7 +177,7 @@ public:
 			if (I::engine->GetPlayerForUserID(userid) != G::LocalplayerIndex)
 				return;
 			
-			int iAttacker = event->GetInt("attacker");
+			/*int iAttacker = event->GetInt("attacker");
 			PlayerInfo_t info;
 			if (BodyShots.find(iAttacker) != BodyShots.end())
 			{
@@ -192,7 +192,7 @@ public:
 				str += " Headshots: " + std::to_string(HeadShots[iAttacker]) + " Bodyshots: " + std::to_string(BodyShots[iAttacker]) + " Headshot %: ";
 				str += std::to_string((float)HeadShots[iAttacker] / (BodyShots[iAttacker] + HeadShots[iAttacker]) * 100);
 				I::engine->ExecuteClientCmd(str.c_str());
-			}
+			}*/
 			
 		}
 		break;

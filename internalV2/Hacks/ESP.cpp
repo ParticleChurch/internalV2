@@ -460,9 +460,9 @@ void ESP::RunPaintTraverse()
 
 	//DrawBacktrackSkeletons();
 
-	DrawPlayerListSkeletons();
+	//DrawPlayerListSkeletons();
 
-	while (safepoints.size() > 10)
+	/*while (safepoints.size() > 10)
 		safepoints.pop_front();
 
 	Vector screen;
@@ -473,7 +473,7 @@ void ESP::RunPaintTraverse()
 		{
 			I::surface->DrawOutlinedCircle(screen.x, screen.y, 3, 3);
 		}
-	}
+	}*/
 	
 	
 
