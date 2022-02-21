@@ -762,8 +762,8 @@ float Aimbot::CalculatePsudoHitchance(Entity* ent, int Hitbox)
 
 void Aimbot::Run()
 {
-	TestRage();
-	return;
+	/*TestRage();
+	return;*/
 
 	if constexpr (DEBUG_AIMBOT) L::Debug("Run Aimbot");
 

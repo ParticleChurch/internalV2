@@ -245,6 +245,7 @@ namespace H
 	int TicksToShift = 0;
 	int TicksToRecharge = 0;
 	EventListener* g_EventListener;
+	static auto mov_bl = (std::uintptr_t*)((std::uintptr_t)(FindPattern("engine.dll", "B3 01 8B 01 8B 40 10 FF D0 84 C0 74 0F 80 BF ? ? ? ? ? 0F 84") + 0x1));
 
 
 	int lag = 0;
@@ -320,7 +321,10 @@ void H::Free()
 	if (modelrenderVMT) modelrenderVMT->UnhookAll();
 
 	// do some last minute adjustments
-	if (G::pSendpacket) *G::pSendpacket = true;
+	unsigned long protect = 0;
+	VirtualProtect((void*)mov_bl, 4, PAGE_EXECUTE_READWRITE, &protect);
+	*reinterpret_cast<bool*>(mov_bl) = true;
+	VirtualProtect((void*)mov_bl, 4, protect, &protect);
 
 	L::Debug("Freeing VMTs");
 
@@ -646,6 +650,14 @@ bool __stdcall H::CreateMoveHook(float flInputSampleTime, CUserCmd* cmd)
 		return false;
 	}
 
+	if (!I::engine->IsInGame())
+	{
+		unsigned long protect = 0;
+		VirtualProtect((void*)mov_bl, 4, PAGE_EXECUTE_READWRITE, &protect);
+		*reinterpret_cast<bool*>(mov_bl) = true;
+		VirtualProtect((void*)mov_bl, 4, protect, &protect);
+	}
+
 	//Anti exploiting, will need to deal with later lol
 	/*static CConVar* cl_lagcompensation = I::convar->FindVar("cl_lagcompensation");
 	cl_lagcompensation->SetValue(0);*/
@@ -717,7 +729,7 @@ bool __stdcall H::CreateMoveHook(float flInputSampleTime, CUserCmd* cmd)
 			G::cmd->iTickCount = INT_MAX;*/
 
 		//bSendPacket = antiaim->FakelagEnd();
-		static auto mov_bl = (std::uintptr_t*)((std::uintptr_t)(FindPattern("engine.dll", "B3 01 8B 01 8B 40 10 FF D0 84 C0 74 0F 80 BF ? ? ? ? ? 0F 84") + 0x1));
+		
 		unsigned long protect = 0;
 		VirtualProtect((void*)mov_bl, 4, PAGE_EXECUTE_READWRITE, &protect);
 		*reinterpret_cast<bool*>(mov_bl) = antiaim->FakelagEnd();
