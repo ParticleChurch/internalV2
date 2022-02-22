@@ -391,7 +391,7 @@ static float CalculatePsudoHitchanceP100(Vector min, Vector max, float radius)
 	auto cone_radius = target_distance * std::tan(cone_angle);
 
 	if (cone_radius == 0.f)
-		return true;
+		return 1.f;
 
 	auto cone_area = M_PI * cone_radius * cone_radius;
 
@@ -403,7 +403,7 @@ static float CalculatePsudoHitchanceP100(Vector min, Vector max, float radius)
 		hitbox_area = M_PI * radius * radius * 0.8f;
 
 	if (cone_area < hitbox_area)
-		return true;
+		return 1.f;
 
 	return sqrtf(hitbox_area / cone_area);
 }
@@ -894,6 +894,7 @@ void Aimbot::Run()
 			shot.max_bone = max;
 			shot.radius_bone = record.bones[HITBOX].flRadius;
 			shot.safepoint = safepoint;
+			shot.hitchance = hitchance;
 			resolver->AimbotShot(shot);
 
 			goto END_AIM;
@@ -992,6 +993,7 @@ void Aimbot::Run()
 			shot.max_bone = max;
 			shot.radius_bone = record.bones[HITBOX].flRadius;
 			shot.safepoint = safepoint;
+			shot.hitchance = hitchance;
 			resolver->AimbotShot(shot);
 
 			// we found a good scan, shoot at it bitch

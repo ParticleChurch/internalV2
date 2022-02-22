@@ -393,9 +393,11 @@ bool CAutoWall::SimulateFireBullet(Entity* pLocal, Entity* pWeapon, FireBulletDa
 		// we didn't hit anything, stop tracing shoot
 		if (data.enterTrace.flFraction == 1.0f)
 		{
-			// normally bad, but if we get to the point then its a win so...
-			ScaleDamage(data.enterTrace.iHitGroup, data.enterTrace.pHitEntity, pWeaponData->flArmorRatio, pWeaponData->flHeadShotMultiplier, data.flCurrentDamage);
-			return true;
+			return false;
+
+			// normally bad, but if we get to the point then its a win so... (ONLY FOR BACKTRACK)
+			/*ScaleDamage(data.enterTrace.iHitGroup, data.enterTrace.pHitEntity, pWeaponData->flArmorRatio, pWeaponData->flHeadShotMultiplier, data.flCurrentDamage);
+			return true;*/
 		}
 
 		// calculate the damage based on the distance the bullet traveled

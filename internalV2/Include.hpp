@@ -73,6 +73,8 @@
 #include "Hacks/Triggerbot.hpp"
 #include "Hacks/Skinchanger.hpp"
 
-
 // Hooks
 #include "Hooks.hpp"            //hooking ingame functions
+
+// DLL_VERSION
+#define DLL_VERSION "v2.01"

@@ -8,6 +8,7 @@ private: // actual rendering
 	void MenuBar();
 	void RenderMenuOptions();
 	void RenderConfig();
+	void RenderPatchNotes();
 
 	void RenderTriggerbot();
 	void RenderMovement();

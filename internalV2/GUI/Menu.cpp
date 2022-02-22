@@ -623,6 +623,44 @@ void Menu::RenderConfig()
 	ImGui::EndChild(); // end child
 }
 
+void Menu::RenderPatchNotes()
+{
+	static float propersize = 100.f;
+
+	ImGui::BeginChild("##PatchNotes ", ImVec2(0, propersize), true);
+
+	float pos1 = ImGui::GetCursorPosY();
+
+	ImGui::Text(("Patch Notes " + (std::string)DLL_VERSION).c_str());
+	ImGui::Separator();
+
+	/*
+	Refined aimbot/lagcompensation to work better together
+		Should hit fast moving enemies better
+	Resolver refinement
+		Now logs missed shots (though with a lot of errors)
+		Now attempts to resolve using bruteforce
+	Menu additions
+		Patch notes added
+	*/
+
+	std::string str;
+	str += "Refined aimbot/lagcompensation to work better together\n";
+	str += "\t Should hit fast moving enemies better\n";
+	str += "Resolver refinement\n";
+	str += "\t Now logs missed shots (though with a lot of errors)\n";
+	str += "\t Now attempts to resolve using bruteforce\n";
+	str += "Menu additions\n";
+	str += "\t Patch notes added\n";
+
+	ImGui::Text(str.c_str());
+
+	float pos2 = ImGui::GetCursorPosY();
+	propersize = pos2 - pos1 + 20.f;
+
+	ImGui::EndChild(); // end child
+}
+
 void Menu::RenderTriggerbot()
 {
 	static float propersize = 100.f;
@@ -1682,6 +1720,7 @@ void Menu::Render()
 		if (mfw::Tab == 5)
 		{
 			RenderConfig();
+			RenderPatchNotes();
 		}
 			
 

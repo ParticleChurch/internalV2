@@ -203,6 +203,9 @@ void Resolver::ResolveMatches()
 		PlayerInfo_t info;
 		I::engine->GetPlayerInfo(I::engine->GetPlayerForUserID(aim.userID), &info);
 
+		aim.hitchance *= 100.f;
+		aim.hitchance = (int)aim.hitchance;
+
 		std::string otherinfo = " ";
 		otherinfo += "DAM[" + std::to_string(aim.damage) + "/" + std::to_string(match.hurt.damage) + "]";
 		otherinfo += " HC[" + std::to_string(aim.hitchance) + "]";
